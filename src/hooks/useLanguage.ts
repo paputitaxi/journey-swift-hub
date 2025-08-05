@@ -46,7 +46,7 @@ const translations = {
   en: {
     // Navigation
     'nav.dashboard': 'Dashboard',
-    'nav.lanes': 'My Lanes',
+    'nav.lanes': 'History',
     'nav.videos': 'Videos',
     'nav.profile': 'Profile',
     
@@ -62,7 +62,7 @@ const translations = {
     'profile.heavyTruck': 'Heavy Truck',
     
     // Lanes
-    'lanes.title': 'My Lanes',
+    'lanes.title': 'History',
     'lanes.createNew': 'Create New Lane',
     'lanes.weekdays': 'Weekdays',
     'lanes.pricing': 'Pricing',
