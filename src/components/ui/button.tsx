@@ -21,7 +21,7 @@ const buttonVariants = cva(
         ride: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-ride transform hover:scale-105",
         "ride-orange": "bg-gradient-accent text-ride-orange-foreground hover:shadow-glow transform hover:scale-105",
         "ride-green": "bg-gradient-success text-accent-foreground hover:transform hover:scale-105",
-        hero: "bg-gradient-primary text-primary-foreground shadow-ride hover:shadow-glow transform hover:scale-105 font-semibold",
+        hero: "bg-primary text-primary-foreground shadow-ride hover:shadow-glow transform hover:scale-105 font-semibold",
       },
       size: {
         default: "h-12 px-6 py-3",
