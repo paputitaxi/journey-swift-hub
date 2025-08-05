@@ -24,7 +24,7 @@ const Welcome = () => {
           </div>
           
           <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Share The
+            Choose your role 
             <span className="bg-gradient-primary bg-clip-text text-transparent"> Journey</span>
           </h1>
           
