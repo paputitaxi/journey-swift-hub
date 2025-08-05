@@ -15,7 +15,7 @@ const Welcome = () => {
   };
   return <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
       {/* Hero Section */}
-      <div className="relative h-screen flex items-center justify-center overflow-hidden bg-cyan-950">
+      <div className="relative h-screen flex items-center justify-center overflow-hidden bg-slate-700">
         
         
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
@@ -68,20 +68,7 @@ const Welcome = () => {
             </Card>
           </div>
 
-          <div className="mt-12 flex justify-center gap-8 text-white/60">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary-glow">50K+</div>
-              <div className="text-sm">Active Users</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-ride-orange">100K+</div>
-              <div className="text-sm">Rides Shared</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-ride-green">95%</div>
-              <div className="text-sm">Satisfaction</div>
-            </div>
-          </div>
+          
         </div>
       </div>
     </div>;
