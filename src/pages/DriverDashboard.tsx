@@ -1,20 +1,26 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plus, History, Play, User, MapPin, Calendar, Clock, DollarSign } from "lucide-react";
+import { Plus, Route, Play, User, MapPin, Calendar, Clock, DollarSign, MessageCircle } from "lucide-react";
 import PostRideModal from "@/components/PostRideModal";
 import VideoFeed from "@/components/VideoFeed";
 import ThemeSwitch from "@/components/ThemeSwitch";
+import { MyLanes } from "@/components/MyLanes";
+import { StatsPage } from "@/components/StatsPage";
+import { AdvancedProfile } from "@/components/AdvancedProfile";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const DriverDashboard = () => {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showPostRide, setShowPostRide] = useState(false);
+  const [showStats, setShowStats] = useState(false);
 
   const bottomNavItems = [
-    { id: "dashboard", label: "Post Ride", icon: Plus },
-    { id: "history", label: "History", icon: History },
-    { id: "videos", label: "Videos", icon: Play },
-    { id: "profile", label: "Profile", icon: User },
+    { id: "dashboard", label: t('nav.dashboard'), icon: Plus },
+    { id: "lanes", label: t('nav.lanes'), icon: Route },
+    { id: "videos", label: t('nav.videos'), icon: Play },
+    { id: "profile", label: t('nav.profile'), icon: User },
   ];
 
   const renderContent = () => {
@@ -56,55 +62,12 @@ const DriverDashboard = () => {
             </div>
           </div>
         );
-      case "history":
-        return (
-          <div className="space-y-3 p-4">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Ride History</h2>
-            {[1, 2, 3].map((ride) => (
-              <Card key={ride} className="p-3 border-0 bg-secondary/30">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="font-medium text-sm">New York → Boston</div>
-                    <div className="text-xs text-muted-foreground">Dec 15, 2024 • 3 passengers</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-semibold text-primary">$45</div>
-                    <div className="text-xs text-muted-foreground">Completed</div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        );
+      case "lanes":
+        return <MyLanes />;
       case "videos":
         return <VideoFeed />;
       case "profile":
-        return (
-          <div className="space-y-4 p-4">
-            <div className="text-center py-6">
-              <div className="w-16 h-16 mx-auto mb-3 bg-primary rounded-full flex items-center justify-center">
-                <User className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <h2 className="text-lg font-semibold text-foreground">John Driver</h2>
-              <p className="text-sm text-muted-foreground">Member since 2023</p>
-            </div>
-            
-            <Card className="p-4 space-y-3 border-0 bg-secondary/30">
-              <div className="flex justify-between text-sm">
-                <span>Email</span>
-                <span className="text-muted-foreground">john@example.com</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Phone</span>
-                <span className="text-muted-foreground">+1 (555) 123-4567</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Car Model</span>
-                <span className="text-muted-foreground">Honda Civic 2022</span>
-              </div>
-            </Card>
-          </div>
-        );
+        return <AdvancedProfile />;
       default:
         return null;
     }
@@ -120,6 +83,9 @@ const DriverDashboard = () => {
             <p className="text-sm opacity-70">John Driver</p>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="text-primary-foreground">
+              <MessageCircle className="h-5 w-5" />
+            </Button>
             <ThemeSwitch />
             <div className="w-8 h-8 bg-primary-foreground/20 rounded-full flex items-center justify-center">
               <User className="h-4 w-4" />
@@ -129,7 +95,7 @@ const DriverDashboard = () => {
       </div>
 
       {/* Content */}
-      <div className={`${activeTab === 'videos' ? 'h-[calc(100vh-120px)]' : 'p-4'} pb-20`}>
+      <div className={`${activeTab === 'videos' ? 'h-[calc(100vh-120px)]' : activeTab === 'profile' ? '' : 'p-4'} pb-20`}>
         {renderContent()}
       </div>
 
