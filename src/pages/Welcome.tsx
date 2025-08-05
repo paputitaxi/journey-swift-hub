@@ -4,28 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Car, Users, MapPin, Clock } from "lucide-react";
 import heroImage from "@/assets/hero-ride.jpg";
-
 const Welcome = () => {
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<string | null>(null);
-
   const handleRoleSelect = (role: "rider" | "driver") => {
     setSelectedType(role);
     setTimeout(() => {
       navigate(`/${role}-dashboard`);
     }, 300);
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
       {/* Hero Section */}
-      <div className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${heroImage})` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-ride-dark/80 via-primary/60 to-transparent" />
-        </div>
+      <div className="relative h-screen flex items-center justify-center overflow-hidden bg-cyan-950">
+        
         
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <div className="animate-bounce-gentle mb-8">
@@ -44,12 +35,7 @@ const Welcome = () => {
 
           {/* Role Selection Cards */}
           <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
-            <Card 
-              className={`p-8 bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 cursor-pointer transition-all duration-500 transform hover:scale-105 ${
-                selectedType === "rider" ? "ring-2 ring-primary-glow scale-105" : ""
-              }`}
-              onClick={() => handleRoleSelect("rider")}
-            >
+            <Card className={`p-8 bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 cursor-pointer transition-all duration-500 transform hover:scale-105 ${selectedType === "rider" ? "ring-2 ring-primary-glow scale-105" : ""}`} onClick={() => handleRoleSelect("rider")}>
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-4 bg-gradient-primary rounded-full flex items-center justify-center">
                   <Users className="h-8 w-8 text-white" />
@@ -65,12 +51,7 @@ const Welcome = () => {
               </div>
             </Card>
 
-            <Card 
-              className={`p-8 bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 cursor-pointer transition-all duration-500 transform hover:scale-105 ${
-                selectedType === "driver" ? "ring-2 ring-ride-orange scale-105" : ""
-              }`}
-              onClick={() => handleRoleSelect("driver")}
-            >
+            <Card className={`p-8 bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 cursor-pointer transition-all duration-500 transform hover:scale-105 ${selectedType === "driver" ? "ring-2 ring-ride-orange scale-105" : ""}`} onClick={() => handleRoleSelect("driver")}>
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-4 bg-gradient-accent rounded-full flex items-center justify-center">
                   <Car className="h-8 w-8 text-white" />
@@ -103,8 +84,6 @@ const Welcome = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Welcome;
