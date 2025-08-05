@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { MapPin, Calendar as CalendarIcon, Mail, Clock, Users, DollarSign, Car } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import LocationSelector from "./LocationSelector";
 
 interface PostRideModalProps {
   open: boolean;
@@ -26,6 +27,8 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
   const [mailPrice, setMailPrice] = useState("");
   const [departureType, setDepartureType] = useState<"time" | "sitToGo" | null>(null);
   const [departureTime, setDepartureTime] = useState("");
+  const [showDepartureSelector, setShowDepartureSelector] = useState(false);
+  const [showDestinationSelector, setShowDestinationSelector] = useState(false);
 
   const mailOptions = [
     {
@@ -78,13 +81,13 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
                 <Label htmlFor="departure" className="text-base font-semibold">Departure Location</Label>
                 <div className="relative mt-2">
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    id="departure"
-                    value={departure}
-                    onChange={(e) => setDeparture(e.target.value)}
-                    placeholder="Where are you starting from?"
-                    className="pl-10 h-14 text-lg"
-                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDepartureSelector(true)}
+                    className="w-full h-14 justify-start text-lg pl-10"
+                  >
+                    {departure || "Where are you starting from?"}
+                  </Button>
                 </div>
               </div>
 
@@ -92,13 +95,13 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
                 <Label htmlFor="destination" className="text-base font-semibold">Destination Location</Label>
                 <div className="relative mt-2">
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary" />
-                  <Input
-                    id="destination"
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    placeholder="Where are you going?"
-                    className="pl-10 h-14 text-lg border-primary/50"
-                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDestinationSelector(true)}
+                    className="w-full h-14 justify-start text-lg pl-10 border-primary/50"
+                  >
+                    {destination || "Where are you going?"}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -353,22 +356,40 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-center">
-            Post a New Ride
-          </DialogTitle>
-          <div className="text-center text-sm text-muted-foreground">
-            Step {step} of 5
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-center">
+              Post a New Ride
+            </DialogTitle>
+            <div className="text-center text-sm text-muted-foreground">
+              Step {step} of 5
+            </div>
+          </DialogHeader>
+          
+          <div className="py-4">
+            {renderStep()}
           </div>
-        </DialogHeader>
-        
-        <div className="py-4">
-          {renderStep()}
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      <LocationSelector
+        open={showDepartureSelector}
+        onOpenChange={setShowDepartureSelector}
+        onLocationSelect={setDeparture}
+        title="Select Departure Location"
+        placeholder="Search departure locations..."
+      />
+
+      <LocationSelector
+        open={showDestinationSelector}
+        onOpenChange={setShowDestinationSelector}
+        onLocationSelect={setDestination}
+        title="Select Destination"
+        placeholder="Search destination locations..."
+      />
+    </>
   );
 };
 
