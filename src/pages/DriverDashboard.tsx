@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button"; // Assuming this is a local UI component or can be removed if not used
-import { Card } from "@/components/ui/card"; // Assuming this is a local UI component or can be removed if not used
+// Removed Button and Card imports as they were causing compilation errors
+// import { Button } from "@/components/ui/button";
+// import { Card } from "@/components/ui/card";
 import {
   Plus,
   Play,
@@ -11,22 +12,166 @@ import {
   BarChart,
   Shield,
   RefreshCcw,
+  MessageCircle,
+  Users, // For Groups
+  Hash, // For Channels
+  Store, // For Market
+  Search, // For search bar
+  Settings, // Placeholder for settings/menu in message dashboard
 } from "lucide-react";
 
-// Removed imports for components and hooks that are not resolvable in this environment
-// import PostRideModal from "@/components/PostRideModal";
-// import VideoFeed from "@/components/VideoFeed";
-// import { MyLanes } from "@/components/MyLanes";
-// import { AdvancedProfile } from "@/components/AdvancedProfile";
-// import { useLanguage } from "@/hooks/useLanguage";
+// Helper component for a simple avatar
+const Avatar = ({ initials, bgColor }) => (
+  <div
+    className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold ${bgColor}`}
+  >
+    {initials}
+  </div>
+);
+
+// Message Dashboard component with Telegram-like UX
+const MessageDashboard = () => {
+  const [activeMessageTab, setActiveMessageTab] = useState("chats"); // Changed from 'persons' to 'chats'
+
+  const messageNavItems = [
+    { id: "chats", label: "Chats", icon: MessageCircle }, // Renamed from Persons to Chats
+    { id: "groups", label: "Groups", icon: Users },
+    { id: "channels", label: "Channels", icon: Hash },
+    { id: "market", label: "Market", icon: Store },
+  ];
+
+  const renderMessageContent = () => {
+    // Placeholder chat items for demonstration
+    const chatItems = {
+      chats: [
+        {
+          id: 1,
+          name: "Jane Doe",
+          lastMessage: "Hey, are you available for a ride?",
+          time: "10:30 AM",
+          avatar: <Avatar initials="JD" bgColor="bg-purple-500" />,
+        },
+        {
+          id: 2,
+          name: "Mike Smith",
+          lastMessage: "Thanks for the ride last week!",
+          time: "Yesterday",
+          avatar: <Avatar initials="MS" bgColor="bg-blue-500" />,
+        },
+        {
+          id: 3,
+          name: "Family Group",
+          lastMessage: "Dinner at 7 PM?",
+          time: "Mon",
+          avatar: <Avatar initials="FG" bgColor="bg-green-500" />,
+        },
+      ],
+      groups: [
+        {
+          id: 1,
+          name: "Drivers Community",
+          lastMessage: "New update on city regulations.",
+          time: "1 hr ago",
+          avatar: <Avatar initials="DC" bgColor="bg-yellow-500" />,
+        },
+      ],
+      channels: [
+        {
+          id: 1,
+          name: "Ride Alerts Official",
+          lastMessage: "High demand in downtown area!",
+          time: "15 min ago",
+          avatar: <Avatar initials="RA" bgColor="bg-red-500" />,
+        },
+      ],
+      market: [
+        {
+          id: 1,
+          name: "Special Offers",
+          lastMessage: "Discount on car maintenance this week.",
+          time: "2 days ago",
+          avatar: <Avatar initials="SO" bgColor="bg-indigo-500" />,
+        },
+      ],
+    };
+
+    const currentChats = chatItems[activeMessageTab];
+
+    return (
+      <div className="flex-grow overflow-y-auto">
+        {currentChats.length > 0 ? (
+          <div className="space-y-1">
+            {currentChats.map((chat) => (
+              <div
+                key={chat.id}
+                className="flex items-center p-3 hover:bg-white/10 cursor-pointer transition-colors"
+              >
+                {chat.avatar}
+                <div className="ml-3 flex-grow">
+                  <p className="font-medium text-white">{chat.name}</p>
+                  <p className="text-sm text-white/70 truncate">
+                    {chat.lastMessage}
+                  </p>
+                </div>
+                <span className="text-xs text-white/50">{chat.time}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-white/50 text-center mt-10">
+            No messages in this section.
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-[#244A62]">
+      {/* Top Bar for Message Dashboard (Telegram-like) */}
+      <div className="bg-[#244A62] p-3 border-b border-white/10 flex items-center justify-between">
+        <button className="text-white/80 hover:text-white">
+          <Settings className="h-6 w-6" /> {/* Placeholder for menu/settings */}
+        </button>
+        <h2 className="text-lg font-semibold text-white">Chats</h2> {/* Dynamic title based on active tab */}
+        <button className="text-white/80 hover:text-white">
+          <Search className="h-6 w-6" />
+        </button>
+      </div>
+
+      {/* Message Dashboard Navigation Tabs */}
+      <div className="flex justify-around bg-[#244A62] p-2 border-b border-white/10">
+        {messageNavItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeMessageTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setActiveMessageTab(item.id)}
+              className={`flex-1 flex flex-col items-center py-2 transition-colors relative
+                ${isActive ? "text-white" : "text-white/50"}`}
+            >
+              <Icon className="h-5 w-5 mb-1" />
+              <span className="text-xs">{item.label}</span>
+              {isActive && (
+                <div className="absolute bottom-0 h-0.5 w-full bg-white rounded-full"></div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Message Content Area */}
+      {renderMessageContent()}
+    </div>
+  );
+};
 
 const DriverDashboard = () => {
-  // Removed useLanguage hook as it's not resolvable
-  // const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [showPostRide, setShowPostRide] = useState(false); // Kept for potential future use if PostRideModal functionality is re-added
+  const [showPostRide, setShowPostRide] = useState(false);
+  const [showMessages, setShowMessages] = useState(false); // State for message dashboard visibility
 
-  // Updated bottom navigation items to match the second image
   const bottomNavItems = [
     { id: "dashboard", label: "Ride", icon: MapPin },
     { id: "lanes", label: "My Lines", icon: RefreshCcw },
@@ -35,6 +180,12 @@ const DriverDashboard = () => {
   ];
 
   const renderContent = () => {
+    // If showMessages is true, render the MessageDashboard
+    if (showMessages) {
+      return <MessageDashboard />;
+    }
+
+    // Otherwise, render content based on the active bottom navigation tab
     switch (activeTab) {
       case "dashboard":
         return (
@@ -83,7 +234,8 @@ const DriverDashboard = () => {
               <Calendar className="h-4 w-4 mr-2" />
               Your activity
             </h3>
-            <Card className="p-4 bg-white/10 border-0 rounded-lg space-y-3">
+            {/* Replaced Card with div, assuming Card component is not resolvable */}
+            <div className="p-4 bg-white/10 border-0 rounded-lg space-y-3">
               {/* Active Ride Card */}
               <div className="flex justify-between items-center text-sm">
                 <div className="flex flex-col">
@@ -125,7 +277,7 @@ const DriverDashboard = () => {
                 </div>
                 <div className="text-xs">24.07.2025</div>
               </div>
-            </Card>
+            </div>
           </div>
         );
       case "lanes":
@@ -157,10 +309,22 @@ const DriverDashboard = () => {
   return (
     // Main container with a dark aqua background color and vertical scroll
     <div className="min-h-screen bg-[#244A62] text-white overflow-hidden flex flex-col">
-      {/* Header section from the first image is removed to match the second image's full-screen content style */}
+      {/* New Header for Message Button and Title */}
+      <div className="bg-[#244A62] p-3 border-b border-white/10 flex justify-between items-center z-20">
+        <h1 className="text-lg font-medium">Driver</h1>
+        <button
+          onClick={() => setShowMessages(!showMessages)}
+          className="text-white/80 hover:text-white transition-colors"
+        >
+          <MessageCircle className="h-6 w-6" />
+        </button>
+      </div>
 
-      {/* Content area with vertical scroll, adjusted padding for bottom nav */}
-      <div className="flex-grow overflow-y-auto pb-20">
+      {/* Content area with vertical scroll, adjusted padding for both top and bottom navs */}
+      {/* The h-full ensures it takes full available height between top and bottom fixed elements */}
+      <div className="flex-grow overflow-y-auto pb-[5rem] pt-[4rem]">
+        {" "}
+        {/* Adjusted padding to account for fixed top and bottom bars */}
         {renderContent()}
       </div>
 
@@ -173,7 +337,10 @@ const DriverDashboard = () => {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setShowMessages(false); // Hide messages when a bottom nav item is clicked
+                }}
                 className={`flex-1 flex flex-col items-center py-3 transition-colors ${
                   isActive ? "text-white" : "text-white/50"
                 }`}
