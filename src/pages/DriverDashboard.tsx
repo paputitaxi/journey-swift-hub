@@ -17,7 +17,7 @@ import {
   Hash, // For Channels
   Store, // For Market
   Search, // For search bar
-  Settings, // Placeholder for settings/menu in message dashboard
+  // Settings, // Removed as per request
 } from "lucide-react";
 
 // Helper component for a simple avatar
@@ -32,6 +32,8 @@ const Avatar = ({ initials, bgColor }) => (
 // Message Dashboard component with Telegram-like UX
 const MessageDashboard = () => {
   const [activeMessageTab, setActiveMessageTab] = useState("chats"); // Changed from 'persons' to 'chats'
+  const [showSearchInput, setShowSearchInput] = useState(false); // New state for search input visibility
+  const [searchQuery, setSearchQuery] = useState(""); // State to hold search query
 
   const messageNavItems = [
     { id: "chats", label: "Chats", icon: MessageCircle }, // Renamed from Persons to Chats
@@ -39,6 +41,9 @@ const MessageDashboard = () => {
     { id: "channels", label: "Channels", icon: Hash },
     { id: "market", label: "Market", icon: Store },
   ];
+
+  // Get the label for the current active message tab for the dynamic title
+  const currentTabLabel = messageNavItems.find(item => item.id === activeMessageTab)?.label;
 
   const renderMessageContent = () => {
     // Placeholder chat items for demonstration
@@ -97,11 +102,17 @@ const MessageDashboard = () => {
 
     const currentChats = chatItems[activeMessageTab];
 
+    // Filter chats based on search query
+    const filteredChats = currentChats.filter(chat =>
+      chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
       <div className="flex-grow overflow-y-auto">
-        {currentChats.length > 0 ? (
+        {filteredChats.length > 0 ? (
           <div className="space-y-1">
-            {currentChats.map((chat) => (
+            {filteredChats.map((chat) => (
               <div
                 key={chat.id}
                 className="flex items-center p-3 hover:bg-white/10 cursor-pointer transition-colors"
@@ -119,7 +130,7 @@ const MessageDashboard = () => {
           </div>
         ) : (
           <p className="text-white/50 text-center mt-10">
-            No messages in this section.
+            No messages found.
           </p>
         )}
       </div>
@@ -130,14 +141,29 @@ const MessageDashboard = () => {
     <div className="flex flex-col h-full bg-[#244A62]">
       {/* Top Bar for Message Dashboard (Telegram-like) */}
       <div className="bg-[#244A62] p-3 border-b border-white/10 flex items-center justify-between">
-        <button className="text-white/80 hover:text-white">
-          <Settings className="h-6 w-6" /> {/* Placeholder for menu/settings */}
-        </button>
-        <h2 className="text-lg font-semibold text-white">Chats</h2> {/* Dynamic title based on active tab */}
-        <button className="text-white/80 hover:text-white">
+        {/* Removed Settings button */}
+        <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
+        <h2 className="text-lg font-semibold text-white">{currentTabLabel}</h2> {/* Dynamic title */}
+        <button
+          onClick={() => setShowSearchInput(!showSearchInput)} // Toggle search input visibility
+          className="text-white/80 hover:text-white"
+        >
           <Search className="h-6 w-6" />
         </button>
       </div>
+
+      {/* Search Input Field (conditionally rendered) */}
+      {showSearchInput && (
+        <div className="p-3 bg-[#244A62] border-b border-white/10">
+          <input
+            type="text"
+            placeholder="Search messages..."
+            className="w-full p-2 rounded-lg bg-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-white/50"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      )}
 
       {/* Message Dashboard Navigation Tabs */}
       <div className="flex justify-around bg-[#244A62] p-2 border-b border-white/10">
@@ -147,7 +173,11 @@ const MessageDashboard = () => {
           return (
             <button
               key={item.id}
-              onClick={() => setActiveMessageTab(item.id)}
+              onClick={() => {
+                setActiveMessageTab(item.id);
+                setSearchQuery(""); // Clear search query when changing tabs
+                setShowSearchInput(false); // Hide search input when changing tabs
+              }}
               className={`flex-1 flex flex-col items-center py-2 transition-colors relative
                 ${isActive ? "text-white" : "text-white/50"}`}
             >
@@ -316,7 +346,7 @@ const DriverDashboard = () => {
           onClick={() => setShowMessages(!showMessages)}
           className="text-white/80 hover:text-white transition-colors"
         >
-          <MessageCircle className="h-6 w-6" />
+          <MessageCircle className="h-8 w-8" /> {/* Increased size */}
         </button>
       </div>
 
