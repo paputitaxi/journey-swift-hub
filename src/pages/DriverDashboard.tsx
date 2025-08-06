@@ -187,21 +187,22 @@ const MessageDashboard = () => {
   );
 };
 
-// Data for Uzbekistan Regions and Cities (simplified for example)
+// Data for Uzbekistan Regions and Cities (updated with more locations)
 const uzbekistanLocations = [
-  { region: "Tashkent Region", cities: ["Tashkent", "Chirchiq", "Angren"] },
-  { region: "Fergana Region", cities: ["Fergana", "Kokand", "Margilan"] },
-  { region: "Samarkand Region", cities: ["Samarkand", "Kattaqoʻrgʻon"] },
-  { region: "Bukhara Region", cities: ["Bukhara", "Galaosiyo"] },
-  { region: "Jizzakh Region", cities: ["Jizzakh", "Zomin", "Gagarin", "G'allaorol", "Dashtobod"] },
-  { region: "Andijan Region", cities: ["Andijan", "Khanabad"] },
-  { region: "Namangan Region", cities: ["Namangan", "Chust"] },
-  { region: "Kashkadarya Region", cities: ["Karshi", "Shakhrisabz"] },
-  { region: "Surkhandarya Region", cities: ["Termez", "Denau"] },
-  { region: "Sirdaryo Region", cities: ["Guliston", "Yangiyer"] },
-  { region: "Khorezm Region", cities: ["Urgench", "Khiva"] },
-  { region: "Navoiy Region", cities: ["Navoiy", "Zarafshon"] },
-  { region: "Republic of Karakalpakstan", cities: ["Nukus", "Beruniy"] },
+  { region: "Tashkent City", cities: ["Tashkent"] },
+  { region: "Tashkent Region", cities: ["Angren", "Bekabad", "Chirchiq", "Gazalkent", "Keles", "Nurafshon", "Olmaliq", "Ohangaron", "Parkent", "Piskent", "Yangiobod", "Yangiyo‘l"] },
+  { region: "Andijan Region", cities: ["Andijan", "Asaka", "Shahrixon", "Qorasuv", "Xonobod"] },
+  { region: "Bukhara Region", cities: ["Bukhara", "Galaosiyo", "Kogon", "Gʻijduvon", "Shofirkon", "Vobkent"] },
+  { region: "Fergana Region", cities: ["Fergana", "Kokand", "Margilan", "Quva", "Quvasoy", "Oltiariq"] },
+  { region: "Jizzakh Region", cities: ["Jizzakh", "Gagarin", "Gʻallaorol", "Dashtobod", "Zomin", "Paxtakor"] },
+  { region: "Karakalpakstan Republic", cities: ["Nukus", "Beruniy", "Xoʻjayli", "Chimboy", "Toʻrtkoʻl"] },
+  { region: "Kashkadarya Region", cities: ["Karshi", "Shakhrisabz", "Kitob", "Koson", "Muborak", "Yakkabogʻ"] },
+  { region: "Khorezm Region", cities: ["Urgench", "Khiva", "Hazorasp", "Gurlan", "Bogʻot"] },
+  { region: "Namangan Region", cities: ["Namangan", "Chust", "Kosonsoy", "Pop", "Uychi", "Toʻraqoʻrgʻon"] },
+  { region: "Navoiy Region", cities: ["Navoiy", "Zarafshon", "Konimex", "Nurota", "Uchquduq", "Tomdi"] },
+  { region: "Samarkand Region", cities: ["Samarkand", "Kattaqoʻrgʻon", "Oqdaryo", "Bulungʻur", "Ishtixon", "Jomboy"] },
+  { region: "Sirdaryo Region", cities: ["Guliston", "Yangiyer", "Sirdaryo", "Baxt", "Shirin", "Oqoltin"] },
+  { region: "Surkhandarya Region", cities: ["Termez", "Denau", "Boysun", "Sariosiyo", "Sherobod", "Shoʻrchi"] },
 ];
 
 // Location Selection Modal Component
@@ -215,8 +216,8 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
 
   const filteredCities = selectedRegion
     ? selectedRegion.cities.filter(city =>
-        city.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      city.toLowerCase().includes(searchTerm.toLowerCase())
+    )
     : [];
 
   if (!isOpen) return null;
@@ -492,13 +493,13 @@ const PostRideForm = ({ onClose }) => {
                 type="button"
                 onClick={() => setMailService("no")}
                 className={`w-full p-4 rounded-lg flex items-center justify-between transition-colors
-                  ${mailService === "no" ? "bg-red-600/30 border border-red-400" : "bg-white/10 hover:bg-white/20"}`}
+                  ${mailService === "no" ? "bg-green-600/30 border border-green-400" : "bg-white/10 hover:bg-white/20"}`}
               >
                 <div className="text-left">
                   <p className="font-medium text-white">No, I do not carry Mail</p>
                   <p className="text-sm text-white/70">I only transport passengers, no mail service</p>
                 </div>
-                {mailService === "no" && <X className="h-6 w-6 text-red-400" />}
+                {mailService === "no" && <CheckCircle className="h-6 w-6 text-green-400" />}
               </button>
               <button
                 type="button"
@@ -568,12 +569,18 @@ const PostRideForm = ({ onClose }) => {
             <label className="block text-white/80 text-sm font-medium mb-2">Price</label>
             <div className="relative">
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="Enter price"
                 className="w-full p-3 pl-10 bg-white/10 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-white/50"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                min="0"
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^[0-9]*$/.test(value)) {
+                    setPrice(value);
+                  }
+                }}
               />
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50">$</span>
             </div>
@@ -782,4 +789,4 @@ const DriverDashboard = () => {
   );
 };
 
-export default DriverDashboard;
+export default DriverD
