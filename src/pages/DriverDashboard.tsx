@@ -632,7 +632,7 @@ const DriverDashboard = () => {
 
   const bottomNavItems = [
     { id: "dashboard", label: "Ride", icon: MapPin },
-    { id: "lanes", label: "My Lines", icon: RefreshCcw },
+    { id: "Navigation", label: "Navigation", icon: RefreshCcw },
     { id: "videos", label: "Videos", icon: Play },
     { id: "profile", label: "Profile", icon: User },
   ];
