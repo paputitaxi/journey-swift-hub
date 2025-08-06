@@ -187,23 +187,24 @@ const MessageDashboard = () => {
   );
 };
 
-// Data for Uzbekistan Regions and Cities
+// Expanded Data for Uzbekistan Regions and Cities
 const uzbekistanLocations = [
-  { region: "Tashkent City", cities: ["Tashkent"] },
-  { region: "Tashkent Region", cities: ["Angren", "Bekabad", "Chirchiq", "Gazalkent", "Keles", "Nurafshon", "Olmaliq", "Ohangaron", "Parkent", "Piskent", "Yangiobod", "Yangiyo‘l"] },
-  { region: "Andijan Region", cities: ["Andijan", "Asaka", "Shahrixon", "Qorasuv", "Xonobod"] },
-  { region: "Bukhara Region", cities: ["Bukhara", "Galaosiyo", "Kogon", "Gʻijduvon", "Shofirkon", "Vobkent"] },
-  { region: "Fergana Region", cities: ["Fergana", "Kokand", "Margilan", "Quva", "Quvasoy", "Oltiariq"] },
-  { region: "Jizzakh Region", cities: ["Jizzakh", "Gagarin", "Gʻallaorol", "Dashtobod", "Zomin", "Paxtakor"] },
-  { region: "Karakalpakstan Republic", cities: ["Nukus", "Beruniy", "Xoʻjayli", "Chimboy", "Toʻrtkoʻl"] },
-  { region: "Kashkadarya Region", cities: ["Karshi", "Shakhrisabz", "Kitob", "Koson", "Muborak", "Yakkabogʻ"] },
-  { region: "Khorezm Region", cities: ["Urgench", "Khiva", "Hazorasp", "Gurlan", "Bogʻot"] },
-  { region: "Namangan Region", cities: ["Namangan", "Chust", "Kosonsoy", "Pop", "Uychi", "Toʻraqoʻrgʻon"] },
-  { region: "Navoiy Region", cities: ["Navoiy", "Zarafshon", "Konimex", "Nurota", "Uchquduq", "Tomdi"] },
-  { region: "Samarkand Region", cities: ["Samarkand", "Kattaqoʻrgʻon", "Oqdaryo", "Bulungʻur", "Ishtixon", "Jomboy"] },
-  { region: "Sirdaryo Region", cities: ["Guliston", "Yangiyer", "Sirdaryo", "Baxt", "Shirin", "Oqoltin"] },
-  { region: "Surkhandarya Region", cities: ["Termez", "Denau", "Boysun", "Sariosiyo", "Sherobod", "Shoʻrchi"] },
+    { region: "Tashkent City", cities: ["Tashkent", "Bektemir", "Chilonzor", "Mirobod", "Mirzo Ulugbek", "Sergeli", "Shaykhontohur", "Uchtepa", "Yakkasaroy", "Yashnobod", "Yunusobod"] },
+    { region: "Andijan Region", cities: ["Andijan", "Asaka", "Baliqchi", "Bo'ston", "Buloqboshi", "Izboskan", "Jalaquduq", "Marhamat", "Oltinko'l", "Paxtaobod", "Qo'rg'ontepa", "Shahrixon", "Ulug'nor", "Xo'jaobod"] },
+    { region: "Bukhara Region", cities: ["Bukhara", "Galaosiyo", "G'ijduvon", "Jondor", "Kogon", "Olot", "Peshku", "Qorako'l", "Qorovulbozor", "Romitan", "Shofirkon", "Vobkent"] },
+    { region: "Fergana Region", cities: ["Fergana", "Bag'dod", "Beshariq", "Buvayda", "Dang'ara", "Farg'ona", "Furqat", "O'zbekiston", "Oltiariq", "Qo'shtepa", "Quva", "Rishton", "So'x", "Toshloq", "Uchko'prik", "Yozyovon", "Quvasoy", "Marg'ilon", "Qo'qon"] },
+    { region: "Jizzakh Region", cities: ["Jizzakh", "Arnasoy", "Baxmal", "Do'stlik", "Forish", "G'allaorol", "Mirzacho'l", "Paxtakor", "Yangiobod", "Zafarobod", "Zarbdor", "Zomin"] },
+    { region: "Karakalpakstan Republic", cities: ["Nukus", "Amudaryo", "Beruniy", "Bo'zatov", "Chimboy", "Ellikqal'a", "Kegeyli", "Mo'ynoq", "Qanliko'l", "Qo'ng'irot", "Qorao'zak", "Shumanay", "Taxtako'pir", "To'rtko'l", "Xo'jayli"] },
+    { region: "Kashkadarya Region", cities: ["Karshi", "Chiroqchi", "Dehqonobod", "G'uzor", "Kasbi", "Kitob", "Koson", "Mirishkor", "Muborak", "Nishon", "Qamashi", "Shahrisabz", "Yakkabog'"] },
+    { region: "Khorezm Region", cities: ["Urgench", "Bog'ot", "Gurlan", "Qo'shko'pir", "Shovot", "Urganch", "Xazorasp", "Xiva", "Xonqa", "Yangiariq", "Yangibozor"] },
+    { region: "Namangan Region", cities: ["Namangan", "Chortoq", "Chust", "Kosonsoy", "Mingbuloq", "Norin", "Pop", "To'raqo'rg'on", "Uchqo'rg'on", "Uychi", "Yangiqo'rg'on", "Davlatobod"] },
+    { region: "Navoiy Region", cities: ["Navoiy", "Karmana", "Konimex", "Navbahor", "Nurota", "Qiziltepa", "Tomdi", "Uchquduq", "Xatirchi", "Zarafshon"] },
+    { region: "Samarkand Region", cities: ["Samarkand", "Bulung'ur", "Ishtixon", "Jomboy", "Kattaqo'rg'on", "Narpay", "Nurobod", "Oqdaryo", "Paxtachi", "Payariq", "Qo'shrabot", "Toyloq", "Urgut"] },
+    { region: "Sirdaryo Region", cities: ["Guliston", "Boyovut", "Oqoltin", "Sardoba", "Sayxunobod", "Shirin", "Sirdaryo", "Xovos", "Mirzaobod", "Yangiyer"] },
+    { region: "Surkhandarya Region", cities: ["Termez", "Angor", "Boysun", "Denov", "Jarqo'rg'on", "Muzrabot", "Oltinsoy", "Qiziriq", "Qumqo'rg'on", "Sariosiyo", "Sherobod", "Sho'rchi", "Uzun"] },
+    { region: "Tashkent Region", cities: ["Nurafshon", "Angren", "Bekobod", "Bo'ka", "Bo'stonliq", "Chinoz", "Ohangaron", "Oqqo'rg'on", "Parkent", "Piskent", "Qibray", "Quyichirchiq", "O'rtachirchiq", "Yangiyo'l", "Yuqorichirchiq", "Zangiota", "Olmaliq", "Chirchiq"] }
 ];
+
 
 // Location Selection Modal Component
 const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
@@ -766,7 +767,7 @@ const DriverDashboard = () => {
         {renderContent()}
       </main>
 
-      {!showMessages && (
+      {!showMessages && !showPostRide && (
         <footer className="fixed bottom-0 left-0 right-0 bg-[#244A62] border-t border-white/10 shadow-lg z-10">
           <div className="flex justify-around">
             {bottomNavItems.map((item) => {
