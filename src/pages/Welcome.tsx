@@ -2,16 +2,22 @@ import React, { useState } from "react";
 // We'll assume these components and icons are available.
 // If not, you can replace them with simple HTML elements.
 import { Car, Users } from "lucide-react";
+// I'm adding a dummy hook to simulate the functionality of react-router-dom's useNavigate
+const useNavigate = () => {
+  return (path) => {
+    console.log(`Navigating to ${path}`);
+  };
+};
 
 const Welcome = () => {
-  // A simple state to track the selected role for a subtle visual feedback
+  const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState(null);
 
-  // This function would handle navigation, which we'll simulate here
   const handleRoleSelect = (role) => {
     setSelectedType(role);
-    // In a real app, you would navigate to the dashboard here.
-    console.log(`Navigating to ${role}-dashboard...`);
+    setTimeout(() => {
+      navigate(`/${role}-dashboard`);
+    }, 300);
   };
 
   return (
