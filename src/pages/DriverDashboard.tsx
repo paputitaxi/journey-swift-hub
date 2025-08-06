@@ -8,7 +8,7 @@ import {
   Clock,
   BarChart,
   Shield,
-  RefreshCcw,
+  Navigation,
   MessageCircle,
   Users, // For Groups
   Hash, // For Channels
@@ -632,7 +632,7 @@ const DriverDashboard = () => {
 
   const bottomNavItems = [
     { id: "dashboard", label: "Ride", icon: MapPin },
-    { id: "Navigation", label: "Navigation", icon: RefreshCcw },
+    { id: "Navigation", label: "Navigation", icon: Navigation },
     { id: "videos", label: "Videos", icon: Play },
     { id: "profile", label: "Profile", icon: User },
   ];
@@ -661,7 +661,7 @@ const DriverDashboard = () => {
                 </div>
                 <div className="flex flex-col items-center">
                   <div className="w-12 h-12 mb-1 bg-white/10 rounded-full flex items-center justify-center border-2 border-white/20">
-                    <RefreshCcw className="h-6 w-6 text-white" />
+                    <Navigation className="h-6 w-6 text-white" />
                   </div>
                   <span className="text-xs">My lines</span>
                 </div>
