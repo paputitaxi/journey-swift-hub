@@ -1,20 +1,16 @@
 import React, { useState } from "react";
-// We'll assume these components and icons are available.
-// If not, you can replace them with simple HTML elements.
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { Car, Users } from "lucide-react";
-// I'm adding a dummy hook to simulate the functionality of react-router-dom's useNavigate
-const useNavigate = () => {
-  return (path) => {
-    console.log(`Navigating to ${path}`);
-  };
-};
 
+// The Welcome component is now a child of the Router
 const Welcome = () => {
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState(null);
 
   const handleRoleSelect = (role) => {
     setSelectedType(role);
+    // The setTimeout is used to allow the selected state to update,
+    // providing a brief visual feedback before navigating.
     setTimeout(() => {
       navigate(`/${role}-dashboard`);
     }, 300);
@@ -66,4 +62,21 @@ const Welcome = () => {
   );
 };
 
-export default Welcome;
+// Dummy components for the dashboards to prevent routing errors
+const RiderDashboard = () => <div className="text-white text-center p-8">Rider Dashboard</div>;
+const DriverDashboard = () => <div className="text-white text-center p-8">Driver Dashboard</div>;
+
+// Main App component with the BrowserRouter
+const App = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Welcome />} />
+        <Route path="/rider-dashboard" element={<RiderDashboard />} />
+        <Route path="/driver-dashboard" element={<DriverDashboard />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+export default App;
