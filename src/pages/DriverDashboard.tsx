@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Plus,
   Play,
@@ -96,7 +96,7 @@ const MessageDashboard = () => {
       ],
     };
 
-    const currentChats = chatItems[activeMessageTab];
+    const currentChats = chatItems[activeMessageTab] || [];
 
     const filteredChats = currentChats.filter(chat =>
       chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -187,7 +187,7 @@ const MessageDashboard = () => {
   );
 };
 
-// Data for Uzbekistan Regions and Cities (updated with more locations)
+// Data for Uzbekistan Regions and Cities
 const uzbekistanLocations = [
   { region: "Tashkent City", cities: ["Tashkent"] },
   { region: "Tashkent Region", cities: ["Angren", "Bekabad", "Chirchiq", "Gazalkent", "Keles", "Nurafshon", "Olmaliq", "Ohangaron", "Parkent", "Piskent", "Yangiobod", "Yangiyo‘l"] },
@@ -210,6 +210,12 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState(null);
 
+  const handleClose = () => {
+    setSelectedRegion(null);
+    setSearchTerm("");
+    onClose();
+  }
+
   const filteredRegions = uzbekistanLocations.filter(regionData =>
     regionData.region.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -227,7 +233,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
       <div className="bg-[#244A62] rounded-lg shadow-lg w-full max-w-md h-[80vh] flex flex-col">
         <div className="p-4 border-b border-white/10 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-white">{title}</h2>
-          <button onClick={onClose} className="text-white/80 hover:text-white">
+          <button onClick={handleClose} className="text-white/80 hover:text-white">
             <X className="h-6 w-6" />
           </button>
         </div>
@@ -259,7 +265,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
                     key={city}
                     onClick={() => {
                       onSelect(city);
-                      onClose();
+                      handleClose();
                     }}
                     className="w-full text-left p-3 bg-white/5 hover:bg-white/10 rounded-md text-white"
                   >
@@ -285,7 +291,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
                       key={city}
                       onClick={() => {
                         onSelect(city);
-                        onClose();
+                        handleClose();
                       }}
                       className="w-full text-left pl-6 py-2 text-white/70 hover:bg-white/5 rounded-md text-sm"
                     >
@@ -345,18 +351,20 @@ const PostRideForm = ({ onClose }) => {
       setIsSubmitted(true);
       setTimeout(() => {
         onClose(); // Close the form after a short delay
-        setIsSubmitted(false); // Reset for next time
+        // No need to reset state here as the component will unmount
       }, 1500);
     } else {
       console.log("Form is not valid.");
     }
   };
 
-  // Dummy Date Picker (replace with a proper component if available)
+  // Date Picker Modal Component
   const DatePickerModal = ({ isOpen, onClose, onSelectDate }) => {
     if (!isOpen) return null;
 
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize today to the start of the day
+
     const currentMonth = today.toLocaleString('default', { month: 'long', year: 'numeric' });
     const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
 
@@ -382,8 +390,11 @@ const PostRideForm = ({ onClose }) => {
                 <div key={`pad-${i}`} className="p-2"></div>
               ))}
               {dates.map(day => {
-                const isToday = day === today.getDate() && today.getMonth() === new Date().getMonth();
-                const dateString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                const date = new Date(today.getFullYear(), today.getMonth(), day);
+                const isToday = day === today.getDate();
+                const isPast = date < today;
+                const dateString = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                
                 return (
                   <button
                     key={day}
@@ -393,9 +404,9 @@ const PostRideForm = ({ onClose }) => {
                     }}
                     className={`p-2 rounded-full text-white text-sm font-medium
                       ${isToday ? 'bg-white/20 border border-white' : 'hover:bg-white/10'}
-                      ${new Date(dateString) < today && !isToday ? 'text-white/30 cursor-not-allowed' : ''}
+                      ${isPast ? 'text-white/30 cursor-not-allowed' : ''}
                     `}
-                    disabled={new Date(dateString) < today && !isToday}
+                    disabled={isPast}
                   >
                     {day}
                   </button>
@@ -522,7 +533,7 @@ const PostRideForm = ({ onClose }) => {
             <div className="space-y-3">
               <button
                 type="button"
-                onClick={() => { setDepartureType("fixed"); setDepartureTime(""); }}
+                onClick={() => { setDepartureType("fixed"); }}
                 className={`w-full p-4 rounded-lg flex items-center justify-between transition-colors
                   ${departureType === "fixed" ? "bg-teal-600/30 border border-teal-400" : "bg-white/10 hover:bg-white/20"}`}
               >
@@ -615,7 +626,7 @@ const PostRideForm = ({ onClose }) => {
 
 const DriverDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [showPostRide, setShowPostRide] = useState(false); // State to control PostRideForm visibility
+  const [showPostRide, setShowPostRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
 
   const bottomNavItems = [
@@ -640,7 +651,7 @@ const DriverDashboard = () => {
               <div className="flex justify-around items-center">
                 <div
                   className="flex flex-col items-center cursor-pointer"
-                  onClick={() => setShowPostRide(true)} // This now opens the PostRideForm
+                  onClick={() => setShowPostRide(true)}
                 >
                   <div className="w-12 h-12 mb-1 bg-white/10 rounded-full flex items-center justify-center border-2 border-white/20">
                     <Plus className="h-6 w-6 text-white" />
@@ -740,8 +751,8 @@ const DriverDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#244A62] text-white overflow-hidden flex flex-col">
-      <div className="bg-[#244A62] p-3 border-b border-white/10 flex justify-between items-center z-20">
+    <div className="h-screen bg-[#244A62] text-white flex flex-col">
+      <header className="bg-[#244A62] p-3 border-b border-white/10 flex justify-between items-center z-20">
         <h1 className="text-lg font-medium">Driver</h1>
         <button
           onClick={() => setShowMessages(!showMessages)}
@@ -749,39 +760,40 @@ const DriverDashboard = () => {
         >
           <MessageCircle className="h-8 w-8" />
         </button>
-      </div>
+      </header>
 
-      <div className="flex-grow overflow-y-auto pb-[5rem] pt-[4rem]">
+      <main className="flex-grow overflow-y-auto">
         {renderContent()}
-      </div>
+      </main>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-[#244A62] border-t border-white/10 shadow-lg z-10">
-        <div className="flex justify-around">
-          {bottomNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveTab(item.id);
-                  setShowMessages(false);
-                }}
-                className={`flex-1 flex flex-col items-center py-3 transition-colors ${
-                  isActive ? "text-white" : "text-white/50"
-                }`}
-              >
-                <Icon
-                  className={`h-6 w-6 ${
+      {!showMessages && (
+        <footer className="fixed bottom-0 left-0 right-0 bg-[#244A62] border-t border-white/10 shadow-lg z-10">
+          <div className="flex justify-around">
+            {bottomNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                  }}
+                  className={`flex-1 flex flex-col items-center py-3 transition-colors ${
                     isActive ? "text-white" : "text-white/50"
                   }`}
-                />
-                <span className="text-xs mt-1">{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+                >
+                  <Icon
+                    className={`h-6 w-6 ${
+                      isActive ? "text-white" : "text-white/50"
+                    }`}
+                  />
+                  <span className="text-xs mt-1">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </footer>
+      )}
 
       {/* Post Ride Form Modal */}
       {showPostRide && <PostRideForm onClose={() => setShowPostRide(false)} />}
@@ -789,4 +801,7 @@ const DriverDashboard = () => {
   );
 };
 
-export default DriverDashboard;
+// Renamed the main component to App for convention
+export default function App() {
+  return <DriverDashboard />;
+}
