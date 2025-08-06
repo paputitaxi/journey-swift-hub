@@ -1,28 +1,34 @@
 import React, { useState } from "react";
 import { Car, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // The Welcome component to choose a role
-const Welcome = ({ onRoleSelect }) => {
+const Welcome = () => {
   const [selectedType, setSelectedType] = useState(null);
+  const navigate = useNavigate();
 
   const handleRoleSelect = (role) => {
     setSelectedType(role);
     // The setTimeout is used to allow the selected state to update,
-    // providing a brief visual feedback before "navigating".
+    // providing a brief visual feedback before navigating.
     setTimeout(() => {
-      onRoleSelect(role);
+      if (role === "rider") {
+        navigate("/rider-dashboard");
+      } else if (role === "driver") {
+        navigate("/driver-dashboard");
+      }
     }, 300);
   };
 
   return (
-    <div className="min-h-screen bg-teal-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="text-center max-w-xl mx-auto space-y-8">
         {/* Main Header and Description */}
         <div className="space-y-4">
-          <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
             Welcome
           </h1>
-          <p className="text-lg text-teal-200">
+          <p className="text-lg text-muted-foreground">
             Choose your role to get started. Find rides or offer a spot in your car.
           </p>
         </div>
@@ -34,11 +40,11 @@ const Welcome = ({ onRoleSelect }) => {
             onClick={() => handleRoleSelect("rider")}
             className={`flex-1 flex items-center justify-center p-6 border-2 rounded-2xl transition-all duration-300
               ${selectedType === "rider"
-                ? "bg-teal-700 border-teal-400 text-white shadow-md"
-                : "bg-teal-800 border-teal-700 text-teal-200 hover:bg-teal-700 hover:border-teal-400"
+                ? "bg-primary border-primary-foreground text-primary-foreground shadow-md"
+                : "bg-card border-border text-card-foreground hover:bg-accent hover:border-accent-foreground"
               }`}
           >
-            <Users className={`h-6 w-6 mr-3 ${selectedType === "rider" ? "text-white" : "text-teal-400"}`} />
+            <Users className={`h-6 w-6 mr-3 ${selectedType === "rider" ? "text-primary-foreground" : "text-muted-foreground"}`} />
             <span className="font-semibold text-lg">I'm a Rider</span>
           </button>
 
@@ -47,11 +53,11 @@ const Welcome = ({ onRoleSelect }) => {
             onClick={() => handleRoleSelect("driver")}
             className={`flex-1 flex items-center justify-center p-6 border-2 rounded-2xl transition-all duration-300
               ${selectedType === "driver"
-                ? "bg-teal-700 border-teal-400 text-white shadow-md"
-                : "bg-teal-800 border-teal-700 text-teal-200 hover:bg-teal-700 hover:border-teal-400"
+                ? "bg-primary border-primary-foreground text-primary-foreground shadow-md"
+                : "bg-card border-border text-card-foreground hover:bg-accent hover:border-accent-foreground"
               }`}
           >
-            <Car className={`h-6 w-6 mr-3 ${selectedType === "driver" ? "text-white" : "text-teal-400"}`} />
+            <Car className={`h-6 w-6 mr-3 ${selectedType === "driver" ? "text-primary-foreground" : "text-muted-foreground"}`} />
             <span className="font-semibold text-lg">I'm a Driver</span>
           </button>
         </div>
@@ -60,30 +66,4 @@ const Welcome = ({ onRoleSelect }) => {
   );
 };
 
-// Dummy components for the dashboards to simulate navigation
-const RiderDashboard = () => <div className="text-white text-center p-8">Rider Dashboard</div>;
-const DriverDashboard = () => <div className="text-white text-center p-8">Driver Dashboard</div>;
-
-// Main App component with the state-based routing logic
-const App = () => {
-  const [currentPage, setCurrentPage] = useState("welcome");
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case "rider":
-        return <RiderDashboard />;
-      case "driver":
-        return <DriverDashboard />;
-      default:
-        return <Welcome onRoleSelect={setCurrentPage} />;
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-teal-900 flex items-center justify-center p-4">
-      {renderPage()}
-    </div>
-  );
-};
-
-export default App;
+export default Welcome;
