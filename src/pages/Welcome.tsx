@@ -1,18 +1,16 @@
 import React, { useState } from "react";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { Car, Users } from "lucide-react";
 
-// The Welcome component is now a child of the Router
-const Welcome = () => {
-  const navigate = useNavigate();
+// The Welcome component to choose a role
+const Welcome = ({ onRoleSelect }) => {
   const [selectedType, setSelectedType] = useState(null);
 
   const handleRoleSelect = (role) => {
     setSelectedType(role);
     // The setTimeout is used to allow the selected state to update,
-    // providing a brief visual feedback before navigating.
+    // providing a brief visual feedback before "navigating".
     setTimeout(() => {
-      navigate(`/${role}-dashboard`);
+      onRoleSelect(role);
     }, 300);
   };
 
@@ -62,20 +60,29 @@ const Welcome = () => {
   );
 };
 
-// Dummy components for the dashboards to prevent routing errors
+// Dummy components for the dashboards to simulate navigation
 const RiderDashboard = () => <div className="text-white text-center p-8">Rider Dashboard</div>;
 const DriverDashboard = () => <div className="text-white text-center p-8">Driver Dashboard</div>;
 
-// Main App component with the BrowserRouter
+// Main App component with the state-based routing logic
 const App = () => {
+  const [currentPage, setCurrentPage] = useState("welcome");
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case "rider":
+        return <RiderDashboard />;
+      case "driver":
+        return <DriverDashboard />;
+      default:
+        return <Welcome onRoleSelect={setCurrentPage} />;
+    }
+  };
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Welcome />} />
-        <Route path="/rider-dashboard" element={<RiderDashboard />} />
-        <Route path="/driver-dashboard" element={<DriverDashboard />} />
-      </Routes>
-    </BrowserRouter>
+    <div className="min-h-screen bg-teal-900 flex items-center justify-center p-4">
+      {renderPage()}
+    </div>
   );
 };
 
