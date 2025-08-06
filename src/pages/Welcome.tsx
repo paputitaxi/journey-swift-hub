@@ -1,76 +1,63 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Car, Users, MapPin, Clock } from "lucide-react";
-import heroImage from "@/assets/hero-ride.jpg";
+import React, { useState } from "react";
+// We'll assume these components and icons are available.
+// If not, you can replace them with simple HTML elements.
+import { Car, Users } from "lucide-react";
+
 const Welcome = () => {
-  const navigate = useNavigate();
-  const [selectedType, setSelectedType] = useState<string | null>(null);
-  const handleRoleSelect = (role: "rider" | "driver") => {
+  // A simple state to track the selected role for a subtle visual feedback
+  const [selectedType, setSelectedType] = useState(null);
+
+  // This function would handle navigation, which we'll simulate here
+  const handleRoleSelect = (role) => {
     setSelectedType(role);
-    setTimeout(() => {
-      navigate(`/${role}-dashboard`);
-    }, 300);
+    // In a real app, you would navigate to the dashboard here.
+    console.log(`Navigating to ${role}-dashboard...`);
   };
-  return <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
-      {/* Hero Section */}
-      <div className="relative h-screen flex items-center justify-center overflow-hidden bg-slate-700">
-        
-        
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <div className="animate-bounce-gentle mb-8">
-            <Car className="h-16 w-16 mx-auto text-primary-glow" />
-          </div>
-          
-          <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Choose your role 
-            <span className="bg-gradient-primary bg-clip-text text-transparent"> Journey</span>
+
+  return (
+    <div className="min-h-screen bg-teal-900 flex items-center justify-center p-4">
+      <div className="text-center max-w-xl mx-auto space-y-8">
+        {/* Main Header and Description */}
+        <div className="space-y-4">
+          <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight">
+            Welcome
           </h1>
-          
-          <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-2xl mx-auto">
-            Connect with fellow travelers. Save money. Reduce carbon footprint. 
-            Make every journey count.
+          <p className="text-lg text-teal-200">
+            Choose your role to get started. Find rides or offer a spot in your car.
           </p>
+        </div>
 
-          {/* Role Selection Cards */}
-          <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
-            <Card className={`p-8 bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 cursor-pointer transition-all duration-500 transform hover:scale-105 ${selectedType === "rider" ? "ring-2 ring-primary-glow scale-105" : ""}`} onClick={() => handleRoleSelect("rider")}>
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-primary rounded-full flex items-center justify-center">
-                  <Users className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-2">I'm a Rider</h3>
-                <p className="text-white/80 mb-6">
-                  Find rides to your destination and travel together
-                </p>
-                <Button variant="hero" size="lg" className="w-full">
-                  Find Rides
-                  <MapPin className="ml-2 h-5 w-5" />
-                </Button>
-              </div>
-            </Card>
+        {/* Role Selection Buttons */}
+        <div className="flex flex-col gap-4">
+          {/* Rider Button */}
+          <button
+            onClick={() => handleRoleSelect("rider")}
+            className={`flex-1 flex items-center justify-center p-6 border-2 rounded-2xl transition-all duration-300
+              ${selectedType === "rider"
+                ? "bg-teal-700 border-teal-400 text-white shadow-md"
+                : "bg-teal-800 border-teal-700 text-teal-200 hover:bg-teal-700 hover:border-teal-400"
+              }`}
+          >
+            <Users className={`h-6 w-6 mr-3 ${selectedType === "rider" ? "text-white" : "text-teal-400"}`} />
+            <span className="font-semibold text-lg">I'm a Rider</span>
+          </button>
 
-            <Card className={`p-8 bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 cursor-pointer transition-all duration-500 transform hover:scale-105 ${selectedType === "driver" ? "ring-2 ring-ride-orange scale-105" : ""}`} onClick={() => handleRoleSelect("driver")}>
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-accent rounded-full flex items-center justify-center">
-                  <Car className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-2">I'm a Driver</h3>
-                <p className="text-white/80 mb-6">
-                  Offer rides and earn money while traveling
-                </p>
-                <Button variant="ride-orange" size="lg" className="w-full">
-                  Offer Rides
-                  <Clock className="ml-2 h-5 w-5" />
-                </Button>
-              </div>
-            </Card>
-          </div>
-
-          
+          {/* Driver Button */}
+          <button
+            onClick={() => handleRoleSelect("driver")}
+            className={`flex-1 flex items-center justify-center p-6 border-2 rounded-2xl transition-all duration-300
+              ${selectedType === "driver"
+                ? "bg-teal-700 border-teal-400 text-white shadow-md"
+                : "bg-teal-800 border-teal-700 text-teal-200 hover:bg-teal-700 hover:border-teal-400"
+              }`}
+          >
+            <Car className={`h-6 w-6 mr-3 ${selectedType === "driver" ? "text-white" : "text-teal-400"}`} />
+            <span className="font-semibold text-lg">I'm a Driver</span>
+          </button>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Welcome;
