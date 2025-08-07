@@ -1,5 +1,5 @@
 // Driver Dashboard - With Custom Scrollbar Styling
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Plus,
   Play,
@@ -22,6 +22,7 @@ import {
   ArrowRight,// For Navigation
   Flag,      // For Navigation
   ChevronLeft, // For Navigation
+  Send, // For search button
 } from "lucide-react";
 
 // --- Custom Scrollbar Styles Component ---
@@ -682,58 +683,97 @@ const PostRideForm = ({ onClose }) => {
 // --- Stunning Navigation View Component ---
 const NavigationView = ({ onClose }) => {
   const [currentInstructionIndex, setCurrentInstructionIndex] = useState(0);
+  const [location, setLocation] = useState(null);
+  const [destination, setDestination] = useState("");
+  const [route, setRoute] = useState(null);
+  const [error, setError] = useState(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
+  // Mock instructions for now
   const instructions = [
-    { icon: ArrowUp, text: "Proceed straight on Amir Temur Avenue", distance: "2.5 km" },
-    { icon: ArrowRight, text: "In 300m, turn right onto Navoiy Street", distance: "800 m" },
-    { icon: ArrowLeft, text: "Turn left onto Beruniy Street", distance: "1.2 km" },
-    { icon: Flag, text: "You have arrived at your destination", distance: "Samarkand" },
+    { icon: ArrowUp, text: "Proceed straight on current road", distance: "2.5 km" },
+    { icon: ArrowRight, text: "In 300m, turn right", distance: "800 m" },
+    { icon: ArrowLeft, text: "Turn left", distance: "1.2 km" },
+    { icon: Flag, text: "You have arrived at your destination", distance: "Destination" },
   ];
-  
-  const CurrentIcon = instructions[currentInstructionIndex].icon;
 
+  const CurrentIcon = instructions[currentInstructionIndex]?.icon || Flag;
+
+  // Get user's current location
   useEffect(() => {
-    // A timer to cycle through instructions
-    if (currentInstructionIndex < instructions.length - 1) {
-      const timer = setTimeout(() => {
-        setCurrentInstructionIndex(prev => prev + 1);
-      }, 4000); // Change instruction every 4 seconds
-      return () => clearTimeout(timer);
+    if (navigator.geolocation) {
+      const watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocation({ lat: latitude, lng: longitude });
+          setError(null);
+        },
+        (err) => {
+          setError(err.message);
+        }
+      );
+      return () => navigator.geolocation.clearWatch(watchId);
+    } else {
+      setError("Geolocation is not supported by this browser.");
     }
-  }, [currentInstructionIndex]);
+  }, []);
+
+  // Simulate route calculation and navigation
+  const handleStartNavigation = () => {
+    if (!destination) {
+      setError("Please enter a destination.");
+      return;
+    }
+    if (!location) {
+      setError("Could not get current location.");
+      return;
+    }
+    
+    // In a real app, you would use a routing service API here
+    // For this demo, we'll create a simple straight line route
+    const newRoute = {
+      path: `M 150,380 C 150,300 150,250 150,50`, // Simple straight path
+      distance: "320 km",
+      eta: "3 hr 45 min",
+      destinationName: destination,
+    };
+    
+    setRoute(newRoute);
+    setIsNavigating(true);
+    setCurrentInstructionIndex(0);
+    setError(null);
+  };
+
+  // Timer to cycle through instructions during navigation
+  useEffect(() => {
+    let timer;
+    if (isNavigating && currentInstructionIndex < instructions.length - 1) {
+      timer = setTimeout(() => {
+        setCurrentInstructionIndex(prev => prev + 1);
+      }, 5000); // Change instruction every 5 seconds
+    }
+    return () => clearTimeout(timer);
+  }, [isNavigating, currentInstructionIndex]);
 
   return (
     <div className="relative h-full w-full bg-[#111827] text-white overflow-hidden">
-      {/* Map Placeholder with animated route */}
+      {/* Map Placeholder */}
       <div className="absolute inset-0">
-        {/* Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#111827] via-[#1a3a52] to-[#244A62]"></div>
-        
-        {/* The SVG Route */}
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice">
-          {/* Faded background route */}
-          <path
-            d="M 50,380 C 50,300 150,250 150,200 S 250,150 250,50"
-            stroke="rgba(100, 116, 139, 0.2)"
-            strokeWidth="8"
-            fill="none"
-          />
-          {/* Animated main route */}
-          <path
-            className="route-path"
-            d="M 50,380 C 50,300 150,250 150,200 S 250,150 250,50"
-            stroke="url(#route-gradient)"
-            strokeWidth="8"
-            strokeLinecap="round"
-            fill="none"
-          />
-          <defs>
-            <linearGradient id="route-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#34d399" />
-              <stop offset="100%" stopColor="#2563eb" />
-            </linearGradient>
-          </defs>
-        </svg>
+        {route && isNavigating && (
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice">
+            <path d={route.path} stroke="rgba(100, 116, 139, 0.2)" strokeWidth="8" fill="none" />
+            <path className="route-path" d={route.path} stroke="url(#route-gradient)" strokeWidth="8" strokeLinecap="round" fill="none" />
+            <defs>
+              <linearGradient id="route-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#34d399" />
+                <stop offset="100%" stopColor="#2563eb" />
+              </linearGradient>
+            </defs>
+            {/* Current Location Marker */}
+            <circle cx="150" cy="380" r="10" fill="#34d399" stroke="white" strokeWidth="2" />
+          </svg>
+        )}
       </div>
 
       {/* Top UI Panel */}
@@ -743,28 +783,50 @@ const NavigationView = ({ onClose }) => {
         </button>
         <div className="text-center">
           <p className="text-sm text-white/70">Trip to</p>
-          <h2 className="text-lg font-bold">Samarkand</h2>
+          <h2 className="text-lg font-bold">{route ? route.destinationName : '...'}</h2>
         </div>
         <div className="w-10 h-10"></div>
       </div>
 
       {/* Bottom UI Panel */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-        <div className="bg-black/40 backdrop-blur-md rounded-2xl p-5 shadow-2xl border border-white/10">
-            <div className="flex items-center">
-                <div className="bg-blue-500 p-4 rounded-xl mr-4">
-                    <CurrentIcon className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                    <h3 className="text-2xl font-bold">{instructions[currentInstructionIndex].distance}</h3>
-                    <p className="text-white/80">{instructions[currentInstructionIndex].text}</p>
-                </div>
+      {!isNavigating ? (
+        <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+          <div className="bg-black/40 backdrop-blur-md rounded-2xl p-5 shadow-2xl border border-white/10">
+            <h3 className="text-lg font-semibold mb-2">Set Destination</h3>
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                placeholder="Enter destination..."
+                className="w-full p-3 bg-white/10 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-white/50"
+              />
+              <button onClick={handleStartNavigation} className="p-3 bg-blue-600 hover:bg-blue-700 rounded-lg">
+                <Send className="h-6 w-6" />
+              </button>
             </div>
-            <div className="mt-4 text-center text-sm text-white/60">
-                <p>ETA: <strong>3 hr 45 min</strong> &bull; 320 km remaining</p>
-            </div>
+            {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+            {location && <p className="text-green-400 text-sm mt-2">Current location acquired.</p>}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+          <div className="bg-black/40 backdrop-blur-md rounded-2xl p-5 shadow-2xl border border-white/10">
+              <div className="flex items-center">
+                  <div className="bg-blue-500 p-4 rounded-xl mr-4">
+                      <CurrentIcon className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                      <h3 className="text-2xl font-bold">{instructions[currentInstructionIndex].distance}</h3>
+                      <p className="text-white/80">{instructions[currentInstructionIndex].text}</p>
+                  </div>
+              </div>
+              <div className="mt-4 text-center text-sm text-white/60">
+                  <p>ETA: <strong>{route.eta}</strong> &bull; {route.distance} remaining</p>
+              </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
