@@ -1,5 +1,5 @@
 // Driver Dashboard - With Custom Scrollbar Styling
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   Play,
@@ -17,10 +17,15 @@ import {
   Search, // For search bar
   X, // For closing modals
   CheckCircle, // For submit button success state
+  ArrowUp,   // For Navigation
+  ArrowLeft, // For Navigation
+  ArrowRight,// For Navigation
+  Flag,      // For Navigation
+  ChevronLeft, // For Navigation
 } from "lucide-react";
 
 // --- Custom Scrollbar Styles Component ---
-// This component injects the CSS for our custom scrollbar into the app.
+// This component injects the CSS for our custom scrollbar and new navigation animations.
 const CustomScrollbarStyles = () => (
   <style>{`
     /* For Webkit-based browsers (Chrome, Safari, Edge) */
@@ -47,6 +52,19 @@ const CustomScrollbarStyles = () => (
     .custom-scrollbar {
       scrollbar-width: thin;
       scrollbar-color: #64748b #244A62; /* thumb and track color */
+    }
+
+    /* Navigation Route Animation */
+    .route-path {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: draw-route 5s linear forwards;
+    }
+    
+    @keyframes draw-route {
+      to {
+        stroke-dashoffset: 0;
+      }
     }
   `}</style>
 );
@@ -661,6 +679,96 @@ const PostRideForm = ({ onClose }) => {
   );
 };
 
+// --- Stunning Navigation View Component ---
+const NavigationView = ({ onClose }) => {
+  const [currentInstructionIndex, setCurrentInstructionIndex] = useState(0);
+
+  const instructions = [
+    { icon: ArrowUp, text: "Proceed straight on Amir Temur Avenue", distance: "2.5 km" },
+    { icon: ArrowRight, text: "In 300m, turn right onto Navoiy Street", distance: "800 m" },
+    { icon: ArrowLeft, text: "Turn left onto Beruniy Street", distance: "1.2 km" },
+    { icon: Flag, text: "You have arrived at your destination", distance: "Samarkand" },
+  ];
+  
+  const CurrentIcon = instructions[currentInstructionIndex].icon;
+
+  useEffect(() => {
+    // A timer to cycle through instructions
+    if (currentInstructionIndex < instructions.length - 1) {
+      const timer = setTimeout(() => {
+        setCurrentInstructionIndex(prev => prev + 1);
+      }, 4000); // Change instruction every 4 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [currentInstructionIndex]);
+
+  return (
+    <div className="relative h-full w-full bg-[#111827] text-white overflow-hidden">
+      {/* Map Placeholder with animated route */}
+      <div className="absolute inset-0">
+        {/* Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#111827] via-[#1a3a52] to-[#244A62]"></div>
+        
+        {/* The SVG Route */}
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice">
+          {/* Faded background route */}
+          <path
+            d="M 50,380 C 50,300 150,250 150,200 S 250,150 250,50"
+            stroke="rgba(100, 116, 139, 0.2)"
+            strokeWidth="8"
+            fill="none"
+          />
+          {/* Animated main route */}
+          <path
+            className="route-path"
+            d="M 50,380 C 50,300 150,250 150,200 S 250,150 250,50"
+            stroke="url(#route-gradient)"
+            strokeWidth="8"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <defs>
+            <linearGradient id="route-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#34d399" />
+              <stop offset="100%" stopColor="#2563eb" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      {/* Top UI Panel */}
+      <div className="absolute top-0 left-0 right-0 p-4 bg-black/20 backdrop-blur-sm flex items-center justify-between z-10">
+        <button onClick={onClose} className="p-2 rounded-full bg-white/10 hover:bg-white/20">
+          <ChevronLeft className="h-6 w-6" />
+        </button>
+        <div className="text-center">
+          <p className="text-sm text-white/70">Trip to</p>
+          <h2 className="text-lg font-bold">Samarkand</h2>
+        </div>
+        <div className="w-10 h-10"></div>
+      </div>
+
+      {/* Bottom UI Panel */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+        <div className="bg-black/40 backdrop-blur-md rounded-2xl p-5 shadow-2xl border border-white/10">
+            <div className="flex items-center">
+                <div className="bg-blue-500 p-4 rounded-xl mr-4">
+                    <CurrentIcon className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                    <h3 className="text-2xl font-bold">{instructions[currentInstructionIndex].distance}</h3>
+                    <p className="text-white/80">{instructions[currentInstructionIndex].text}</p>
+                </div>
+            </div>
+            <div className="mt-4 text-center text-sm text-white/60">
+                <p>ETA: <strong>3 hr 45 min</strong> &bull; 320 km remaining</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 const DriverDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -669,7 +777,7 @@ const DriverDashboard = () => {
 
   const bottomNavItems = [
     { id: "dashboard", label: "Ride", icon: MapPin },
-    { id: "Navigation", label: "Navigation", icon: Navigation },
+    { id: "navigation", label: "Navigation", icon: Navigation },
     { id: "videos", label: "Videos", icon: Play },
     { id: "profile", label: "Profile", icon: User },
   ];
@@ -762,13 +870,8 @@ const DriverDashboard = () => {
             </div>
           </div>
         );
-      case "lanes":
-        return (
-          <div className="p-4 text-white">
-            <h2 className="text-xl font-bold">My Lines Content</h2>
-            <p>This section would display your saved routes or "lines".</p>
-          </div>
-        );
+      case "navigation":
+        return <NavigationView onClose={() => setActiveTab("dashboard")} />;
       case "videos":
         return (
           <div className="p-4 text-white">
@@ -790,22 +893,26 @@ const DriverDashboard = () => {
 
   return (
     <div className="h-screen bg-[#244A62] text-white flex flex-col">
-      <header className="bg-[#244A62] p-3 border-b border-white/10 flex justify-between items-center z-20">
-        <h1 className="text-lg font-medium">Driver</h1>
-        <button
-          onClick={() => setShowMessages(!showMessages)}
-          className="text-white/80 hover:text-white transition-colors"
-        >
-          <MessageCircle className="h-8 w-8" />
-        </button>
-      </header>
+      {/* Conditionally render header to hide it in navigation view */}
+      {activeTab !== 'navigation' && (
+        <header className="bg-[#244A62] p-3 border-b border-white/10 flex justify-between items-center z-20">
+          <h1 className="text-lg font-medium">Driver</h1>
+          <button
+            onClick={() => setShowMessages(!showMessages)}
+            className="text-white/80 hover:text-white transition-colors"
+          >
+            <MessageCircle className="h-8 w-8" />
+          </button>
+        </header>
+      )}
 
       {/* Added "custom-scrollbar" class here */}
       <main className="flex-grow overflow-y-auto custom-scrollbar">
         {renderContent()}
       </main>
 
-      {!showMessages && !showPostRide && (
+      {/* Conditionally render footer to hide it in navigation view */}
+      {activeTab !== 'navigation' && !showMessages && !showPostRide && (
         <footer className="fixed bottom-0 left-0 right-0 bg-[#244A62] border-t border-white/10 shadow-lg z-10">
           <div className="flex justify-around">
             {bottomNavItems.map((item) => {
