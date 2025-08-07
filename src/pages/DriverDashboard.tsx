@@ -53,7 +53,7 @@ const Avatar = ({ initials, bgColor }) => (
 );
 
 // Message Dashboard component with Telegram-like UX
-const MessageDashboard = () => {
+const MessageDashboard = ({ onClose }) => {
   const [activeMessageTab, setActiveMessageTab] = useState("chats");
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -99,7 +99,9 @@ const MessageDashboard = () => {
   return (
     <div className="flex flex-col h-full bg-[#244A62]">
       <div className="bg-[#244A62] p-3 border-b border-white/10 flex items-center justify-between">
-        <div className="w-6 h-6"></div>
+        <button onClick={onClose} className="text-white/80 hover:text-white">
+            <ChevronLeft className="h-6 w-6" />
+        </button>
         <h2 className="text-lg font-semibold text-white">{currentTabLabel}</h2>
         <button onClick={() => setShowSearchInput(!showSearchInput)} className="text-white/80 hover:text-white" >
           <Search className="h-6 w-6" />
@@ -687,7 +689,7 @@ const DriverDashboard = () => {
   ];
 
   const renderContent = () => {
-    if (showMessages) { return <MessageDashboard />; }
+    if (showMessages) { return <MessageDashboard onClose={() => setShowMessages(false)} />; }
     switch (activeTab) {
       case "dashboard": return (
           <div className="p-4 space-y-4 text-white">
@@ -792,8 +794,8 @@ export default function App() {
   return (
     <>
       <CustomScrollbarStyles />
-      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" xintegrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossOrigin=""/>
-      <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" xintegrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossOrigin=""></script>
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" crossOrigin=""/>
+      <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" crossOrigin=""></script>
       <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
       <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
       <DriverDashboard />
