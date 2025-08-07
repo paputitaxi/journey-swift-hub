@@ -23,6 +23,7 @@ import {
   Flag,      // For Navigation
   ChevronLeft, // For Navigation
   Send, // For search button
+  Loader2, // For loading state
 } from "lucide-react";
 
 // --- Custom Scrollbar Styles Component ---
@@ -66,6 +67,10 @@ const CustomScrollbarStyles = () => (
       to {
         stroke-dashoffset: 0;
       }
+    }
+    
+    .animate-spin-slow {
+        animation: spin 2s linear infinite;
     }
   `}</style>
 );
@@ -157,7 +162,6 @@ const MessageDashboard = () => {
     );
 
     return (
-      // Added "custom-scrollbar" class here
       <div className="flex-grow overflow-y-auto custom-scrollbar">
         {filteredChats.length > 0 ? (
           <div className="space-y-1">
@@ -304,7 +308,6 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
             />
           </div>
         </div>
-        {/* Added "custom-scrollbar" class here */}
         <div className="flex-grow overflow-y-auto p-4 space-y-2 custom-scrollbar">
           {selectedRegion ? (
             <>
@@ -342,7 +345,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
                   >
                     {regionData.region}
                   </button>
-                  {searchTerm === "" && regionData.cities.slice(0, 3).map(city => ( // Show first 3 cities if no search
+                  {searchTerm === "" && regionData.cities.slice(0, 3).map(city => (
                     <button
                       key={city}
                       onClick={() => {
@@ -372,17 +375,16 @@ const PostRideForm = ({ onClose }) => {
   const [fromLocation, setFromLocation] = useState("");
   const [toLocation, setToLocation] = useState("");
   const [departureDate, setDepartureDate] = useState("");
-  const [mailService, setMailService] = useState(""); // "yes", "no", "mail_only"
-  const [departureType, setDepartureType] = useState(""); // "fixed", "when_fills"
-  const [departureTime, setDepartureTime] = useState(""); // Only for fixed departure
+  const [mailService, setMailService] = useState("");
+  const [departureType, setDepartureType] = useState("");
+  const [departureTime, setDepartureTime] = useState("");
   const [price, setPrice] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const [showFromModal, setShowFromModal] = useState(false);
   const [showToModal, setShowToModal] = useState(false);
-  const [showDateModal, setShowDateModal] = useState(false); // For date picker modal
+  const [showDateModal, setShowDateModal] = useState(false);
 
-  // Simple validation for submit button
   const isFormValid =
     fromLocation &&
     toLocation &&
@@ -390,36 +392,23 @@ const PostRideForm = ({ onClose }) => {
     mailService &&
     departureType &&
     price &&
-    (departureType !== "fixed" || departureTime); // If fixed, time is also required
+    (departureType !== "fixed" || departureTime);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isFormValid) {
-      console.log("Ride Posted:", {
-        fromLocation,
-        toLocation,
-        departureDate,
-        mailService,
-        departureType,
-        departureTime,
-        price,
-      });
       setIsSubmitted(true);
       setTimeout(() => {
-        onClose(); // Close the form after a short delay
-        // No need to reset state here as the component will unmount
+        onClose();
       }, 1500);
-    } else {
-      console.log("Form is not valid.");
     }
   };
 
-  // Date Picker Modal Component
   const DatePickerModal = ({ isOpen, onClose, onSelectDate }) => {
     if (!isOpen) return null;
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize today to the start of the day
+    today.setHours(0, 0, 0, 0);
 
     const currentMonth = today.toLocaleString('default', { month: 'long', year: 'numeric' });
     const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
@@ -441,7 +430,6 @@ const PostRideForm = ({ onClose }) => {
               <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
             </div>
             <div className="grid grid-cols-7 gap-2">
-              {/* Dummy padding for days before 1st */}
               {Array.from({ length: new Date(today.getFullYear(), today.getMonth(), 1).getDay() }).map((_, i) => (
                 <div key={`pad-${i}`} className="p-2"></div>
               ))}
@@ -486,9 +474,7 @@ const PostRideForm = ({ onClose }) => {
           </button>
         </div>
 
-        {/* Added "custom-scrollbar" class here */}
         <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-4 space-y-6 custom-scrollbar">
-          {/* From Where */}
           <div>
             <label className="block text-white/80 text-sm font-medium mb-2">From Where</label>
             <div
@@ -506,7 +492,6 @@ const PostRideForm = ({ onClose }) => {
             />
           </div>
 
-          {/* To Where */}
           <div>
             <label className="block text-white/80 text-sm font-medium mb-2">To Where</label>
             <div
@@ -524,7 +509,6 @@ const PostRideForm = ({ onClose }) => {
             />
           </div>
 
-          {/* Departure Date */}
           <div>
             <label className="block text-white/80 text-sm font-medium mb-2">Departure Date</label>
             <div
@@ -541,7 +525,6 @@ const PostRideForm = ({ onClose }) => {
             />
           </div>
 
-          {/* Mail Service */}
           <div>
             <label className="block text-white/80 text-sm font-medium mb-2">Mail Service</label>
             <div className="space-y-3">
@@ -584,7 +567,6 @@ const PostRideForm = ({ onClose }) => {
             </div>
           </div>
 
-          {/* Departure Type */}
           <div>
             <label className="block text-white/80 text-sm font-medium mb-2">Departure Type</label>
             <div className="space-y-3">
@@ -632,7 +614,6 @@ const PostRideForm = ({ onClose }) => {
             </div>
           </div>
 
-          {/* Price */}
           <div>
             <label className="block text-white/80 text-sm font-medium mb-2">Price</label>
             <div className="relative">
@@ -654,7 +635,6 @@ const PostRideForm = ({ onClose }) => {
             </div>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={!isFormValid || isSubmitted}
@@ -688,16 +668,18 @@ const NavigationView = ({ onClose }) => {
   const [route, setRoute] = useState(null);
   const [error, setError] = useState(null);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [instructions, setInstructions] = useState([]);
+  const routeKey = useRef(0);
 
-  // Mock instructions for now
-  const instructions = [
-    { icon: ArrowUp, text: "Proceed straight on current road", distance: "2.5 km" },
-    { icon: ArrowRight, text: "In 300m, turn right", distance: "800 m" },
-    { icon: ArrowLeft, text: "Turn left", distance: "1.2 km" },
-    { icon: Flag, text: "You have arrived at your destination", distance: "Destination" },
-  ];
+  const iconMap = {
+      ArrowUp: ArrowUp,
+      ArrowLeft: ArrowLeft,
+      ArrowRight: ArrowRight,
+      Flag: Flag
+  };
 
-  const CurrentIcon = instructions[currentInstructionIndex]?.icon || Flag;
+  const CurrentIcon = instructions.length > 0 ? (iconMap[instructions[currentInstructionIndex]?.icon] || Flag) : Flag;
 
   // Get user's current location
   useEffect(() => {
@@ -706,42 +688,105 @@ const NavigationView = ({ onClose }) => {
         (position) => {
           const { latitude, longitude } = position.coords;
           setLocation({ lat: latitude, lng: longitude });
-          setError(null);
+          if(error === "Geolocation permission denied.") setError(null);
         },
         (err) => {
-          setError(err.message);
+            if(err.code === 1) { // PERMISSION_DENIED
+                setError("Geolocation permission denied.");
+            } else {
+                setError(err.message);
+            }
         }
       );
       return () => navigator.geolocation.clearWatch(watchId);
     } else {
       setError("Geolocation is not supported by this browser.");
     }
-  }, []);
+  }, [error]);
 
-  // Simulate route calculation and navigation
-  const handleStartNavigation = () => {
+  // Function to get directions from Gemini
+  const getDirections = async (origin, destination) => {
+      const prompt = `Provide turn-by-turn navigation instructions from my current location to "${destination}". My current location's approximate coordinates are latitude ${origin.lat} and longitude ${origin.lng}. The destination is a place, not coordinates. Give me a plausible, realistic route for a car. Provide a JSON array of objects, where each object has "icon" (one of "ArrowUp", "ArrowLeft", "ArrowRight", or "Flag" for the final step), "text" (the instruction, e.g., "Turn right onto Main St"), and "distance" (e.g., "2.5 km"). The final step should use the "Flag" icon.`;
+      
+      const payload = {
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                  type: "ARRAY",
+                  items: {
+                      type: "OBJECT",
+                      properties: {
+                          "icon": { "type": "STRING" },
+                          "text": { "type": "STRING" },
+                          "distance": { "type": "STRING" }
+                      },
+                      required: ["icon", "text", "distance"]
+                  }
+              }
+          }
+      };
+      
+      const apiKey = ""; // API key will be injected by the environment
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+      try {
+          const response = await fetch(apiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+          });
+          if (!response.ok) {
+              throw new Error(`API call failed with status: ${response.status}`);
+          }
+          const result = await response.json();
+          if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+              const parsedInstructions = JSON.parse(result.candidates[0].content.parts[0].text);
+              return parsedInstructions;
+          } else {
+              throw new Error("Invalid response structure from API.");
+          }
+      } catch (e) {
+          console.error("Error fetching directions:", e);
+          throw e;
+      }
+  };
+
+  // Handle starting the navigation
+  const handleStartNavigation = async () => {
     if (!destination) {
       setError("Please enter a destination.");
       return;
     }
     if (!location) {
-      setError("Could not get current location.");
+      setError("Could not get current location. Please grant permission and try again.");
       return;
     }
     
-    // In a real app, you would use a routing service API here
-    // For this demo, we'll create a simple straight line route
-    const newRoute = {
-      path: `M 150,380 C 150,300 150,250 150,50`, // Simple straight path
-      distance: "320 km",
-      eta: "3 hr 45 min",
-      destinationName: destination,
-    };
-    
-    setRoute(newRoute);
-    setIsNavigating(true);
-    setCurrentInstructionIndex(0);
+    setIsLoading(true);
     setError(null);
+    setRoute(null);
+
+    try {
+        const fetchedInstructions = await getDirections(location, destination);
+        setInstructions(fetchedInstructions);
+
+        const newRoute = {
+          path: `M 150,380 C ${Math.random() * 100 + 100},250 ${Math.random() * 100 + 100},150 150,50`,
+          distance: "Calculating...",
+          eta: "Calculating...",
+          destinationName: destination,
+        };
+        
+        routeKey.current += 1; // Force re-render of SVG for animation
+        setRoute(newRoute);
+        setIsNavigating(true);
+        setCurrentInstructionIndex(0);
+    } catch (e) {
+        setError("Could not fetch directions. Please try again.");
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   // Timer to cycle through instructions during navigation
@@ -753,15 +798,14 @@ const NavigationView = ({ onClose }) => {
       }, 5000); // Change instruction every 5 seconds
     }
     return () => clearTimeout(timer);
-  }, [isNavigating, currentInstructionIndex]);
+  }, [isNavigating, currentInstructionIndex, instructions]);
 
   return (
     <div className="relative h-full w-full bg-[#111827] text-white overflow-hidden">
-      {/* Map Placeholder */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-[#111827] via-[#1a3a52] to-[#244A62]"></div>
         {route && isNavigating && (
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice">
+          <svg key={routeKey.current} className="absolute inset-0 w-full h-full" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice">
             <path d={route.path} stroke="rgba(100, 116, 139, 0.2)" strokeWidth="8" fill="none" />
             <path className="route-path" d={route.path} stroke="url(#route-gradient)" strokeWidth="8" strokeLinecap="round" fill="none" />
             <defs>
@@ -770,13 +814,12 @@ const NavigationView = ({ onClose }) => {
                 <stop offset="100%" stopColor="#2563eb" />
               </linearGradient>
             </defs>
-            {/* Current Location Marker */}
             <circle cx="150" cy="380" r="10" fill="#34d399" stroke="white" strokeWidth="2" />
+             <circle cx="150" cy="50" r="10" fill="#f43f5e" stroke="white" strokeWidth="2" />
           </svg>
         )}
       </div>
 
-      {/* Top UI Panel */}
       <div className="absolute top-0 left-0 right-0 p-4 bg-black/20 backdrop-blur-sm flex items-center justify-between z-10">
         <button onClick={onClose} className="p-2 rounded-full bg-white/10 hover:bg-white/20">
           <ChevronLeft className="h-6 w-6" />
@@ -788,7 +831,6 @@ const NavigationView = ({ onClose }) => {
         <div className="w-10 h-10"></div>
       </div>
 
-      {/* Bottom UI Panel */}
       {!isNavigating ? (
         <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
           <div className="bg-black/40 backdrop-blur-md rounded-2xl p-5 shadow-2xl border border-white/10">
@@ -800,13 +842,14 @@ const NavigationView = ({ onClose }) => {
                 onChange={(e) => setDestination(e.target.value)}
                 placeholder="Enter destination..."
                 className="w-full p-3 bg-white/10 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-white/50"
+                disabled={isLoading}
               />
-              <button onClick={handleStartNavigation} className="p-3 bg-blue-600 hover:bg-blue-700 rounded-lg">
-                <Send className="h-6 w-6" />
+              <button onClick={handleStartNavigation} disabled={isLoading} className="p-3 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:bg-gray-500 disabled:cursor-not-allowed">
+                {isLoading ? <Loader2 className="h-6 w-6 animate-spin-slow" /> : <Send className="h-6 w-6" />}
               </button>
             </div>
             {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
-            {location && <p className="text-green-400 text-sm mt-2">Current location acquired.</p>}
+            {location && !error && <p className="text-green-400 text-sm mt-2">Current location acquired.</p>}
           </div>
         </div>
       ) : (
@@ -817,8 +860,8 @@ const NavigationView = ({ onClose }) => {
                       <CurrentIcon className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                      <h3 className="text-2xl font-bold">{instructions[currentInstructionIndex].distance}</h3>
-                      <p className="text-white/80">{instructions[currentInstructionIndex].text}</p>
+                      <h3 className="text-2xl font-bold">{instructions[currentInstructionIndex]?.distance}</h3>
+                      <p className="text-white/80">{instructions[currentInstructionIndex]?.text}</p>
                   </div>
               </div>
               <div className="mt-4 text-center text-sm text-white/60">
@@ -955,7 +998,6 @@ const DriverDashboard = () => {
 
   return (
     <div className="h-screen bg-[#244A62] text-white flex flex-col">
-      {/* Conditionally render header to hide it in navigation view */}
       {activeTab !== 'navigation' && (
         <header className="bg-[#244A62] p-3 border-b border-white/10 flex justify-between items-center z-20">
           <h1 className="text-lg font-medium">Driver</h1>
@@ -968,12 +1010,10 @@ const DriverDashboard = () => {
         </header>
       )}
 
-      {/* Added "custom-scrollbar" class here */}
       <main className="flex-grow overflow-y-auto custom-scrollbar">
         {renderContent()}
       </main>
 
-      {/* Conditionally render footer to hide it in navigation view */}
       {activeTab !== 'navigation' && !showMessages && !showPostRide && (
         <footer className="fixed bottom-0 left-0 right-0 bg-[#244A62] border-t border-white/10 shadow-lg z-10">
           <div className="flex justify-around">
@@ -1003,13 +1043,11 @@ const DriverDashboard = () => {
         </footer>
       )}
 
-      {/* Post Ride Form Modal */}
       {showPostRide && <PostRideForm onClose={() => setShowPostRide(false)} />}
     </div>
   );
 };
 
-// Renamed the main component to App for convention
 export default function App() {
   return (
     <>
