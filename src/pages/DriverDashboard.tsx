@@ -25,6 +25,9 @@ import {
   Send, // For search button
   Loader2, // For loading state
   XCircle, // For ending a trip
+  Fuel, // Nearby gas stations
+  Radar, // Speed cameras
+  LocateFixed, // Recenter to user
 } from "lucide-react";
 
 // --- Custom Scrollbar Styles Component ---
