@@ -1,4 +1,4 @@
-// Driver Dashboard - Navigation icon updated
+// Driver Dashboard - With Custom Scrollbar Styling
 import { useState } from "react";
 import {
   Plus,
@@ -18,6 +18,39 @@ import {
   X, // For closing modals
   CheckCircle, // For submit button success state
 } from "lucide-react";
+
+// --- Custom Scrollbar Styles Component ---
+// This component injects the CSS for our custom scrollbar into the app.
+const CustomScrollbarStyles = () => (
+  <style>{`
+    /* For Webkit-based browsers (Chrome, Safari, Edge) */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px; /* Width of the entire scrollbar */
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #244A62; /* Color of the tracking area, matches app background */
+      border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #64748b; /* A nice slate color for the thumb */
+      border-radius: 10px; /* Roundness of the scroll thumb */
+      border: 2px solid #244A62; /* Creates padding around thumb */
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background-color: #94a3b8; /* Lighter color on hover */
+    }
+
+    /* For Firefox */
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: #64748b #244A62; /* thumb and track color */
+    }
+  `}</style>
+);
+
 
 // Helper component for a simple avatar
 const Avatar = ({ initials, bgColor }) => (
@@ -105,7 +138,8 @@ const MessageDashboard = () => {
     );
 
     return (
-      <div className="flex-grow overflow-y-auto">
+      // Added "custom-scrollbar" class here
+      <div className="flex-grow overflow-y-auto custom-scrollbar">
         {filteredChats.length > 0 ? (
           <div className="space-y-1">
             {filteredChats.map((chat) => (
@@ -251,7 +285,8 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
             />
           </div>
         </div>
-        <div className="flex-grow overflow-y-auto p-4 space-y-2">
+        {/* Added "custom-scrollbar" class here */}
+        <div className="flex-grow overflow-y-auto p-4 space-y-2 custom-scrollbar">
           {selectedRegion ? (
             <>
               <button
@@ -381,7 +416,7 @@ const PostRideForm = ({ onClose }) => {
               <X className="h-6 w-6" />
             </button>
           </div>
-          <div className="p-4 flex-grow overflow-y-auto">
+          <div className="p-4 flex-grow overflow-y-auto custom-scrollbar">
             <div className="text-center text-white text-lg font-medium mb-4">{currentMonth}</div>
             <div className="grid grid-cols-7 gap-2 text-center text-white/70 text-sm mb-2">
               <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
@@ -432,7 +467,8 @@ const PostRideForm = ({ onClose }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-4 space-y-6">
+        {/* Added "custom-scrollbar" class here */}
+        <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-4 space-y-6 custom-scrollbar">
           {/* From Where */}
           <div>
             <label className="block text-white/80 text-sm font-medium mb-2">From Where</label>
@@ -764,7 +800,8 @@ const DriverDashboard = () => {
         </button>
       </header>
 
-      <main className="flex-grow overflow-y-auto">
+      {/* Added "custom-scrollbar" class here */}
+      <main className="flex-grow overflow-y-auto custom-scrollbar">
         {renderContent()}
       </main>
 
@@ -805,5 +842,10 @@ const DriverDashboard = () => {
 
 // Renamed the main component to App for convention
 export default function App() {
-  return <DriverDashboard />;
+  return (
+    <>
+      <CustomScrollbarStyles />
+      <DriverDashboard />
+    </>
+  );
 }
