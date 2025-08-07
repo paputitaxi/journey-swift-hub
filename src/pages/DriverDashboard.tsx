@@ -472,238 +472,358 @@ const PostRideForm = ({ onClose }) => {
 
 // --- Stunning Navigation View Component ---
 const NavigationView = ({ onClose }) => {
-  const [currentInstructionIndex, setCurrentInstructionIndex] = useState(0);
-  const [location, setLocation] = useState(null);
-  const [destination, setDestination] = useState("");
-  const [route, setRoute] = useState(null);
-  const [error, setError] = useState(null);
+  // Geolocation & navigation state
+  const [origin, setOrigin] = useState<any>(null);
+  const [geoError, setGeoError] = useState<string | null>(null);
+
+  const [destInput, setDestInput] = useState("");
+  const [destCoords, setDestCoords] = useState<any>(null);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+
   const [isNavigating, setIsNavigating] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [instructions, setInstructions] = useState([]);
-  const routeKey = useRef(0);
+  const [isRouting, setIsRouting] = useState(false);
 
-  const iconMap = {
-      ArrowUp: ArrowUp,
-      ArrowLeft: ArrowLeft,
-      ArrowRight: ArrowRight,
-      Flag: Flag
+  const [instructions, setInstructions] = useState<any[]>([]); // {text, distance, time}
+  const [summary, setSummary] = useState<{ distance: number; time: number }>({ distance: 0, time: 0 });
+  const [stepIndex, setStepIndex] = useState(0);
+
+  const [layers, setLayers] = useState({ drivers: false, gas: false, market: false, radar: false });
+  const [recenterTick, setRecenterTick] = useState(0);
+
+  // Formatters
+  const formatDistance = (m?: number) => {
+    if (m === undefined || m === null) return "";
+    if (m >= 1000) return `${(m / 1000).toFixed(1)} km`;
+    return `${Math.round(m)} m`;
+  };
+  const formatTime = (s?: number) => {
+    if (s === undefined || s === null) return "";
+    const min = Math.round(s / 60);
+    if (min < 60) return `${min} min`;
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return `${h}h ${m}m`;
   };
 
-  const CurrentIcon = instructions.length > 0 ? (iconMap[instructions[currentInstructionIndex]?.icon] || Flag) : Flag;
+  // Choose icon based on instruction text
+  const CurrentIcon = (() => {
+    const t = instructions[stepIndex]?.text?.toLowerCase() || "";
+    if (t.includes("left")) return ArrowLeft;
+    if (t.includes("right")) return ArrowRight;
+    if (t.includes("destination") || t.includes("arrive")) return Flag;
+    return ArrowUp;
+  })();
 
-  // Get user's current location
+  // Watch geolocation
   useEffect(() => {
-    if (navigator.geolocation) {
-      const watchId = navigator.geolocation.watchPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setLocation({ lat: latitude, lng: longitude });
-          if(error === "Geolocation permission denied.") setError(null);
-        },
-        (err) => {
-            if(err.code === 1) { // PERMISSION_DENIED
-                setError("Geolocation permission denied. Please enable it in your browser settings.");
-            } else {
-                setError("Could not retrieve location.");
-            }
-        },
-        { enableHighAccuracy: true }
-      );
-      return () => navigator.geolocation.clearWatch(watchId);
-    } else {
-      setError("Geolocation is not supported by this browser.");
-    }
-  }, [error]);
-
-  // Function to get directions from Gemini
-  const getDirections = async (origin, destination) => {
-      const prompt = `Provide turn-by-turn navigation instructions from my current location to "${destination}". My current location's approximate coordinates are latitude ${origin.lat} and longitude ${origin.lng}. The destination is a place, not coordinates. Give me a plausible, realistic route for a car. Provide a JSON object with three keys: "totalEta" (a string like "25 mins"), "totalDistance" (a string like "15 km"), and "instructions" (an array of objects). Each object in the "instructions" array should have "icon" (one of "ArrowUp", "ArrowLeft", "ArrowRight", or "Flag" for the final step), "text" (the instruction, e.g., "Turn right onto Main St"), and "distance" (e.g., "2.5 km"). The final step should use the "Flag" icon.`;
-      
-      const payload = {
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-              responseMimeType: "application/json",
-              responseSchema: {
-                  type: "OBJECT",
-                  properties: {
-                      "totalEta": { "type": "STRING" },
-                      "totalDistance": { "type": "STRING" },
-                      "instructions": {
-                          "type": "ARRAY",
-                          "items": {
-                              "type": "OBJECT",
-                              "properties": {
-                                  "icon": { "type": "STRING" },
-                                  "text": { "type": "STRING" },
-                                  "distance": { "type": "STRING" }
-                              },
-                              "required": ["icon", "text", "distance"]
-                          }
-                      }
-                  },
-                  required: ["totalEta", "totalDistance", "instructions"]
-              }
-          }
-      };
-      
-      const apiKey = ""; // API key will be injected by the environment
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-      try {
-          const response = await fetch(apiUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-          });
-          if (!response.ok) {
-              const errorBody = await response.text();
-              console.error("API Error Response:", errorBody);
-              throw new Error(`API call failed with status: ${response.status}`);
-          }
-          const result = await response.json();
-          if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
-              const parsedResponse = JSON.parse(result.candidates[0].content.parts[0].text);
-              if(parsedResponse.instructions && parsedResponse.totalDistance && parsedResponse.totalEta) {
-                return parsedResponse;
-              }
-          }
-          throw new Error("Invalid or incomplete response structure from API.");
-      } catch (e) {
-          console.error("Error fetching directions:", e);
-          throw e;
-      }
-  };
-
-  // Handle starting the navigation
-  const handleStartNavigation = async () => {
-    if (!destination) {
-      setError("Please enter a destination.");
+    if (!navigator.geolocation) {
+      setGeoError("Geolocation is not supported by this browser.");
       return;
     }
-    if (!location) {
-      setError("Could not get current location. Please grant permission and try again.");
+    const id = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setOrigin({ lat: latitude, lng: longitude });
+        if (geoError) setGeoError(null);
+      },
+      (err) => {
+        if (err.code === 1) setGeoError("Geolocation permission denied. Enable it in your browser settings.");
+        else setGeoError("Could not retrieve location.");
+      },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+    );
+    return () => navigator.geolocation.clearWatch(id);
+  }, [geoError]);
+
+  // Simulate progression through steps
+  useEffect(() => {
+    if (!isNavigating || instructions.length === 0) return;
+    if (stepIndex >= instructions.length - 1) return;
+    const timeout = setTimeout(() => setStepIndex((i) => i + 1), 6000);
+    return () => clearTimeout(timeout);
+  }, [isNavigating, stepIndex, instructions]);
+
+  // Geocode destination via Nominatim
+  const geocodeDestination = async () => {
+    if (!destInput.trim()) return;
+    if (!origin) {
+      setGeoError("Waiting for your current location...");
       return;
     }
-    
-    setIsLoading(true);
-    setError(null);
-    setRoute(null);
-
+    setIsGeocoding(true);
     try {
-        const { instructions: fetchedInstructions, totalEta, totalDistance } = await getDirections(location, destination);
-        setInstructions(fetchedInstructions);
-
-        const newRoute = {
-          path: `M 150,380 C ${Math.random() * 100 + 100},250 ${Math.random() * 100 + 100},150 150,50`,
-          distance: totalDistance,
-          eta: totalEta,
-          destinationName: destination,
-        };
-        
-        routeKey.current += 1; // Force re-render of SVG for animation
-        setRoute(newRoute);
-        setIsNavigating(true);
-        setCurrentInstructionIndex(0);
-    } catch (e) {
-        setError("Could not fetch directions. Please try a different destination.");
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destInput)}&limit=1`;
+      const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+      const data = await res.json();
+      if (!data?.length) throw new Error("Destination not found.");
+      const { lat, lon, display_name } = data[0];
+      setDestCoords({ lat: parseFloat(lat), lng: parseFloat(lon), name: display_name });
+      setIsNavigating(true);
+      setStepIndex(0);
+    } catch (e: any) {
+      setGeoError(e.message || "Geocoding failed. Try another address.");
     } finally {
-        setIsLoading(false);
+      setIsGeocoding(false);
     }
   };
 
-  const handleEndTrip = () => {
+  const endTrip = () => {
     setIsNavigating(false);
-    setRoute(null);
+    setDestCoords(null);
     setInstructions([]);
-    setDestination("");
-    setCurrentInstructionIndex(0);
+    setSummary({ distance: 0, time: 0 });
+    setStepIndex(0);
   };
 
-  // Timer to cycle through instructions during navigation
-  useEffect(() => {
-    let timer;
-    if (isNavigating && currentInstructionIndex < instructions.length - 1) {
-      timer = setTimeout(() => {
-        setCurrentInstructionIndex(prev => prev + 1);
-      }, 5000); // Change instruction every 5 seconds
-    }
-    return () => clearTimeout(timer);
-  }, [isNavigating, currentInstructionIndex, instructions]);
+  // Map child component encapsulating Leaflet
+  const MapComponent = ({ origin, destinationCoords, navigating, onRouteFound, showLayers, recenterTrigger }:{
+    origin: any;
+    destinationCoords: any;
+    navigating: boolean;
+    onRouteFound: (p:{instructions:any[]; summary:{totalDistance:number; totalTime:number}})=>void;
+    showLayers: {drivers:boolean; gas:boolean; market:boolean; radar:boolean};
+    recenterTrigger: number;
+  }) => {
+    const mapRef = useRef<any>(null);
+    const userMarkerRef = useRef<any>(null);
+    const routingRef = useRef<any>(null);
+
+    const gasLayerRef = useRef<any>(null);
+    const marketLayerRef = useRef<any>(null);
+    const radarLayerRef = useRef<any>(null);
+    const driversLayerRef = useRef<any>(null);
+
+    // Load CDN assets if needed and ensure L & L.Routing exist
+    const ensureLeaflet = () => new Promise<void>((resolve) => {
+      const ready = () => (window as any).L && (window as any).L.Routing;
+      if (ready()) return resolve();
+      const i = setInterval(() => { if (ready()) { clearInterval(i); resolve(); } }, 100);
+    });
+
+    useEffect(() => {
+      let mounted = true;
+      (async () => {
+        await ensureLeaflet();
+        if (!mounted) return;
+        const L = (window as any).L;
+        if (!mapRef.current) {
+          const map = L.map('leaflet-map', { zoomControl: false, attributionControl: false });
+          mapRef.current = map;
+          L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap & CARTO' }).addTo(map);
+          if (origin) map.setView([origin.lat, origin.lng], 14);
+          // Layer groups
+          gasLayerRef.current = L.layerGroup().addTo(map);
+          marketLayerRef.current = L.layerGroup().addTo(map);
+          radarLayerRef.current = L.layerGroup().addTo(map);
+          driversLayerRef.current = L.layerGroup().addTo(map);
+        }
+      })();
+      return () => { mounted = false; };
+    }, []);
+
+    // Update user marker and follow
+    useEffect(() => {
+      (async () => {
+        await ensureLeaflet();
+        const L = (window as any).L; const map = mapRef.current; if (!map || !origin) return;
+        if (!userMarkerRef.current) {
+          userMarkerRef.current = L.circleMarker([origin.lat, origin.lng], { radius: 8, color: '#34d399', weight: 3, fillColor: '#34d399', fillOpacity: 0.9 }).addTo(map);
+        } else userMarkerRef.current.setLatLng([origin.lat, origin.lng]);
+        if (!navigating) map.setView([origin.lat, origin.lng], 14);
+      })();
+    }, [origin, navigating]);
+
+    // Recenter trigger
+    useEffect(() => {
+      if (!recenterTrigger || !origin || !mapRef.current) return;
+      mapRef.current.setView([origin.lat, origin.lng], 15, { animate: true });
+    }, [recenterTrigger]);
+
+    // Build route when navigating
+    useEffect(() => {
+      (async () => {
+        await ensureLeaflet();
+        const L = (window as any).L; const map = mapRef.current; if (!map) return;
+        if (routingRef.current) { routingRef.current.setWaypoints([]); map.removeControl(routingRef.current); routingRef.current = null; }
+        if (navigating && origin && destinationCoords) {
+          const ctrl = L.Routing.control({
+            waypoints: [L.latLng(origin.lat, origin.lng), L.latLng(destinationCoords.lat, destinationCoords.lng)],
+            routeWhileDragging: false,
+            addWaypoints: false,
+            show: false,
+            fitSelectedRoutes: true,
+            lineOptions: { styles: [{ color: '#3b82f6', opacity: 0.95, weight: 6 }] },
+            createMarker: (_i: number, wp: any) => L.marker(wp.latLng, { opacity: 0.9 })
+          }).addTo(map);
+          routingRef.current = ctrl;
+          ctrl.on('routesfound', function(e: any) {
+            const r = e.routes?.[0];
+            if (!r) return;
+            const instr = (r.instructions || []).map((it: any) => ({ text: it.text, distance: it.distance, time: it.time }));
+            onRouteFound({ instructions: instr, summary: r.summary });
+          });
+        }
+      })();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [navigating, origin?.lat, origin?.lng, destinationCoords?.lat, destinationCoords?.lng]);
+
+    // Helpers for Overpass
+    const clearLayer = (ref: any) => { if (ref.current) ref.current.clearLayers(); };
+    const fetchOverpass = async (query: string) => {
+      const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+      const res = await fetch(url); if (!res.ok) throw new Error('Overpass request failed'); return res.json();
+    };
+    const addPOIs = (ref: any, elements: any[], color: string) => {
+      const L = (window as any).L; const group = ref.current; const map = mapRef.current; if (!group || !map) return;
+      elements.forEach((el: any) => { const lat = el.lat || el.center?.lat; const lon = el.lon || el.center?.lon; if (lat && lon) L.circleMarker([lat, lon], { radius: 6, color, weight: 2, fillColor: color, fillOpacity: 0.85 }).addTo(group); });
+    };
+
+    // Drivers nearby (simulated around origin)
+    useEffect(() => {
+      (async () => {
+        await ensureLeaflet(); const map = mapRef.current; if (!map) return;
+        clearLayer(driversLayerRef); if (!showLayers.drivers || !origin) return;
+        const L = (window as any).L; const group = driversLayerRef.current; const N = 10; const R = 0.008; // ~800m
+        for (let i = 0; i < N; i++) { const lat = origin.lat + (Math.random() - 0.5) * R; const lng = origin.lng + (Math.random() - 0.5) * R; L.circleMarker([lat, lng], { radius: 7, color: '#22c55e', weight: 2, fillColor: '#22c55e', fillOpacity: 0.85 }).addTo(group); }
+      })();
+    }, [showLayers.drivers, origin?.lat, origin?.lng]);
+
+    // Gas stations
+    useEffect(() => {
+      (async () => {
+        await ensureLeaflet(); const map = mapRef.current; if (!map) return;
+        clearLayer(gasLayerRef); if (!showLayers.gas || !origin) return;
+        const query = `[out:json];node(around:2000,${origin.lat},${origin.lng})["amenity"="fuel"];out center;`;
+        try { const data = await fetchOverpass(query); addPOIs(gasLayerRef, data.elements || [], '#f59e0b'); } catch (e) {}
+      })();
+    }, [showLayers.gas, origin?.lat, origin?.lng]);
+
+    // Markets
+    useEffect(() => {
+      (async () => {
+        await ensureLeaflet(); const map = mapRef.current; if (!map) return;
+        clearLayer(marketLayerRef); if (!showLayers.market || !origin) return;
+        const query = `[out:json];(node(around:2000,${origin.lat},${origin.lng})["shop"="supermarket"];node(around:2000,${origin.lat},${origin.lng})["amenity"="marketplace"];);out center;`;
+        try { const data = await fetchOverpass(query); addPOIs(marketLayerRef, data.elements || [], '#3b82f6'); } catch (e) {}
+      })();
+    }, [showLayers.market, origin?.lat, origin?.lng]);
+
+    // Speed cameras (radar)
+    useEffect(() => {
+      (async () => {
+        await ensureLeaflet(); const map = mapRef.current; if (!map) return;
+        clearLayer(radarLayerRef); if (!showLayers.radar || !origin) return;
+        const query = `[out:json];node(around:3000,${origin.lat},${origin.lng})["highway"="speed_camera"];out center;`;
+        try { const data = await fetchOverpass(query); addPOIs(radarLayerRef, data.elements || [], '#ef4444'); } catch (e) {}
+      })();
+    }, [showLayers.radar, origin?.lat, origin?.lng]);
+
+    return <div id="leaflet-map" className="absolute inset-0" />;
+  };
+
+  const handleRouteFound = ({ instructions, summary }:{instructions:any[]; summary:{totalDistance:number; totalTime:number}}) => {
+    setIsRouting(false);
+    setInstructions(instructions);
+    setSummary({ distance: summary.totalDistance, time: summary.totalTime });
+    setStepIndex(0);
+  };
+
+  useEffect(() => { setIsRouting(isNavigating); }, [isNavigating]);
 
   return (
-    <div className="relative h-full w-full bg-[#111827] text-white overflow-hidden">
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#111827] via-[#1a3a52] to-[#244A62]"></div>
-        {route && isNavigating && (
-          <svg key={routeKey.current} className="absolute inset-0 w-full h-full" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice">
-            <path d={route.path} stroke="rgba(100, 116, 139, 0.2)" strokeWidth="8" fill="none" />
-            <path className="route-path" d={route.path} stroke="url(#route-gradient)" strokeWidth="8" strokeLinecap="round" fill="none" />
-            <defs>
-              <linearGradient id="route-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#34d399" />
-                <stop offset="100%" stopColor="#2563eb" />
-              </linearGradient>
-            </defs>
-            <circle cx="150" cy="380" r="10" fill="#34d399" stroke="white" strokeWidth="2" />
-             <circle cx="150" cy="50" r="10" fill="#f43f5e" stroke="white" strokeWidth="2" />
-          </svg>
-        )}
-      </div>
+    <div className="relative h-full w-full text-white">
+      {/* Hide default LRM panel */}
+      <style>{`.leaflet-routing-container{display:none!important}`}</style>
 
-      <div className="absolute top-0 left-0 right-0 p-4 bg-black/20 backdrop-blur-sm flex items-center justify-between z-10">
+      {/* Map background */}
+      <MapComponent
+        origin={origin}
+        destinationCoords={destCoords}
+        navigating={isNavigating}
+        onRouteFound={handleRouteFound}
+        showLayers={layers}
+        recenterTrigger={recenterTick}
+      />
+
+      {/* Top bar */}
+      <header className="absolute top-0 left-0 right-0 p-4 bg-black/30 backdrop-blur-md flex items-center justify-between z-10">
         <button onClick={onClose} className="p-2 rounded-full bg-white/10 hover:bg-white/20">
           <ChevronLeft className="h-6 w-6" />
         </button>
         <div className="text-center">
-          <p className="text-sm text-white/70">Trip to</p>
-          <h2 className="text-lg font-bold">{route ? route.destinationName : '...'}</h2>
+          <h1 className="text-lg font-semibold">Driver Navigation</h1>
+          {destCoords?.name && <p className="text-xs text-white/70 truncate max-w-[60vw]">To: {destCoords.name}</p>}
         </div>
         {isNavigating ? (
-            <button onClick={handleEndTrip} className="p-2 rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-400">
-                <XCircle className="h-6 w-6" />
-            </button>
-        ) : <div className="w-10 h-10"></div>}
+          <button onClick={endTrip} className="p-2 rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-400">
+            <XCircle className="h-6 w-6" />
+          </button>
+        ) : (
+          <div className="w-10 h-10"/>
+        )}
+      </header>
+
+      {/* Right tools panel */}
+      <aside className="absolute right-4 top-24 z-10 space-y-2">
+        <button onClick={() => setLayers((s) => ({ ...s, drivers: !s.drivers }))} className={`p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50 ${layers.drivers ? 'ring-2 ring-white/50' : ''}`} aria-label="Toggle drivers nearby">
+          <Users className="h-5 w-5" />
+        </button>
+        <button onClick={() => setLayers((s) => ({ ...s, gas: !s.gas }))} className={`p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50 ${layers.gas ? 'ring-2 ring-white/50' : ''}`} aria-label="Toggle gas stations nearby">
+          <Fuel className="h-5 w-5" />
+        </button>
+        <button onClick={() => setLayers((s) => ({ ...s, market: !s.market }))} className={`p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50 ${layers.market ? 'ring-2 ring-white/50' : ''}`} aria-label="Toggle markets nearby">
+          <Store className="h-5 w-5" />
+        </button>
+        <button onClick={() => setLayers((s) => ({ ...s, radar: !s.radar }))} className={`p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50 ${layers.radar ? 'ring-2 ring-white/50' : ''}`} aria-label="Toggle speed cameras">
+          <Radar className="h-5 w-5" />
+        </button>
+      </aside>
+
+      {/* Recenter */}
+      <div className="absolute left-4 bottom-32 z-10">
+        <button onClick={() => setRecenterTick((n) => n + 1)} className="p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50" aria-label="Recenter on me">
+          <LocateFixed className="h-5 w-5" />
+        </button>
       </div>
 
+      {/* Bottom panel */}
       {!isNavigating ? (
-        <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-          <div className="bg-black/40 backdrop-blur-md rounded-2xl p-5 shadow-2xl border border-white/10">
-            <h3 className="text-lg font-semibold mb-2">Set Destination</h3>
-            <div className="flex items-center space-x-2">
+        <section className="absolute bottom-0 left-0 right-0 p-4 z-10">
+          <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/10">
+            <h2 className="text-base font-semibold mb-2">Set destination</h2>
+            <div className="flex gap-2">
               <input
-                type="text"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                placeholder="Enter destination..."
+                value={destInput}
+                onChange={(e) => setDestInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && geocodeDestination()}
+                placeholder="Enter address or place"
                 className="w-full p-3 bg-white/10 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-white/50"
-                disabled={isLoading}
-                onKeyUp={(e) => e.key === 'Enter' && handleStartNavigation()}
+                disabled={isGeocoding}
               />
-              <button onClick={handleStartNavigation} disabled={isLoading || !location} className="p-3 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:bg-gray-500 disabled:cursor-not-allowed">
-                {isLoading ? <Loader2 className="h-6 w-6 animate-spin-slow" /> : <Send className="h-6 w-6" />}
+              <button onClick={geocodeDestination} className="p-3 rounded-lg bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] hover:opacity-90 disabled:opacity-60" disabled={!origin || !destInput || isGeocoding}>
+                {isGeocoding ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
               </button>
             </div>
-            {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
-            {location && !error && <p className="text-green-400 text-sm mt-2">Current location acquired.</p>}
+            {geoError && <p className="text-red-400 text-sm mt-2">{geoError}</p>}
+            {!geoError && origin && <p className="text-emerald-400 text-sm mt-2">Current location acquired.</p>}
           </div>
-        </div>
+        </section>
       ) : (
-        <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-          <div className="bg-black/40 backdrop-blur-md rounded-2xl p-5 shadow-2xl border border-white/10">
-              <div className="flex items-center">
-                  <div className="bg-blue-500 p-4 rounded-xl mr-4">
-                      <CurrentIcon className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                      <h3 className="text-2xl font-bold">{instructions[currentInstructionIndex]?.distance}</h3>
-                      <p className="text-white/80">{instructions[currentInstructionIndex]?.text}</p>
-                  </div>
+        <section className="absolute bottom-0 left-0 right-0 p-4 z-10">
+          <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/10">
+            <div className="flex items-start gap-4">
+              <div className="bg-[hsl(var(--accent))] p-3 rounded-xl">
+                <CurrentIcon className="h-7 w-7 text-[hsl(var(--accent-foreground))]" />
               </div>
-              <div className="mt-4 text-center text-sm text-white/60">
-                  <p>ETA: <strong>{route.eta}</strong> &bull; {route.distance} remaining</p>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold">{formatDistance(instructions[stepIndex]?.distance)}</h3>
+                <p className="text-white/80 leading-snug">{instructions[stepIndex]?.text || 'Starting navigation...'}</p>
+                <p className="text-white/60 text-sm mt-2">Total: {formatDistance(summary.distance)} • ETA {formatTime(summary.time)}</p>
               </div>
+              {isRouting && <Loader2 className="h-6 w-6 animate-spin" />}
+            </div>
           </div>
-        </div>
+        </section>
       )}
     </div>
   );
