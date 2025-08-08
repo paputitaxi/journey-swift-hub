@@ -501,10 +501,16 @@ const NavigationView = ({ onClose }) => {
     const radarLayerRef = useRef(null);
     const driversLayerRef = useRef(null);
 
-    const ensureLeaflet = () => new Promise((resolve) => {
-      const ready = () => window.L && window.L.Routing;
+    const ensureLeaflet = () => new Promise<void>((resolve: () => void) => {
+      const ready = () =>
+        typeof window !== 'undefined' && (window as any).L && (window as any).L.Routing;
       if (ready()) return resolve();
-      const i = setInterval(() => { if (ready()) { clearInterval(i); resolve(); } }, 100);
+      const i = setInterval(() => {
+        if (ready()) {
+          clearInterval(i);
+          resolve();
+        }
+      }, 100);
     });
 
     useEffect(() => {
@@ -790,15 +796,4 @@ const DriverDashboard = () => {
   );
 };
 
-export default function App() {
-  return (
-    <>
-      <CustomScrollbarStyles />
-      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" crossOrigin=""/>
-      <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" crossOrigin=""></script>
-      <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
-      <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-      <DriverDashboard />
-    </>
-  );
-}
+export default DriverDashboard;
