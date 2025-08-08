@@ -59,41 +59,122 @@ const MessageDashboard = ({ onClose }) => {
   const [activeMessageTab, setActiveMessageTab] = useState("chats");
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [draft, setDraft] = useState("");
+  const [conversations, setConversations] = useState({
+    1: [
+      { id: "m1", sender: "Jane Doe", text: "Hey, are you available for a ride?", time: "10:30 AM" },
+      { id: "m2", sender: "me", text: "Hi Jane, yes I am!", time: "10:31 AM" },
+    ],
+    2: [
+      { id: "m3", sender: "Mike Smith", text: "Thanks for the ride last week!", time: "Yesterday" },
+    ],
+  });
 
   const messageNavItems = [
-    { id: "chats", label: "Chats", icon: MessageCircle }, { id: "groups", label: "Groups", icon: Users }, { id: "channels", label: "Channels", icon: Hash }, { id: "market", label: "Market", icon: Store },
+    { id: "chats", label: "Chats", icon: MessageCircle },
+    { id: "groups", label: "Groups", icon: Users },
+    { id: "channels", label: "Channels", icon: Hash },
+    { id: "market", label: "Market", icon: Store },
   ];
 
-  const currentTabLabel = messageNavItems.find(item => item.id === activeMessageTab)?.label;
+  const chatItems = {
+    chats: [
+      { id: 1, name: "Jane Doe", lastMessage: "Hey, are you available for a ride?", time: "10:30 AM", avatar: <Avatar initials="JD" bgColor="bg-purple-500" /> },
+      { id: 2, name: "Mike Smith", lastMessage: "Thanks for the ride last week!", time: "Yesterday", avatar: <Avatar initials="MS" bgColor="bg-blue-500" /> },
+    ],
+    groups: [ { id: 101, name: "Drivers Community", lastMessage: "New update on city regulations.", time: "1 hr ago", avatar: <Avatar initials="DC" bgColor="bg-yellow-500" /> } ],
+    channels: [ { id: 201, name: "Ride Alerts Official", lastMessage: "High demand in downtown area!", time: "15 min ago", avatar: <Avatar initials="RA" bgColor="bg-red-500" /> } ],
+    market: [ { id: 301, name: "Special Offers", lastMessage: "Discount on car maintenance this week.", time: "2 days ago", avatar: <Avatar initials="SO" bgColor="bg-indigo-500" /> } ],
+  };
 
-  const renderMessageContent = () => {
-    const chatItems = {
-      chats: [ { id: 1, name: "Jane Doe", lastMessage: "Hey, are you available for a ride?", time: "10:30 AM", avatar: <Avatar initials="JD" bgColor="bg-purple-500" /> }, { id: 2, name: "Mike Smith", lastMessage: "Thanks for the ride last week!", time: "Yesterday", avatar: <Avatar initials="MS" bgColor="bg-blue-500" /> }, ],
-      groups: [ { id: 1, name: "Drivers Community", lastMessage: "New update on city regulations.", time: "1 hr ago", avatar: <Avatar initials="DC" bgColor="bg-yellow-500" /> }, ],
-      channels: [ { id: 1, name: "Ride Alerts Official", lastMessage: "High demand in downtown area!", time: "15 min ago", avatar: <Avatar initials="RA" bgColor="bg-red-500" /> }, ],
-      market: [ { id: 1, name: "Special Offers", lastMessage: "Discount on car maintenance this week.", time: "2 days ago", avatar: <Avatar initials="SO" bgColor="bg-indigo-500" /> }, ],
-    };
-    const currentChats = chatItems[activeMessageTab] || [];
-    const filteredChats = currentChats.filter(chat =>
-      chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    return (
-      <div className="flex-grow overflow-y-auto custom-scrollbar">
-        {filteredChats.length > 0 ? (
-          <div className="space-y-1">
-            {filteredChats.map((chat) => (
-              <div key={chat.id} className="flex items-center p-3 hover:bg-white/10 cursor-pointer transition-colors" >
-                {chat.avatar}
-                <div className="ml-3 flex-grow">
-                  <p className="font-medium text-white">{chat.name}</p>
-                  <p className="text-sm text-white/70 truncate">{chat.lastMessage}</p>
-                </div>
-                <span className="text-xs text-white/50">{chat.time}</span>
+  const currentTabLabel = selectedChat?.name || messageNavItems.find(item => item.id === activeMessageTab)?.label;
+
+  const currentChats = chatItems[activeMessageTab] || [];
+  const filteredChats = currentChats.filter((chat) =>
+    chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+    if (!selectedChat || !draft.trim()) return;
+    setConversations((prev) => {
+      const msgs = prev[selectedChat.id] || [];
+      return {
+        ...prev,
+        [selectedChat.id]: [
+          ...msgs,
+          { id: `${Date.now()}`, sender: "me", text: draft.trim(), time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
+        ],
+      };
+    });
+    setDraft("");
+    // Simulate quick auto-reply
+    setTimeout(() => {
+      setConversations((prev) => {
+        const msgs = prev[selectedChat.id] || [];
+        return {
+          ...prev,
+          [selectedChat.id]: [
+            ...msgs,
+            { id: `${Date.now()}-r`, sender: selectedChat.name, text: "Got it!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
+          ],
+        };
+      });
+    }, 800);
+  };
+
+  const renderList = () => (
+    <div className="flex-grow overflow-y-auto custom-scrollbar">
+      {filteredChats.length > 0 ? (
+        <div className="space-y-1">
+          {filteredChats.map((chat) => (
+            <button
+              key={chat.id}
+              onClick={() => setSelectedChat(chat)}
+              className="w-full flex items-center p-3 hover:bg-white/10 cursor-pointer transition-colors text-left"
+            >
+              {chat.avatar}
+              <div className="ml-3 flex-grow">
+                <p className="font-medium text-white">{chat.name}</p>
+                <p className="text-sm text-white/70 truncate">{chat.lastMessage}</p>
               </div>
-            ))}
-          </div>
-        ) : ( <p className="text-white/50 text-center mt-10">No messages found.</p> )}
+              <span className="text-xs text-white/50">{chat.time}</span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="text-white/50 text-center mt-10">No messages found.</p>
+      )}
+    </div>
+  );
+
+  const renderChat = () => {
+    const msgs = conversations[selectedChat?.id] || [];
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
+          {msgs.map((m) => (
+            <div key={m.id} className={`flex ${m.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.sender === 'me' ? 'bg-blue-600 text-white' : 'bg-white/10 text-white'}`}>
+                <p className="whitespace-pre-wrap">{m.text}</p>
+                <div className="text-[10px] opacity-70 mt-1 text-right">{m.time}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <form onSubmit={sendMessage} className="p-3 border-t border-white/10 bg-[#244A62] flex items-center gap-2">
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Type a message"
+            className="flex-1 p-2 rounded-lg bg-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-white/50"
+          />
+          <button type="submit" className="p-2 rounded-lg bg-blue-600 hover:bg-blue-500">
+            <Send className="h-5 w-5" />
+          </button>
+        </form>
       </div>
     );
   };
@@ -101,33 +182,45 @@ const MessageDashboard = ({ onClose }) => {
   return (
     <div className="flex flex-col h-full bg-[#244A62]">
       <div className="bg-[#244A62] p-3 border-b border-white/10 flex items-center justify-between">
-        <button onClick={onClose} className="text-white/80 hover:text-white">
-            <ChevronLeft className="h-6 w-6" />
+        <button onClick={() => { if (selectedChat) setSelectedChat(null); else onClose(); }} className="text-white/80 hover:text-white">
+          <ChevronLeft className="h-6 w-6" />
         </button>
         <h2 className="text-lg font-semibold text-white">{currentTabLabel}</h2>
-        <button onClick={() => setShowSearchInput(!showSearchInput)} className="text-white/80 hover:text-white" >
+        <button onClick={() => setShowSearchInput(!showSearchInput)} className="text-white/80 hover:text-white">
           <Search className="h-6 w-6" />
         </button>
       </div>
-      {showSearchInput && (
+      {showSearchInput && !selectedChat && (
         <div className="p-3 bg-[#244A62] border-b border-white/10">
-          <input type="text" placeholder="Search messages..." className="w-full p-2 rounded-lg bg-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-white/50" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <input
+            type="text"
+            placeholder="Search messages..."
+            className="w-full p-2 rounded-lg bg-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-white/50"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
       )}
-      <div className="flex justify-around bg-[#244A62] p-2 border-b border-white/10">
-        {messageNavItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeMessageTab === item.id;
-          return (
-            <button key={item.id} onClick={() => { setActiveMessageTab(item.id); setSearchQuery(""); setShowSearchInput(false); }} className={`flex-1 flex flex-col items-center py-2 transition-colors relative ${isActive ? "text-white" : "text-white/50"}`} >
-              <Icon className="h-5 w-5 mb-1" />
-              <span className="text-xs">{item.label}</span>
-              {isActive && (<div className="absolute bottom-0 h-0.5 w-full bg-white rounded-full"></div>)}
-            </button>
-          );
-        })}
-      </div>
-      {renderMessageContent()}
+      {!selectedChat && (
+        <div className="flex justify-around bg-[#244A62] p-2 border-b border-white/10">
+          {messageNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeMessageTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => { setActiveMessageTab(item.id); setSearchQuery(""); setShowSearchInput(false); }}
+                className={`flex-1 flex flex-col items-center py-2 transition-colors relative ${isActive ? "text-white" : "text-white/50"}`}
+              >
+                <Icon className="h-5 w-5 mb-1" />
+                <span className="text-xs">{item.label}</span>
+                {isActive && (<div className="absolute bottom-0 h-0.5 w-full bg-white rounded-full"></div>)}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {selectedChat ? renderChat() : renderList()}
     </div>
   );
 };
@@ -522,8 +615,8 @@ const NavigationView = ({ onClose }) => {
     const radarLayerRef = useRef(null);
     const driversLayerRef = useRef(null);
 
-    // Corrected promise syntax for plain JS
-    const ensureLeaflet = () => new Promise((resolve) => {
+    // Ensure Leaflet & LRM are loaded
+    const ensureLeaflet = () => new Promise<void>((resolve) => {
       const ready = () =>
         typeof window !== 'undefined' && window.L && window.L.Routing;
       if (ready()) return resolve();
@@ -686,10 +779,6 @@ const NavigationView = ({ onClose }) => {
         // Navigation Panel
         <section className="absolute bottom-0 left-0 right-0 p-4 z-10">
           <div className="bg-slate-800/80 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/10 space-y-4">
-            {/* Progress Bar */}
-            <div className="w-full bg-slate-600 rounded-full h-1.5">
-              <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${tripProgress}%`, transition: 'width 0.5s ease-in-out' }}></div>
-            </div>
             {/* Instruction */}
             <div className="flex items-center gap-4">
               <div className="bg-blue-600 p-3 rounded-xl"> <CurrentIcon className="h-8 w-8 text-white" /> </div>
@@ -697,7 +786,15 @@ const NavigationView = ({ onClose }) => {
                 <h3 className="text-2xl font-bold">{formatDistance(instructions[stepIndex]?.distance)}</h3>
                 <p className="text-white/80 leading-snug">{instructions[stepIndex]?.text || 'Starting navigation...'}</p>
               </div>
-              {isRouting && <Loader2 className="h-6 w-6 animate-spin text-white/70" />}
+              <div className="flex items-center gap-2">
+                <button aria-label="Previous step" onClick={() => setStepIndex((i) => Math.max(0, i - 1))} className="p-2 rounded-lg bg-black/30 hover:bg-black/50 border border-white/10 disabled:opacity-40" disabled={stepIndex <= 0}>
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                <button aria-label="Next step" onClick={() => setStepIndex((i) => Math.min(instructions.length - 1, i + 1))} className="p-2 rounded-lg bg-black/30 hover:bg-black/50 border border-white/10 disabled:opacity-40" disabled={stepIndex >= instructions.length - 1}>
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+                {isRouting && <Loader2 className="h-6 w-6 animate-spin text-white/70" />}
+              </div>
             </div>
              {/* Summary & End Button */}
             <div className="flex justify-between items-center pt-2 border-t border-white/10">
