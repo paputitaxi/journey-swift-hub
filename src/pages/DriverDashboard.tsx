@@ -1,5 +1,5 @@
 // Driver Dashboard - With Custom Scrollbar Styling
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Plus,
   Play,
@@ -38,8 +38,10 @@ const CustomScrollbarStyles = () => (
     .custom-scrollbar::-webkit-scrollbar-track { background: #244A62; border-radius: 10px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #64748b; border-radius: 10px; border: 2px solid #244A62; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+    /* For Firefox */
     .custom-scrollbar { scrollbar-width: thin; scrollbar-color: #64748b #244A62; }
     .animate-spin-slow { animation: spin 2s linear infinite; }
+    /* Hide the default Leaflet routing instructions panel */
     .leaflet-routing-container { display: none !important; }
   `}</style>
 );
@@ -216,7 +218,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
 };
 
 
-// Main Post Ride Form Component - RESTORED FROM ORIGINAL
+// Main Post Ride Form Component
 const PostRideForm = ({ onClose }) => {
   const [fromLocation, setFromLocation] = useState("");
   const [toLocation, setToLocation] = useState("");
@@ -413,6 +415,7 @@ const NavigationView = ({ onClose }) => {
   const [layers, setLayers] = useState({ drivers: false, gas: false, market: false, radar: false });
   const [recenterTick, setRecenterTick] = useState(0);
 
+  // --- Helper Functions ---
   const formatDistance = (m) => {
     if (m === undefined || m === null) return "";
     if (m >= 1000) return `${(m / 1000).toFixed(1)} km`;
@@ -427,6 +430,7 @@ const NavigationView = ({ onClose }) => {
     return `${h}h ${m}m`;
   };
 
+  // --- Dynamic Icon for Current Step ---
   const CurrentIcon = (() => {
     const t = instructions[stepIndex]?.text?.toLowerCase() || "";
     if (t.includes("left")) return ArrowLeft;
@@ -434,7 +438,13 @@ const NavigationView = ({ onClose }) => {
     if (t.includes("destination") || t.includes("arrive")) return Flag;
     return ArrowUp;
   })();
+  
+  // --- Calculate Trip Progress ---
+  const initialDistance = summary.distance;
+  const distanceCovered = instructions.slice(0, stepIndex).reduce((acc, curr) => acc + curr.distance, 0);
+  const tripProgress = initialDistance > 0 ? (distanceCovered / initialDistance) * 100 : 0;
 
+  // --- Effects ---
   useEffect(() => {
     if (!navigator.geolocation) {
       setGeoError("Geolocation is not supported by this browser.");
@@ -457,10 +467,13 @@ const NavigationView = ({ onClose }) => {
 
   useEffect(() => {
     if (!isNavigating || instructions.length === 0 || stepIndex >= instructions.length - 1) return;
-    const timeout = setTimeout(() => setStepIndex((i) => i + 1), 6000);
+    const timeout = setTimeout(() => setStepIndex((i) => i + 1), 6000); // Simulate progress every 6 seconds
     return () => clearTimeout(timeout);
   }, [isNavigating, stepIndex, instructions]);
+  
+  useEffect(() => { setIsRouting(isNavigating); }, [isNavigating]);
 
+  // --- Action Handlers ---
   const geocodeDestination = async () => {
     if (!destInput.trim()) return;
     if (!origin) {
@@ -491,7 +504,15 @@ const NavigationView = ({ onClose }) => {
     setSummary({ distance: 0, time: 0 });
     setStepIndex(0);
   };
+  
+  const handleRouteFound = ({ instructions, summary }) => {
+    setIsRouting(false);
+    setInstructions(instructions);
+    setSummary({ distance: summary.totalDistance, time: summary.totalTime });
+    setStepIndex(0);
+  };
 
+  // --- Map Component (Internal) ---
   const MapComponent = ({ origin, destinationCoords, navigating, onRouteFound, showLayers, recenterTrigger }) => {
     const mapRef = useRef(null);
     const userMarkerRef = useRef(null);
@@ -501,9 +522,10 @@ const NavigationView = ({ onClose }) => {
     const radarLayerRef = useRef(null);
     const driversLayerRef = useRef(null);
 
-    const ensureLeaflet = () => new Promise<void>((resolve: () => void) => {
+    // Corrected promise syntax for plain JS
+    const ensureLeaflet = () => new Promise((resolve) => {
       const ready = () =>
-        typeof window !== 'undefined' && (window as any).L && (window as any).L.Routing;
+        typeof window !== 'undefined' && window.L && window.L.Routing;
       if (ready()) return resolve();
       const i = setInterval(() => {
         if (ready()) {
@@ -602,77 +624,90 @@ const NavigationView = ({ onClose }) => {
     useEffect(() => {
         (async () => {
             await ensureLeaflet();
-            const L = window.L;
             if (!driversLayerRef.current || !origin) return;
             driversLayerRef.current.clearLayers();
             if (showLayers.drivers) {
                 for (let i = 0; i < 10; i++) {
                     const lat = origin.lat + (Math.random() - 0.5) * 0.008;
                     const lng = origin.lng + (Math.random() - 0.5) * 0.008;
-                    L.circleMarker([lat, lng], { radius: 7, color: '#22c55e', weight: 2, fillColor: '#22c55e', fillOpacity: 0.85 }).addTo(driversLayerRef.current);
+                    window.L.circleMarker([lat, lng], { radius: 7, color: '#22c55e', weight: 2, fillColor: '#22c55e', fillOpacity: 0.85 }).addTo(driversLayerRef.current);
                 }
             }
         })();
     }, [showLayers.drivers, origin]);
 
-
     return <div id="leaflet-map" className="absolute inset-0" />;
   };
-
-  const handleRouteFound = ({ instructions, summary }) => {
-    setIsRouting(false);
-    setInstructions(instructions);
-    setSummary({ distance: summary.totalDistance, time: summary.totalTime });
-    setStepIndex(0);
-  };
-
-  useEffect(() => { setIsRouting(isNavigating); }, [isNavigating]);
 
   return (
     <div className="relative h-full w-full text-white">
       <MapComponent origin={origin} destinationCoords={destCoords} navigating={isNavigating} onRouteFound={handleRouteFound} showLayers={layers} recenterTrigger={recenterTick} />
-      <header className="absolute top-0 left-0 right-0 p-4 bg-black/30 backdrop-blur-md flex items-center justify-between z-10">
-        <button onClick={onClose} className="p-2 rounded-full bg-white/10 hover:bg-white/20"> <ChevronLeft className="h-6 w-6" /> </button>
+      
+      {/* Header */}
+      <header className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/50 to-transparent flex items-center justify-between z-10">
+        <button onClick={onClose} className="p-2 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm"> <ChevronLeft className="h-6 w-6" /> </button>
         <div className="text-center">
-          <h1 className="text-lg font-semibold">Driver Navigation</h1>
-          {destCoords?.name && <p className="text-xs text-white/70 truncate max-w-[60vw]">To: {destCoords.name}</p>}
+            {isNavigating && destCoords?.name && <p className="text-sm text-white/80 truncate max-w-[60vw]">To: {destCoords.name}</p>}
         </div>
-        {isNavigating ? ( <button onClick={endTrip} className="p-2 rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-400"> <XCircle className="h-6 w-6" /> </button> ) : ( <div className="w-10 h-10"/> )}
+        <div className="w-10 h-10"/>
       </header>
+
+      {/* Side Controls */}
       <aside className="absolute right-4 top-24 z-10 flex flex-col space-y-2">
-        <button onClick={() => setLayers((s) => ({ ...s, drivers: !s.drivers }))} className={`p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50 ${layers.drivers ? 'ring-2 ring-white/50' : ''}`} aria-label="Toggle drivers nearby"> <Users className="h-5 w-5" /> </button>
-        <button onClick={() => setLayers((s) => ({ ...s, gas: !s.gas }))} className={`p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50 ${layers.gas ? 'ring-2 ring-white/50' : ''}`} aria-label="Toggle gas stations nearby"> <Fuel className="h-5 w-5" /> </button>
-        <button onClick={() => setLayers((s) => ({ ...s, market: !s.market }))} className={`p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50 ${layers.market ? 'ring-2 ring-white/50' : ''}`} aria-label="Toggle markets nearby"> <Store className="h-5 w-5" /> </button>
-        <button onClick={() => setLayers((s) => ({ ...s, radar: !s.radar }))} className={`p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50 ${layers.radar ? 'ring-2 ring-white/50' : ''}`} aria-label="Toggle speed cameras"> <Radar className="h-5 w-5" /> </button>
+        <button onClick={() => setLayers((s) => ({ ...s, drivers: !s.drivers }))} className={`p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50 transition-all ${layers.drivers ? 'ring-2 ring-white/50 bg-black/60' : ''}`} aria-label="Toggle drivers nearby"> <Users className="h-5 w-5" /> </button>
+        <button onClick={() => setLayers((s) => ({ ...s, gas: !s.gas }))} className={`p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50 transition-all ${layers.gas ? 'ring-2 ring-white/50 bg-black/60' : ''}`} aria-label="Toggle gas stations nearby"> <Fuel className="h-5 w-5" /> </button>
+        <button onClick={() => setLayers((s) => ({ ...s, market: !s.market }))} className={`p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50 transition-all ${layers.market ? 'ring-2 ring-white/50 bg-black/60' : ''}`} aria-label="Toggle markets nearby"> <Store className="h-5 w-5" /> </button>
+        <button onClick={() => setLayers((s) => ({ ...s, radar: !s.radar }))} className={`p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50 transition-all ${layers.radar ? 'ring-2 ring-white/50 bg-black/60' : ''}`} aria-label="Toggle speed cameras"> <Radar className="h-5 w-5" /> </button>
       </aside>
+      
+      {/* Recenter Button */}
       <div className="absolute left-4 bottom-32 z-10">
         <button onClick={() => setRecenterTick((n) => n + 1)} className="p-3 rounded-xl backdrop-blur bg-black/40 border border-white/10 hover:bg-black/50" aria-label="Recenter on me"> <LocateFixed className="h-5 w-5" /> </button>
       </div>
+
+      {/* Bottom Panels */}
       {!isNavigating ? (
+        // Search Panel
         <section className="absolute bottom-0 left-0 right-0 p-4 z-10">
-          <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/10">
-            <h2 className="text-base font-semibold mb-2">Set destination</h2>
+          <div className="bg-slate-800/80 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/10">
+            <h2 className="text-lg font-semibold mb-3">Where to?</h2>
             <div className="flex gap-2">
-              <input value={destInput} onChange={(e) => setDestInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && geocodeDestination()} placeholder="Enter address or place" className="w-full p-3 bg-white/10 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-white/50" disabled={isGeocoding} />
-              <button onClick={geocodeDestination} className="p-3 rounded-lg bg-blue-600 text-white hover:opacity-90 disabled:opacity-60" disabled={!origin || !destInput || isGeocoding}>
-                {isGeocoding ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+              <input value={destInput} onChange={(e) => setDestInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && geocodeDestination()} placeholder="Enter address or place" className="w-full p-3 bg-slate-700/50 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500" disabled={isGeocoding} />
+              <button onClick={geocodeDestination} className="p-3 rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:bg-blue-800 disabled:cursor-not-allowed transition-colors" disabled={!origin || !destInput || isGeocoding}>
+                {isGeocoding ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
               </button>
             </div>
-            {geoError && <p className="text-red-400 text-sm mt-2">{geoError}</p>}
-            {!geoError && origin && <p className="text-emerald-400 text-sm mt-2">Current location acquired.</p>}
+            {geoError && <p className="text-red-400 text-sm mt-3">{geoError}</p>}
+            {!geoError && !origin && <p className="text-amber-400 text-sm mt-3 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin"/> Acquiring current location...</p>}
+            {!geoError && origin && <p className="text-emerald-400 text-sm mt-3">Ready to navigate.</p>}
           </div>
         </section>
       ) : (
+        // Navigation Panel
         <section className="absolute bottom-0 left-0 right-0 p-4 z-10">
-          <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/10">
-            <div className="flex items-start gap-4">
-              <div className="bg-blue-600 p-3 rounded-xl"> <CurrentIcon className="h-7 w-7 text-white" /> </div>
+          <div className="bg-slate-800/80 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/10 space-y-4">
+            {/* Progress Bar */}
+            <div className="w-full bg-slate-600 rounded-full h-1.5">
+              <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${tripProgress}%`, transition: 'width 0.5s ease-in-out' }}></div>
+            </div>
+            {/* Instruction */}
+            <div className="flex items-center gap-4">
+              <div className="bg-blue-600 p-3 rounded-xl"> <CurrentIcon className="h-8 w-8 text-white" /> </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold">{formatDistance(instructions[stepIndex]?.distance)}</h3>
+                <h3 className="text-2xl font-bold">{formatDistance(instructions[stepIndex]?.distance)}</h3>
                 <p className="text-white/80 leading-snug">{instructions[stepIndex]?.text || 'Starting navigation...'}</p>
-                <p className="text-white/60 text-sm mt-2">Total: {formatDistance(summary.distance)} • ETA {formatTime(summary.time)}</p>
               </div>
-              {isRouting && <Loader2 className="h-6 w-6 animate-spin" />}
+              {isRouting && <Loader2 className="h-6 w-6 animate-spin text-white/70" />}
+            </div>
+             {/* Summary & End Button */}
+            <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                 <p className="text-white/60 text-sm">
+                    {formatDistance(summary.distance)} • ETA {formatTime(summary.time)}
+                 </p>
+                 <button onClick={endTrip} className="flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-300 transition-colors">
+                    <XCircle className="h-5 w-5" />
+                    End
+                 </button>
             </div>
           </div>
         </section>
@@ -766,6 +801,7 @@ const DriverDashboard = () => {
 
   return (
     <div className="h-screen bg-[#244A62] text-white flex flex-col">
+      <CustomScrollbarStyles />
       {activeTab !== 'navigation' && (
         <header className="bg-[#244A62] p-3 border-b border-white/10 flex justify-between items-center z-20">
           <h1 className="text-lg font-medium">Driver</h1>
@@ -774,7 +810,7 @@ const DriverDashboard = () => {
           </button>
         </header>
       )}
-      <main className="flex-grow overflow-y-auto custom-scrollbar h-full"> {renderContent()} </main>
+      <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative"> {renderContent()} </main>
       {activeTab !== 'navigation' && !showMessages && !showPostRide && (
         <footer className="fixed bottom-0 left-0 right-0 bg-[#244A62] border-t border-white/10 shadow-lg z-10">
           <div className="flex justify-around">
