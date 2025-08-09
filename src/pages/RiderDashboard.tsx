@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+ import React, { useState, useRef, useEffect } from 'react';
 import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info } from 'lucide-react';
 
 // Define Uzbekistan locations as a flat list of capital and regions
@@ -563,8 +563,8 @@ const App = () => {
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-xl z-50">
         <div className="flex justify-around items-center h-16">
-          <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 ${activeTab === 'history' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600'}`} onClick={() => setActiveTab('history')}><History size={24} strokeWidth={2} /><span className="text-xs mt-1">History</span></button>
           <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 ${activeTab === 'search' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600'}`} onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setActiveFilter(null); setActiveSort(null); setSelectedRide(null); }}><Search size={24} strokeWidth={2} /><span className="text-xs mt-1">Search</span></button>
+          <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 ${activeTab === 'history' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600'}`} onClick={() => setActiveTab('history')}><History size={24} strokeWidth={2} /><span className="text-xs mt-1">History</span></button>
           <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 ${activeTab === 'profile' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600'}`} onClick={() => setActiveTab('profile')}><User size={24} strokeWidth={2} /><span className="text-xs mt-1">Profile</span></button>
         </div>
       </nav>
