@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
-import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Welcome from "./pages/Welcome";
 import DriverDashboard from "./pages/DriverDashboard";
@@ -14,8 +13,8 @@ import RiderDashboard from "./pages/RiderDashboard";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Register service worker for PWA
-  if ('serviceWorker' in navigator) {
+  // Register service worker for PWA (production only)
+  if (import.meta.env.PROD && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
         .then((registration) => {

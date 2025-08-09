@@ -9,15 +9,11 @@ const Welcome = () => {
 
   const handleRoleSelect = (role) => {
     setSelectedType(role);
-    // The setTimeout is used to allow the selected state to update,
-    // providing a brief visual feedback before navigating.
-    setTimeout(() => {
-      if (role === "rider") {
-        navigate("/rider-dashboard");
-      } else if (role === "driver") {
-        navigate("/driver-dashboard");
-      }
-    }, 300);
+    if (role === "rider") {
+      navigate("/rider-dashboard");
+    } else if (role === "driver") {
+      navigate("/driver-dashboard");
+    }
   };
 
   return (
