@@ -21,27 +21,27 @@ const uzbekistanLocations = [
 ];
 
 // Helper to format date for display (e.g., "Sat Apr 23")
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { weekday: 'short', month: 'short', day: 'numeric' };
+  const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
 };
 
 // Helper to format time for display (e.g., "11:45")
-const formatTime = (dateString) => {
+const formatTime = (dateString: string) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
+  const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
   return date.toLocaleTimeString('en-US', options);
 };
 
 // Helper to calculate a dummy drop-off date (e.g., next day)
-const getDropOffDate = (pickupDateString) => {
+const getDropOffDate = (pickupDateString: string) => {
   if (!pickupDateString) return '';
   const pickupDate = new Date(pickupDateString);
   pickupDate.setDate(pickupDate.getDate() + 1); // Add one day
-  const options = { weekday: 'short', month: 'short', day: 'numeric' };
+  const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
   return pickupDate.toLocaleDateString('en-US', options);
 };
 
@@ -436,7 +436,7 @@ const App = () => {
                                 {activeFilter === 'mail' ? item.mailPayout : `$${calculatePayout(item.basePrice).toFixed(2)}`}
                             </div>
                             <div className="text-sm text-gray-600">
-                                {activeFilter === 'mail' ? item.ratePerMail : item.ratePerMile}
+                                {activeFilter === 'mail' ? item.ratePerMail : item.avgFuelPerMile}
                             </div>
                           </div>
                         </div>
@@ -620,7 +620,7 @@ const SpecialService = ({ service }) => {
 }
 
 
-const TripDetails = ({ ride, isUnreliable, onToggleReliability }) => {
+const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack }) => {
     const discount = ride.basePrice * 0.10;
     const finalPrice = isUnreliable ? ride.basePrice : ride.basePrice - discount;
 
@@ -628,6 +628,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability }) => {
         <div className="flex flex-col h-full">
             <div className="bg-[#005f73] text-white p-4 flex-shrink-0">
                  <div className="flex items-center">
+                    <button onClick={onBack} className="mr-3 text-white/90 hover:text-white"><ChevronLeft size={24} /></button>
                     <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4"/>
                     <div className="flex items-stretch w-full">
                         <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
@@ -704,7 +705,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability }) => {
             <div className="p-4 bg-white border-t flex-shrink-0 flex justify-between items-center">
                 <div>
                     <p className="text-2xl font-bold">${finalPrice.toFixed(2)}</p>
-                    <p className="text-sm text-gray-600">{ride.ratePerMile}</p>
+                    <p className="text-sm text-gray-600">{ride.ratePerMail || ride.avgFuelPerMile}</p>
                 </div>
                 <button className="bg-[#005f73] text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-[#007a8d] transition-colors">Book</button>
             </div>
