@@ -17,7 +17,7 @@ import {
   Search, // For search bar
   X, // For closing modals
   CheckCircle, // For submit button success state
-  ArrowUp,   // For Navigation
+  ArrowUp,    // For Navigation
   ArrowLeft, // For Navigation
   ArrowRight,// For Navigation
   Flag,      // For Navigation
@@ -29,7 +29,7 @@ import {
   Radar, // Speed cameras
   LocateFixed, // Recenter to user
   Car, // Added Car icon back for Welcome component
-} from "lucide-react";
+} from "lucide"; // Changed to 'lucide' as per standard usage
 
 // --- Custom Scrollbar Styles Component ---
 const CustomScrollbarStyles = () => (
@@ -224,7 +224,7 @@ const MessageDashboard = ({ onClose }) => {
   );
 };
 
-// Expanded Data for Uzbekistan Regions and Cities
+// Expanded Data for Uzbekistan Regions and Cities - ALL 14 REGIONS INCLUDED
 const uzbekistanLocations = [
   { region: "Andijan Region", cities: ["Andijan", "Asaka", "Baliqchi", "Bo'ston", "Buloqboshi", "Izboskan", "Jalaquduq", "Marhamat", "Oltinko'l", "Paxtaobod", "Qo'rg'ontepa", "Shahrixon", "Ulug'nor", "Xo'jaobod"] },
   { region: "Bukhara Region", cities: ["Bukhara", "Galaosiyo", "G'ijduvon", "Jondor", "Kogon", "Olot", "Peshku", "Qorako'l", "Qorovulbozor", "Romitan", "Shofirkon", "Vobkent"] },
@@ -807,15 +807,15 @@ const NavigationView = ({ onClose }) => {
                 {isRouting && <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />} {/* Updated text color */}
               </div>
             </div>
-             {/* Summary & End Button */}
+              {/* Summary & End Button */}
             <div className="flex justify-between items-center pt-2 border-t border-neutral-200"> {/* Updated border */}
-                 <p className="text-neutral-600 text-sm"> {/* Updated text color */}
-                    {formatDistance(summary.distance)} • ETA {formatTime(summary.time)}
-                 </p>
-                 <button onClick={endTrip} className="flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-600 transition-colors shadow-sm"> {/* Updated text color */}
-                    <XCircle className="h-5 w-5" />
-                    End
-                 </button>
+                <p className="text-neutral-600 text-sm"> {/* Updated text color */}
+                  {formatDistance(summary.distance)} • ETA {formatTime(summary.time)}
+                </p>
+                <button onClick={endTrip} className="flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-600 transition-colors shadow-sm"> {/* Updated text color */}
+                  <XCircle className="h-5 w-5" />
+                  End
+                </button>
             </div>
           </div>
         </section>
