@@ -56,7 +56,7 @@ const Avatar = ({ initials, bgColor }) => (
 // Message Dashboard component with Telegram-like UX
 const MessageDashboard = ({ onClose }) => {
   const [activeMessageTab, setActiveMessageTab] = useState("chats");
-  const [showSearchInput, setShowSearchInput] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedChat, setSelectedChat] = useState(null);
   const [draft, setDraft] = useState("");
@@ -86,8 +86,6 @@ const MessageDashboard = ({ onClose }) => {
     channels: [ { id: 201, name: "Ride Alerts Official", lastMessage: "High demand in downtown area!", time: "15 min ago", avatar: <Avatar initials="RA" bgColor="bg-red-500" /> } ],
     market: [ { id: 301, name: "Special Offers", lastMessage: "Discount on car maintenance this week.", time: "2 days ago", avatar: <Avatar initials="SO" bgColor="bg-indigo-500" /> } ],
   };
-
-  const currentTabLabel = selectedChat?.name || messageNavItems.find(item => item.id === activeMessageTab)?.label;
 
   const currentChats = chatItems[activeMessageTab] || [];
   const filteredChats = currentChats.filter((chat) =>
@@ -180,33 +178,43 @@ const MessageDashboard = ({ onClose }) => {
 
   return (
     <div className="flex flex-col h-full bg-white rounded-3xl overflow-hidden">
-      <div className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between">
+      <div className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between gap-2">
         {selectedChat ? (
-            <>
-                <button onClick={() => setSelectedChat(null)} className="text-neutral-800 hover:text-gray-900">
-                    <ChevronLeft className="h-6 w-6" />
-                </button>
-                <h2 className="text-lg font-semibold text-gray-800">{currentTabLabel}</h2>
-            </>
+          <>
+            <button onClick={() => setSelectedChat(null)} className="text-neutral-800 hover:text-gray-900">
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <h2 className="text-lg font-semibold text-gray-800 flex-1 truncate">{selectedChat.name}</h2>
+            <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
+          </>
+        ) : isSearching ? (
+          <>
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full bg-neutral-100 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] text-gray-800"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <button onClick={() => { setIsSearching(false); setSearchQuery(''); }} className="text-sm font-semibold text-gray-700 hover:text-gray-900">
+              Cancel
+            </button>
+          </>
         ) : (
-            // When no chat is selected, use a placeholder to align the search button correctly.
-            <div className="w-6 h-6"></div>
+          <>
+            <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
+            <div className="flex-1"></div> {/* Placeholder to push search icon to the right */}
+            <button onClick={() => setIsSearching(true)} className="text-neutral-800 hover:text-gray-900">
+              <Search className="h-6 w-6" />
+            </button>
+          </>
         )}
-        <button onClick={() => setShowSearchInput(!showSearchInput)} className="text-neutral-800 hover:text-gray-900">
-            <Search className="h-6 w-6" />
-        </button>
       </div>
-      {showSearchInput && !selectedChat && (
-        <div className="p-3 bg-white border-b border-neutral-200">
-          <input
-            type="text"
-            placeholder="Search messages..."
-            className="w-full p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-      )}
+
       {!selectedChat && (
         <div className="flex justify-around bg-white p-2 border-b border-neutral-200">
           {messageNavItems.map((item) => {
@@ -215,7 +223,7 @@ const MessageDashboard = ({ onClose }) => {
             return (
               <button
                 key={item.id}
-                onClick={() => { setActiveMessageTab(item.id); setSearchQuery(""); setShowSearchInput(false); }}
+                onClick={() => { setActiveMessageTab(item.id); setSearchQuery(""); setIsSearching(false); }}
                 className={`flex-1 flex flex-col items-center py-2 transition-colors relative ${isActive ? "text-gray-800" : "text-neutral-500"}`}
               >
                 <Icon className="h-5 w-5 mb-1" />
