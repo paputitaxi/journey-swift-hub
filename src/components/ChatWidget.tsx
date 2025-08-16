@@ -6,17 +6,6 @@ import { useLocation } from "react-router-dom";
 
 const ChatWidget: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const [isAuthed, setIsAuthed] = useState(false);
-  const location = useLocation();
-
-  useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setIsAuthed(!!session));
-    supabase.auth.getSession().then(({ data: { session } }) => setIsAuthed(!!session));
-    return () => sub.subscription.unsubscribe();
-  }, []);
-
-  // Hide on auth page
-  if (location.pathname.startsWith('/auth') || !isAuthed) return null;
 
   return (
     <div className="fixed right-4 bottom-4 z-50">
