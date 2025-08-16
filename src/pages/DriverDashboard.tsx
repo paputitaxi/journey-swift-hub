@@ -398,21 +398,21 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
         </div>
         <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-4 space-y-6 custom-scrollbar">
           <div>
-            <div onClick={() => setShowFromModal(true)} className="w-full p-3 bg-neutral-100 rounded-xl text-neutral-600 flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" >
+            <div onClick={() => setShowFromModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${fromLocation ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
               {fromLocation || "From where"}
               <MapPin className="h-5 w-5 text-neutral-500" />
             </div>
             <LocationSelectModal title="Select Origin" isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setFromLocation} />
           </div>
           <div>
-            <div onClick={() => setShowToModal(true)} className="w-full p-3 bg-neutral-100 rounded-xl text-neutral-600 flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" >
+            <div onClick={() => setShowToModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${toLocation ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
               {toLocation || "To where"}
               <MapPin className="h-5 w-5 text-neutral-500" />
             </div>
             <LocationSelectModal title="Select Destination" isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setToLocation} />
           </div>
           <div>
-            <div onClick={() => setShowDateModal(true)} className="w-full p-3 bg-neutral-100 rounded-xl text-neutral-600 flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" >
+            <div onClick={() => setShowDateModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${departureDate ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
               {departureDate || "Departure date"}
               <Calendar className="h-5 w-5 text-neutral-500" />
             </div>
