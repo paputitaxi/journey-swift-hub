@@ -29,7 +29,7 @@ import {
   Radar, // Speed cameras
   LocateFixed, // Recenter to user
   Car, // Added Car icon back for Welcome component
-} from "lucide"; // Changed to 'lucide' as per standard usage
+} from "lucide-react";
 
 // --- Custom Scrollbar Styles Component ---
 const CustomScrollbarStyles = () => (
@@ -136,10 +136,10 @@ const MessageDashboard = ({ onClose }) => {
             >
               {chat.avatar}
               <div className="ml-3 flex-grow">
-                <p className="font-medium text-gray-800">{chat.name}</p> {/* Updated text color */}
-                <p className="text-sm text-neutral-600 truncate">{chat.lastMessage}</p> {/* Updated text color */}
+                <p className="font-medium text-gray-800">{chat.name}</p>
+                <p className="text-sm text-neutral-600 truncate">{chat.lastMessage}</p>
               </div>
-              <span className="text-xs text-neutral-500">{chat.time}</span> {/* Updated text color */}
+              <span className="text-xs text-neutral-500">{chat.time}</span>
             </button>
           ))}
         </div>
@@ -156,21 +156,21 @@ const MessageDashboard = ({ onClose }) => {
         <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
           {msgs.map((m) => (
             <div key={m.id} className={`flex ${m.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.sender === 'me' ? 'bg-[#E1F87E] text-[#121212]' : 'bg-neutral-100 text-gray-800'}`}> {/* Updated sent message bubble background and text */}
+              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.sender === 'me' ? 'bg-[#E1F87E] text-[#121212]' : 'bg-neutral-100 text-gray-800'}`}>
                 <p className="whitespace-pre-wrap">{m.text}</p>
                 <div className="text-[10px] opacity-70 mt-1 text-right">{m.time}</div>
               </div>
             </div>
           ))}
         </div>
-        <form onSubmit={sendMessage} className="p-3 border-t border-neutral-200 bg-white flex items-center gap-2"> {/* Updated background and border */}
+        <form onSubmit={sendMessage} className="p-3 border-t border-neutral-200 bg-white flex items-center gap-2">
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Type a message"
-            className="flex-1 p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" // Updated background, text, placeholder, focus ring
+            className="flex-1 p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]"
           />
-          <button type="submit" className="p-2 rounded-lg bg-[#E1F87E] text-[#121212] hover:bg-opacity-80"> {/* Updated send button */}
+          <button type="submit" className="p-2 rounded-lg bg-[#E1F87E] text-[#121212] hover:bg-opacity-80">
             <Send className="h-5 w-5" />
           </button>
         </form>
@@ -179,29 +179,36 @@ const MessageDashboard = ({ onClose }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-3xl overflow-hidden"> {/* Updated background */}
-      <div className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between"> {/* Updated background and border */}
-        <button onClick={() => { if (selectedChat) setSelectedChat(null); else onClose(); }} className="text-neutral-800 hover:text-gray-900"> {/* Updated text color */}
-          <ChevronLeft className="h-6 w-6" />
-        </button>
-        <h2 className="text-lg font-semibold text-gray-800">{currentTabLabel}</h2> {/* Updated text color */}
-        <button onClick={() => setShowSearchInput(!showSearchInput)} className="text-neutral-800 hover:text-gray-900"> {/* Updated text color */}
-          <Search className="h-6 w-6" />
+    <div className="flex flex-col h-full bg-white rounded-3xl overflow-hidden">
+      <div className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between">
+        {selectedChat ? (
+            <>
+                <button onClick={() => setSelectedChat(null)} className="text-neutral-800 hover:text-gray-900">
+                    <ChevronLeft className="h-6 w-6" />
+                </button>
+                <h2 className="text-lg font-semibold text-gray-800">{currentTabLabel}</h2>
+            </>
+        ) : (
+            // When no chat is selected, use a placeholder to align the search button correctly.
+            <div className="w-6 h-6"></div>
+        )}
+        <button onClick={() => setShowSearchInput(!showSearchInput)} className="text-neutral-800 hover:text-gray-900">
+            <Search className="h-6 w-6" />
         </button>
       </div>
       {showSearchInput && !selectedChat && (
-        <div className="p-3 bg-white border-b border-neutral-200"> {/* Updated background and border */}
+        <div className="p-3 bg-white border-b border-neutral-200">
           <input
             type="text"
             placeholder="Search messages..."
-            className="w-full p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" // Updated background, text, placeholder, focus ring
+            className="w-full p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       )}
       {!selectedChat && (
-        <div className="flex justify-around bg-white p-2 border-b border-neutral-200"> {/* Updated background and border */}
+        <div className="flex justify-around bg-white p-2 border-b border-neutral-200">
           {messageNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeMessageTab === item.id;
@@ -263,35 +270,34 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
-      <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[80vh] flex flex-col"> {/* Updated background */}
-        <div className="p-4 border-b border-neutral-200 flex justify-between items-center"> {/* Updated border */}
-          <h2 className="text-lg font-semibold text-gray-800">{title}</h2> {/* Updated text color */}
-          <button onClick={handleClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> {/* Updated text color and hover */}
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[80vh] flex flex-col">
+        <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+          <button onClick={handleClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors">
             <X className="h-6 w-6" />
           </button>
         </div>
-        <div className="p-4 border-b border-neutral-200"> {/* Updated border */}
+        <div className="p-4 border-b border-neutral-200">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 h-5 w-5" /> {/* Updated text color */}
-            <input type="text" placeholder="Search for a city or region..." className="w-full pl-10 pr-4 py-2 rounded-xl bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /> {/* Updated background, text, placeholder, focus ring */}
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 h-5 w-5" />
+            <input type="text" placeholder="Search for a city or region..." className="w-full pl-10 pr-4 py-2 rounded-xl bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </div>
         <div className="flex-grow overflow-y-auto p-4 space-y-2 custom-scrollbar">
           {filteredLocations.length > 0 ? (
             filteredLocations.map(regionData => (
               <div key={regionData.region}>
-                {/* Region is now a non-clickable header */}
-                <h3 className="w-full text-left p-3 font-semibold text-gray-800 select-none"> {/* Removed onClick, added select-none */}
+                <h3 className="w-full text-left p-3 font-semibold text-gray-800 select-none">
                   {regionData.region}
                 </h3>
                 {regionData.cities.map(city => (
-                  <button key={city} onClick={() => { onSelect(city); handleClose(); }} className="w-full text-left pl-6 py-2 text-neutral-600 hover:bg-neutral-50 rounded-lg text-sm transition-colors" > {/* Updated text and hover colors */}
+                  <button key={city} onClick={() => { onSelect(city); handleClose(); }} className="w-full text-left pl-6 py-2 text-neutral-600 hover:bg-neutral-50 rounded-lg text-sm transition-colors" >
                     {city}
                   </button>
                 ))}
               </div>
             ))
-          ) : ( <p className="text-neutral-500 text-center mt-10">No regions or cities found.</p> )} {/* Updated text color */}
+          ) : ( <p className="text-neutral-500 text-center mt-10">No regions or cities found.</p> )}
         </div>
       </div>
     </div>
@@ -300,7 +306,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
 
 
 // Main Post Ride Form Component
-const PostRideForm = ({ onClose, onPostSuccess }) => {
+const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
   const [fromLocation, setFromLocation] = useState("");
   const [toLocation, setToLocation] = useState("");
   const [departureDate, setDepartureDate] = useState("");
@@ -329,7 +335,9 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isFormValid) {
-      console.log("Ride Posted:", { fromLocation, toLocation, departureDate, mailService, freeSeats, departureType, departureTime, price });
+      const newRideData = { fromLocation, toLocation, departureDate, mailService, freeSeats, departureType, departureTime, price };
+      onAddRide(newRideData); // Pass the data up to the parent component
+      console.log("Ride Posted:", newRideData);
       setIsSubmitted(true);
       setTimeout(() => {
         onClose();
@@ -348,14 +356,14 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
     const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     return (
       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
-        <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col"> {/* Updated background */}
-          <div className="p-4 border-b border-neutral-200 flex justify-between items-center"> {/* Updated border */}
-            <h2 className="text-lg font-semibold text-gray-800">Select Departure Date</h2> {/* Updated text color */}
-            <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> <X className="h-6 w-6" /> </button> {/* Updated text color and hover */}
+        <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
+          <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-gray-800">Select Departure Date</h2>
+            <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> <X className="h-6 w-6" /> </button>
           </div>
           <div className="p-4 flex-grow overflow-y-auto custom-scrollbar">
-            <div className="text-center text-gray-800 text-lg font-medium mb-4">{currentMonth}</div> {/* Updated text color */}
-            <div className="grid grid-cols-7 gap-2 text-center text-neutral-600 text-sm mb-2"> {/* Updated text color */}
+            <div className="text-center text-gray-800 text-lg font-medium mb-4">{currentMonth}</div>
+            <div className="grid grid-cols-7 gap-2 text-center text-neutral-600 text-sm mb-2">
               <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
             </div>
             <div className="grid grid-cols-7 gap-2">
@@ -368,7 +376,7 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
                 const isPast = date < today; // Compare normalized dates
                 const dateString = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
                 return (
-                  <button key={day} onClick={() => { if (!isPast) { onSelectDate(dateString); onClose(); } }} className={`p-2 rounded-full text-gray-800 text-sm font-medium ${isToday ? 'bg-neutral-100 border border-neutral-300' : 'hover:bg-neutral-100'} ${isPast ? 'text-neutral-400 cursor-not-allowed' : ''}`} disabled={isPast} > {/* Updated text and background colors */}
+                  <button key={day} onClick={() => { if (!isPast) { onSelectDate(dateString); onClose(); } }} className={`p-2 rounded-full text-gray-800 text-sm font-medium ${isToday ? 'bg-neutral-100 border border-neutral-300' : 'hover:bg-neutral-100'} ${isPast ? 'text-neutral-400 cursor-not-allowed' : ''}`} disabled={isPast} >
                     {day}
                   </button>
                 );
@@ -383,58 +391,53 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 p-4 font-sans">
-      <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[90vh] flex flex-col"> {/* Updated background */}
-        <div className="p-4 border-b border-neutral-200 flex justify-between items-center"> {/* Updated border */}
-          <h2 className="text-lg font-semibold text-gray-800">Post a New Ride</h2> {/* Updated text color */}
-          <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> <X className="h-6 w-6" /> </button> {/* Updated text color and hover */}
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[90vh] flex flex-col">
+        <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-800">Post a New Ride</h2>
+          <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> <X className="h-6 w-6" /> </button>
         </div>
         <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-4 space-y-6 custom-scrollbar">
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">From Where</label> {/* Updated text color */}
-            <div onClick={() => setShowFromModal(true)} className="w-full p-3 bg-neutral-100 rounded-xl text-neutral-600 flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" > {/* Updated background, text, focus ring */}
-              {fromLocation || "Select origin"}
-              <MapPin className="h-5 w-5 text-neutral-500" /> {/* Updated text color */}
+            <div onClick={() => setShowFromModal(true)} className="w-full p-3 bg-neutral-100 rounded-xl text-neutral-600 flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" >
+              {fromLocation || "From where"}
+              <MapPin className="h-5 w-5 text-neutral-500" />
             </div>
             <LocationSelectModal title="Select Origin" isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setFromLocation} />
           </div>
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">To Where</label> {/* Updated text color */}
-            <div onClick={() => setShowToModal(true)} className="w-full p-3 bg-neutral-100 rounded-xl text-neutral-600 flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" > {/* Updated background, text, focus ring */}
-              {toLocation || "Select destination"}
-              <MapPin className="h-5 w-5 text-neutral-500" /> {/* Updated text color */}
+            <div onClick={() => setShowToModal(true)} className="w-full p-3 bg-neutral-100 rounded-xl text-neutral-600 flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" >
+              {toLocation || "To where"}
+              <MapPin className="h-5 w-5 text-neutral-500" />
             </div>
             <LocationSelectModal title="Select Destination" isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setToLocation} />
           </div>
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Departure Date</label> {/* Updated text color */}
-            <div onClick={() => setShowDateModal(true)} className="w-full p-3 bg-neutral-100 rounded-xl text-neutral-600 flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" > {/* Updated background, text, focus ring */}
-              {departureDate || "Select date"}
-              <Calendar className="h-5 w-5 text-neutral-500" /> {/* Updated text color */}
+            <div onClick={() => setShowDateModal(true)} className="w-full p-3 bg-neutral-100 rounded-xl text-neutral-600 flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" >
+              {departureDate || "Departure date"}
+              <Calendar className="h-5 w-5 text-neutral-500" />
             </div>
             <DatePickerModal isOpen={showDateModal} onClose={() => setShowDateModal(false)} onSelectDate={setDepartureDate} />
           </div>
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Mail Service</label> {/* Updated text color */}
+            <label className="block text-neutral-800 text-sm font-medium mb-2">Mail Service</label>
             <div className="space-y-3">
-              <button type="button" onClick={() => setMailService("yes")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${mailService === "yes" ? "bg-green-600/30 border border-green-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} > {/* Updated background and hover */}
+              <button type="button" onClick={() => setMailService("yes")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${mailService === "yes" ? "bg-green-600/30 border border-green-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="text-left">
-                  <p className="font-medium text-gray-800">Yes, I do carry Mail</p> {/* Updated text color */}
-                  <p className="text-sm text-neutral-600">I can transport both passengers and mail packages</p> {/* Updated text color */}
+                  <p className="font-medium text-gray-800">Yes, I do carry Mail</p>
+                  <p className="text-sm text-neutral-600">I can transport both passengers and mail packages</p>
                 </div>
                 {mailService === "yes" && <CheckCircle className="h-6 w-6 text-green-400" />}
               </button>
-              <button type="button" onClick={() => setMailService("no")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${mailService === "no" ? "bg-green-600/30 border border-green-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} > {/* Updated to green for selection, not red */}
+              <button type="button" onClick={() => setMailService("no")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${mailService === "no" ? "bg-green-600/30 border border-green-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="text-left">
-                  <p className="font-medium text-gray-800">No, I do not carry Mail</p> {/* Updated text color */}
-                  <p className="text-sm text-neutral-600">I only transport passengers, no mail service</p> {/* Updated text color */}
+                  <p className="font-medium text-gray-800">No, I do not carry Mail</p>
+                  <p className="text-sm text-neutral-600">I only transport passengers, no mail service</p>
                 </div>
-                {mailService === "no" && <CheckCircle className="h-6 w-6 text-green-400" />} {/* Updated to green icon */}
+                {mailService === "no" && <CheckCircle className="h-6 w-6 text-green-400" />}
               </button>
-              {/* Removed "I carry Mail Only Not Riders" button */}
             </div>
           </div>
 
-          {/* New Free Seats Section */}
           <div>
             <label className="block text-neutral-800 text-sm font-medium mb-2">Free Seats</label>
             <div className="flex justify-around space-x-2">
@@ -456,30 +459,30 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
           </div>
 
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Departure Type</label> {/* Updated text color */}
+            <label className="block text-neutral-800 text-sm font-medium mb-2">Departure Type</label>
             <div className="space-y-3">
-              <button type="button" onClick={() => { setDepartureType("fixed"); }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${departureType === "fixed" ? "bg-teal-600/30 border border-teal-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} > {/* Updated background and hover */}
+              <button type="button" onClick={() => { setDepartureType("fixed"); }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${departureType === "fixed" ? "bg-teal-600/30 border border-teal-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="flex items-center">
                   <Clock className="h-6 w-6 mr-3 text-teal-400" />
                   <div className="text-left">
-                    <p className="font-medium text-gray-800">Fixed Departure Time</p> {/* Updated text color */}
-                    <p className="text-sm text-neutral-600">Leave at a specific time regardless of seat availability</p> {/* Updated text color */}
+                    <p className="font-medium text-gray-800">Fixed Departure Time</p>
+                    <p className="text-sm text-neutral-600">Leave at a specific time regardless of seat availability</p>
                   </div>
                 </div>
                 {departureType === "fixed" && <CheckCircle className="h-6 w-6 text-teal-400" />}
               </button>
               {departureType === "fixed" && (
-                <div className="w-full p-3 bg-neutral-100 rounded-xl flex items-center border border-neutral-200 mt-2"> {/* Updated background and border */}
-                  <input type="time" value={departureTime} onChange={(e) => setDepartureTime(e.target.value)} className="flex-grow bg-transparent text-gray-800 placeholder-neutral-500 focus:outline-none" /> {/* Updated text and placeholder */}
-                  <Clock className="h-5 w-5 text-neutral-500 ml-2" /> {/* Updated text color */}
+                <div className="w-full p-3 bg-neutral-100 rounded-xl flex items-center border border-neutral-200 mt-2">
+                  <input type="time" value={departureTime} onChange={(e) => setDepartureTime(e.target.value)} className="flex-grow bg-transparent text-gray-800 placeholder-neutral-500 focus:outline-none" />
+                  <Clock className="h-5 w-5 text-neutral-500 ml-2" />
                 </div>
               )}
-              <button type="button" onClick={() => { setDepartureType("when_fills"); setDepartureTime(""); }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${departureType === "when_fills" ? "bg-teal-600/30 border border-teal-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} > {/* Updated background and hover */}
+              <button type="button" onClick={() => { setDepartureType("when_fills"); setDepartureTime(""); }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${departureType === "when_fills" ? "bg-teal-600/30 border border-teal-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="flex items-center">
                   <Users className="h-6 w-6 mr-3 text-teal-400" />
                   <div className="text-left">
-                    <p className="font-medium text-gray-800">Leave When Seats Fill</p> {/* Updated text color */}
-                    <p className="text-sm text-neutral-600">Depart as soon as all available seats are booked</p> {/* Updated text color */}
+                    <p className="font-medium text-gray-800">Leave When Seats Fill</p>
+                    <p className="text-sm text-neutral-600">Depart as soon as all available seats are booked</p>
                   </div>
                 </div>
                 {departureType === "when_fills" && <CheckCircle className="h-6 w-6 text-teal-400" />}
@@ -487,10 +490,10 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
             </div>
           </div>
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Price</label> {/* Updated text color */}
+            <label className="block text-neutral-800 text-sm font-medium mb-2">Price</label>
             <div className="relative">
-              <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Enter price" className="w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={price} onChange={(e) => { const value = e.target.value; if (/^[0-9]*$/.test(value)) { setPrice(value); } }} /> {/* Updated background, text, placeholder, focus ring */}
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">$</span> {/* Updated text color */}
+              <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Enter price" className="w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={price} onChange={(e) => { const value = e.target.value; if (/^[0-9]*$/.test(value)) { setPrice(value); } }} />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">$</span>
             </div>
           </div>
           <button type="submit" disabled={!isFormValid || isSubmitted} className={`w-full py-3 rounded-xl text-lg font-semibold transition-colors flex items-center justify-center shadow-lg ${isFormValid && !isSubmitted ? "bg-green-500 hover:bg-green-600 text-white" : isSubmitted ? "bg-green-700 text-white cursor-not-allowed" : "bg-gray-600 text-gray-400 cursor-not-allowed"}`} >
@@ -502,324 +505,26 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
   );
 };
 
-// --- New, Advanced Navigation View Component ---
-// This component is currently not used in the main App rendering due to previous user request
-// but its styling has been updated for consistency if it were to be re-introduced.
-const NavigationView = ({ onClose }) => {
-  const [origin, setOrigin] = useState(null);
-  const [geoError, setGeoError] = useState(null);
-  const [destInput, setDestInput] = useState("");
-  const [destCoords, setDestCoords] = useState(null);
-  const [isGeocoding, setIsGeocoding] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [isRouting, setIsRouting] = useState(false);
-  const [instructions, setInstructions] = useState([]);
-  const [summary, setSummary] = useState({ distance: 0, time: 0 });
-  const [stepIndex, setStepIndex] = useState(0);
-  const [layers, setLayers] = useState({ drivers: false, gas: false, market: false, radar: false });
-  const [recenterTick, setRecenterTick] = useState(0);
-
-  // --- Helper Functions ---
-  const formatDistance = (m) => {
-    if (m === undefined || m === null) return "";
-    if (m >= 1000) return `${(m / 1000).toFixed(1)} km`;
-    return `${Math.round(m)} m`;
-  };
-  const formatTime = (s) => {
-    if (s === undefined || s === null) return "";
-    const min = Math.round(s / 60);
-    if (min < 60) return `${min} min`;
-    const h = Math.floor(min / 60);
-    const m = min % 60;
-    return `${h}h ${m}m`;
-  };
-
-  // --- Dynamic Icon for Current Step ---
-  const CurrentIcon = (() => {
-    const t = instructions[stepIndex]?.text?.toLowerCase() || "";
-    if (t.includes("left")) return ArrowLeft;
-    if (t.includes("right")) return ArrowRight;
-    if (t.includes("destination") || t.includes("arrive")) return Flag;
-    return ArrowUp;
-  })();
-  
-  // --- Calculate Trip Progress ---
-  const initialDistance = summary.distance;
-  const distanceCovered = instructions.slice(0, stepIndex).reduce((acc, curr) => acc + curr.distance, 0);
-  const tripProgress = initialDistance > 0 ? (distanceCovered / initialDistance) * 100 : 0;
-
-  // --- Effects ---
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setGeoError("Geolocation is not supported by this browser.");
-      return;
-    }
-    const id = navigator.geolocation.watchPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setOrigin({ lat: latitude, lng: longitude });
-        if (geoError) setGeoError(null);
-      },
-      (err) => {
-        if (err.code === 1) setGeoError("Geolocation permission denied. Enable it in your browser settings.");
-        else setGeoError("Could not retrieve location.");
-      },
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
-    );
-    return () => navigator.geolocation.clearWatch(id);
-  }, [geoError]);
-
-  useEffect(() => {
-    if (!isNavigating || instructions.length === 0 || stepIndex >= instructions.length - 1) return;
-    const timeout = setTimeout(() => setStepIndex((i) => i + 1), 6000); // Simulate progress every 6 seconds
-    return () => clearTimeout(timeout);
-  }, [isNavigating, stepIndex, instructions]);
-  
-  useEffect(() => { setIsRouting(isNavigating); }, [isNavigating]);
-
-  // --- Action Handlers ---
-  const geocodeDestination = async () => {
-    if (!destInput.trim()) return;
-    if (!origin) {
-      setGeoError("Waiting for your current location...");
-      return;
-    }
-    setIsGeocoding(true);
-    try {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destInput)}&limit=1`;
-      const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-      const data = await res.json();
-      if (!data?.length) throw new Error("Destination not found.");
-      const { lat, lon, display_name } = data[0];
-      setDestCoords({ lat: parseFloat(lat), lng: parseFloat(lon), name: display_name });
-      setIsNavigating(true);
-      setStepIndex(0);
-    } catch (e) {
-      setGeoError(e.message || "Geocoding failed. Try another address.");
-    } finally {
-      setIsGeocoding(false);
-    }
-  };
-
-  const endTrip = () => {
-    setIsNavigating(false);
-    setDestCoords(null);
-    setInstructions([]);
-    setSummary({ distance: 0, time: 0 });
-    setStepIndex(0);
-  };
-  
-  const handleRouteFound = ({ instructions, summary }) => {
-    setIsRouting(false);
-    setInstructions(instructions);
-    setSummary({ distance: summary.totalDistance, time: summary.totalTime });
-  };
-
-  // --- Map Component (Internal) ---
-  const MapComponent = ({ origin, destinationCoords, navigating, onRouteFound, showLayers, recenterTrigger }) => {
-    const mapRef = useRef(null);
-    const userMarkerRef = useRef(null);
-    const routingRef = useRef(null);
-    const gasLayerRef = useRef(null);
-    const marketLayerRef = useRef(null);
-    const radarLayerRef = useRef(null);
-    const driversLayerRef = useRef(null);
-
-    // Ensure Leaflet & LRM are loaded
-    const ensureLeaflet = () => new Promise<void>((resolve) => {
-      const ready = () =>
-        typeof window !== 'undefined' && window.L && window.L.Routing;
-      if (ready()) return resolve();
-      const i = setInterval(() => {
-        if (ready()) {
-          clearInterval(i);
-          resolve();
-        }
-      }, 100);
-    });
-
-    useEffect(() => {
-      let mounted = true;
-      (async () => {
-        await ensureLeaflet();
-        if (!mounted || !window.L) return;
-        if (!mapRef.current) {
-          const map = window.L.map('leaflet-map', { zoomControl: false, attributionControl: false });
-          mapRef.current = map;
-          // Using a light basemap for consistency
-          window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap & CARTO' }).addTo(map);
-          if (origin) map.setView([origin.lat, origin.lng], 14);
-          gasLayerRef.current = window.L.layerGroup().addTo(map);
-          marketLayerRef.current = window.L.layerGroup().addTo(map);
-          radarLayerRef.current = window.L.layerGroup().addTo(map);
-          driversLayerRef.current = window.L.layerGroup().addTo(map);
-        }
-      })();
-      return () => { mounted = false; };
-    }, []);
-
-    useEffect(() => {
-      (async () => {
-        await ensureLeaflet();
-        const L = window.L; const map = mapRef.current; if (!map || !origin) return;
-        if (!userMarkerRef.current) {
-          userMarkerRef.current = L.circleMarker([origin.lat, origin.lng], { radius: 8, color: '#34d399', weight: 3, fillColor: '#34d399', fillOpacity: 0.9 }).addTo(map);
-        } else userMarkerRef.current.setLatLng([origin.lat, origin.lng]);
-        if (!navigating) map.setView([origin.lat, origin.lng], 14);
-      })();
-    }, [origin, navigating]);
-
-    useEffect(() => {
-      if (!recenterTrigger || !origin || !mapRef.current) return;
-      mapRef.current.setView([origin.lat, origin.lng], 15, { animate: true });
-    }, [recenterTrigger]);
-
-    useEffect(() => {
-      (async () => {
-        await ensureLeaflet();
-        const L = window.L; const map = mapRef.current; if (!map) return;
-        if (routingRef.current) { routingRef.current.setWaypoints([]); map.removeControl(routingRef.current); routingRef.current = null; }
-        if (navigating && origin && destinationCoords) {
-          const ctrl = L.Routing.control({
-            waypoints: [L.latLng(origin.lat, origin.lng), L.latLng(destinationCoords.lat, destinationCoords.lng)],
-            routeWhileDragging: false, addWaypoints: false, show: false, fitSelectedRoutes: true,
-            lineOptions: { styles: [{ color: '#3b82f6', opacity: 0.95, weight: 6 }] },
-            createMarker: (_i, wp) => L.marker(wp.latLng, { opacity: 0.9 })
-          }).addTo(map);
-          routingRef.current = ctrl;
-          ctrl.on('routesfound', function(e) {
-            const r = e.routes?.[0];
-            if (!r) return;
-            const instr = (r.instructions || []).map((it) => ({ text: it.text, distance: it.distance, time: it.time }));
-            onRouteFound({ instructions: instr, summary: r.summary });
-          });
-        }
-      })();
-    }, [navigating, origin?.lat, origin?.lng, destinationCoords?.lat, destinationCoords?.lng]);
-
-    const fetchAndAddPOIs = async (layerRef, query, color) => {
-        await ensureLeaflet();
-        const L = window.L;
-        const map = mapRef.current;
-        if (!map || !layerRef.current) return;
-        layerRef.current.clearLayers();
-
-        try {
-            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(`[out:json];${query}(around:2000,${origin.lat},${origin.lng});out center;`)}`;
-            const res = await fetch(url);
-            if (!res.ok) throw new Error('Overpass request failed');
-            const data = await res.json();
-            data.elements.forEach((el) => {
-                const lat = el.lat || el.center?.lat;
-                const lon = el.lon || el.center?.lon;
-                if (lat && lon) {
-                    L.circleMarker([lat, lon], { radius: 6, color, weight: 2, fillColor: color, fillOpacity: 0.85 }).addTo(layerRef.current);
-                }
-            });
-        } catch (e) {
-            console.error("POI Fetch Error:", e);
-        }
-    };
-
-    useEffect(() => { if (showLayers.gas && origin) fetchAndAddPOIs(gasLayerRef, 'node["amenity"="fuel"]', '#f59e0b'); else gasLayerRef.current?.clearLayers(); }, [showLayers.gas, origin]);
-    useEffect(() => { if (showLayers.market && origin) fetchAndAddPOIs(marketLayerRef, '(node["shop"="supermarket"];node["amenity"="marketplace"];)', '#3b82f6'); else marketLayerRef.current?.clearLayers(); }, [showLayers.market, origin]);
-    useEffect(() => { if (showLayers.radar && origin) fetchAndAddPOIs(radarLayerRef, 'node["highway"="speed_camera"]', '#ef4444'); else radarLayerRef.current?.clearLayers(); }, [showLayers.radar, origin]);
-    
-    useEffect(() => {
-        (async () => {
-            await ensureLeaflet();
-            if (!driversLayerRef.current || !origin) return;
-            driversLayerRef.current.clearLayers();
-            if (showLayers.drivers) {
-                for (let i = 0; i < 10; i++) {
-                    const lat = origin.lat + (Math.random() - 0.5) * 0.008;
-                    const lng = origin.lng + (Math.random() - 0.5) * 0.008;
-                    window.L.circleMarker([lat, lng], { radius: 7, color: '#22c55e', weight: 2, fillColor: '#22c55e', fillOpacity: 0.85 }).addTo(driversLayerRef.current);
-                }
-            }
-        })();
-    }, [showLayers.drivers, origin]);
-
-    return <div id="leaflet-map" className="absolute inset-0" />;
-  };
-
+// --- Seat Indicator Component ---
+const SeatIndicator = ({ totalSeats = 4, availableSeats }) => {
   return (
-    <div className="relative h-full w-full text-gray-800 font-sans"> {/* Changed text color for light background */}
-      <MapComponent origin={origin} destinationCoords={destCoords} navigating={isNavigating} onRouteFound={handleRouteFound} showLayers={layers} recenterTrigger={recenterTick} />
-      
-      {/* Header */}
-      <header className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/50 to-transparent flex items-center justify-between z-10">
-        <button onClick={onClose} className="p-2 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm"> <ChevronLeft className="h-6 w-6 text-white" /> </button> {/* Ensure icon is visible on dark gradient */}
-        <div className="text-center">
-            {isNavigating && destCoords?.name && <p className="text-sm text-white/80 truncate max-w-[60vw]">To: {destCoords.name}</p>}
-        </div>
-        <div className="w-10 h-10"/> {/* Placeholder for alignment */}
-      </header>
-
-      {/* Side Controls */}
-      <aside className="absolute right-4 top-24 z-10 flex flex-col space-y-2">
-        <button onClick={() => setLayers((s) => ({ ...s, drivers: !s.drivers }))} className={`p-3 rounded-xl backdrop-blur bg-white/40 border border-neutral-200 hover:bg-white/50 transition-all shadow-md ${layers.drivers ? 'ring-2 ring-neutral-300 bg-white/60' : ''}`} aria-label="Toggle drivers nearby"> <Users className="h-5 w-5 text-gray-800" /> </button> {/* Updated background, border, text */}
-        <button onClick={() => setLayers((s) => ({ ...s, gas: !s.gas }))} className={`p-3 rounded-xl backdrop-blur bg-white/40 border border-neutral-200 hover:bg-white/50 transition-all shadow-md ${layers.gas ? 'ring-2 ring-neutral-300 bg-white/60' : ''}`} aria-label="Toggle gas stations nearby"> <Fuel className="h-5 w-5 text-gray-800" /> </button> {/* Updated background, border, text */}
-        <button onClick={() => setLayers((s) => ({ ...s, market: !s.market }))} className={`p-3 rounded-xl backdrop-blur bg-white/40 border border-neutral-200 hover:bg-white/50 transition-all shadow-md ${layers.market ? 'ring-2 ring-neutral-300 bg-white/60' : ''}`} aria-label="Toggle markets nearby"> <Store className="h-5 w-5 text-gray-800" /> </button> {/* Updated background, border, text */}
-        <button onClick={() => setLayers((s) => ({ ...s, radar: !s.radar }))} className={`p-3 rounded-xl backdrop-blur bg-white/40 border border-neutral-200 hover:bg-white/50 transition-all shadow-md ${layers.radar ? 'ring-2 ring-neutral-300 bg-white/60' : ''}`} aria-label="Toggle speed cameras"> <Radar className="h-5 w-5 text-gray-800" /> </button> {/* Updated background, border, text */}
-      </aside>
-      
-      {/* Recenter Button */}
-      <div className="absolute left-4 bottom-32 z-10">
-        <button onClick={() => setRecenterTick((n) => n + 1)} className="p-3 rounded-xl backdrop-blur bg-white/40 border border-neutral-200 hover:bg-white/50 shadow-md" aria-label="Recenter on me"> <LocateFixed className="h-5 w-5 text-gray-800" /> </button> {/* Updated background, border, text */}
+    <div className="flex flex-col items-center">
+      <div className="flex space-x-2">
+        {Array.from({ length: totalSeats }).map((_, index) => {
+          const isAvailable = index < availableSeats;
+          return (
+            <div
+              key={index}
+              className={`w-6 h-6 rounded-full border-2 ${
+                isAvailable
+                  ? 'bg-green-700 border-green-600'
+                  : 'border-gray-400'
+              }`}
+            ></div>
+          );
+        })}
       </div>
-
-      {/* Bottom Panels */}
-      {!isNavigating ? (
-        // Search Panel
-        <section className="absolute bottom-0 left-0 right-0 p-4 z-10">
-          <div className="bg-white/80 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-neutral-200"> {/* Updated background and border */}
-            <h2 className="text-lg font-semibold mb-3 text-gray-800">Where to?</h2> {/* Updated text color */}
-            <div className="flex gap-2">
-              <input value={destInput} onChange={(e) => setDestInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && geocodeDestination()} placeholder="Enter address or place" className="w-full p-3 bg-neutral-100 rounded-lg text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#E1F87E]" disabled={isGeocoding} /> {/* Updated background, text, placeholder, focus ring */}
-              <button onClick={geocodeDestination} className="p-3 rounded-lg bg-[#E1F87E] text-[#121212] hover:bg-opacity-80 disabled:bg-opacity-50 disabled:cursor-not-allowed transition-colors shadow-md" disabled={!origin || !destInput || isGeocoding}>
-                {isGeocoding ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
-              </button>
-            </div>
-            {geoError && <p className="text-red-600 text-sm mt-3">{geoError}</p>} {/* Updated text color */}
-            {!geoError && !origin && <p className="text-amber-600 text-sm mt-3 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin"/> Acquiring current location...</p>} {/* Updated text color */}
-            {!geoError && origin && <p className="text-emerald-600 text-sm mt-3">Ready to navigate.</p>} {/* Updated text color */}
-          </div>
-        </section>
-      ) : (
-        // Navigation Panel
-        <section className="absolute bottom-0 left-0 right-0 p-4 z-10">
-          <div className="bg-white/80 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-neutral-200"> {/* Updated background and border */}
-            {/* Instruction */}
-            <div className="flex items-center gap-4">
-              <div className="bg-[#E1F87E] p-3 rounded-xl shadow-md"> <CurrentIcon className="h-8 w-8 text-[#121212]" /> </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold text-gray-800">{formatDistance(instructions[stepIndex]?.distance)}</h3> {/* Updated text color */}
-                <p className="text-neutral-700 leading-snug">{instructions[stepIndex]?.text || 'Starting navigation...'}</p> {/* Updated text color */}
-              </div>
-              <div className="flex items-center gap-2">
-                <button aria-label="Previous step" onClick={() => setStepIndex((i) => Math.max(0, i - 1))} className="p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 disabled:opacity-40 shadow-sm" disabled={stepIndex <= 0}> {/* Updated background and border */}
-                  <ArrowLeft className="h-5 w-5 text-gray-800" /> {/* Updated text color */}
-                </button>
-                <button aria-label="Next step" onClick={() => setStepIndex((i) => Math.min(instructions.length - 1, i + 1))} className="p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 disabled:opacity-40 shadow-sm" disabled={stepIndex >= instructions.length - 1}> {/* Updated background and border */}
-                  <ArrowRight className="h-5 w-5 text-gray-800" /> {/* Updated text color */}
-                </button>
-                {isRouting && <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />} {/* Updated text color */}
-              </div>
-            </div>
-              {/* Summary & End Button */}
-            <div className="flex justify-between items-center pt-2 border-t border-neutral-200"> {/* Updated border */}
-                <p className="text-neutral-600 text-sm"> {/* Updated text color */}
-                  {formatDistance(summary.distance)} • ETA {formatTime(summary.time)}
-                </p>
-                <button onClick={endTrip} className="flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-600 transition-colors shadow-sm"> {/* Updated text color */}
-                  <XCircle className="h-5 w-5" />
-                  End
-                </button>
-            </div>
-          </div>
-        </section>
-      )}
+      <p className="text-xs text-neutral-600 mt-1">{availableSeats} seats available</p>
     </div>
   );
 };
@@ -827,27 +532,29 @@ const NavigationView = ({ onClose }) => {
 
 const DriverDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [headerTitle, setHeaderTitle] = useState("Ride"); // State for dynamic header title
+  const [headerTitle, setHeaderTitle] = useState("Ride");
   const [showPostRide, setShowPostRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
+  const [myRides, setMyRides] = useState([]); // State to hold posted rides
 
-  // Function to handle back button logic
+  // Function to add a new ride to the state
+  const handleAddRide = (newRide) => {
+    setMyRides(prevRides => [...prevRides, { ...newRide, id: Date.now() }]);
+  };
+
   const handleBack = () => {
     if (showPostRide) {
       setShowPostRide(false);
-      setHeaderTitle("Ride"); // Go back to "Ride" when closing PostRide
+      setHeaderTitle("Ride");
     } else if (showMessages) {
       setShowMessages(false);
-      setHeaderTitle("Ride"); // Go back to "Ride" when closing Messages
+      setHeaderTitle("Ride");
     } else {
-      // Handle actual navigation back if this were a real router setup
-      // For this mock, we'll just set it back to "Ride"
       setHeaderTitle("Ride");
       setActiveTab("dashboard");
     }
   };
 
-  // Update header title when activeTab changes
   useEffect(() => {
     switch (activeTab) {
       case "dashboard":
@@ -866,13 +573,13 @@ const DriverDashboard = () => {
 
   const bottomNavItems = [
     { id: "dashboard", label: "Ride", icon: MapPin },
-    { id: "my-lines", label: "My lines", icon: Navigation }, // Moved My lines to bottom nav
+    { id: "my-lines", label: "My lines", icon: Navigation },
     { id: "profile", label: "Profile", icon: User },
   ];
 
   const renderContent = () => {
     if (showMessages) { return <MessageDashboard onClose={() => { setShowMessages(false); setHeaderTitle("Ride"); }} />; }
-    if (showPostRide) { return <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle("Ride"); }} onPostSuccess={() => setHeaderTitle("Ride")} />; }
+    if (showPostRide) { return <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle("Ride"); }} onPostSuccess={() => setHeaderTitle("Ride")} onAddRide={handleAddRide} />; }
 
     switch (activeTab) {
       case "dashboard": return (
@@ -881,13 +588,12 @@ const DriverDashboard = () => {
               <h2 className="text-sm text-neutral-600">Total Earnings</h2>
               <p className="text-5xl font-extrabold mt-1 mb-4 text-gray-800">$0.00</p>
               <div className="flex justify-around items-center">
-                <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle("New Ride"); }} > {/* Update header on click */}
+                <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle("New Ride"); }} >
                   <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
                     <Plus className="h-7 w-7 text-gray-800" />
                   </div>
                   <span className="text-xs text-neutral-600">New Ride</span>
                 </div>
-                {/* My lines moved to bottom nav */}
                 <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105">
                   <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
                     <BarChart className="h-7 w-7 text-[#E1F87E]" />
@@ -907,10 +613,11 @@ const DriverDashboard = () => {
               Your activity
             </h3>
             <div className="p-4 bg-white border border-neutral-200 rounded-2xl space-y-3 shadow-lg">
+              {/* This is now a static example, dynamic rides are in "My Lines" */}
               <div className="flex justify-between items-center text-sm">
                 <div className="flex flex-col">
-                  <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> Ggg </div>
-                  <div className="flex items-center text-gray-800 ml-6 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> Ttgt </div>
+                  <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> Example Origin </div>
+                  <div className="flex items-center text-gray-800 ml-6 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> Example Destination </div>
                   <div className="flex items-center text-neutral-600 mt-2"> <User className="h-4 w-4 mr-2" /> 2/4 passengers </div>
                   <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> 31.07.2025 <Clock className="h-4 w-4 mx-2" /> 16:15 </div>
                 </div>
@@ -919,18 +626,38 @@ const DriverDashboard = () => {
                   <button className="p-1 rounded-full hover:bg-neutral-100 transition-colors"> <Plus className="h-5 w-5 mt-2 text-neutral-500 rotate-45" /> </button>
                 </div>
               </div>
-              <div className="h-px bg-neutral-200 my-3" />
-              <div className="flex justify-between items-center text-sm text-neutral-600">
-                <div className="flex flex-col">
-                  <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2" /> wfwewrf </div>
-                  <div className="flex items-center text-gray-800 ml-6 font-medium"> <MapPin className="h-4 w-4 mr-2" /> fwewfw </div>
-                </div>
-                <div className="text-xs">24.07.2025</div>
-              </div>
             </div>
           </div>
         );
-      case "my-lines": return ( <div className="p-4 text-gray-800 font-sans"> <h2 className="text-xl font-bold">My Lines Content</h2> <p className="text-neutral-600 mt-2">Manage your saved routes and lines here.</p> </div> );
+      case "my-lines": return (
+        <div className="p-4 text-gray-800 font-sans space-y-4">
+            {myRides.length > 0 ? (
+                myRides.map(ride => (
+                    <div key={ride.id} className="p-4 bg-white border border-neutral-200 rounded-2xl shadow-lg">
+                        <div className="flex justify-between items-center text-sm">
+                             <div className="flex flex-col space-y-1">
+                                <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> {ride.fromLocation} </div>
+                                <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> {ride.toLocation} </div>
+                                <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> {ride.departureDate} {ride.departureTime && <><Clock className="h-4 w-4 mx-2" /> {ride.departureTime}</>} </div>
+                            </div>
+                            
+                            <SeatIndicator availableSeats={ride.freeSeats} />
+
+                            <div className="flex flex-col items-end space-y-2">
+                                <span className="text-xl font-bold text-gray-800">${ride.price}</span>
+                                <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full"> Active </span>
+                            </div>
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <div className="text-center py-10">
+                    <h2 className="text-xl font-bold">No Lines Posted Yet</h2>
+                    <p className="text-neutral-600 mt-2">Post a new ride to see it here.</p>
+                </div>
+            )}
+        </div>
+      );
       case "profile": return ( <div className="p-4 text-gray-800 font-sans"> <h2 className="text-xl font-bold">Advanced Profile Content</h2> <p className="text-neutral-600 mt-2">Manage your account details here.</p> </div> );
       default: return null;
     }
@@ -939,15 +666,12 @@ const DriverDashboard = () => {
   return (
     <div className="h-screen bg-[#F8F8F8] text-gray-800 flex flex-col font-sans">
       <CustomScrollbarStyles />
-      {/* Header is always visible unless PostRide or Messages modals are open */}
       <header className="bg-white p-3 border-b border-neutral-200 flex justify-between items-center z-20 shadow-lg">
-        {/* Back button logic */}
         {(showPostRide || showMessages || activeTab !== "dashboard") && (
           <button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
             <ChevronLeft className="h-8 w-8" />
           </button>
         )}
-        {/* Placeholder for alignment if no back button */}
         {!(showPostRide || showMessages || activeTab !== "dashboard") && (
           <div className="w-8 h-8"></div>
         )}
@@ -959,7 +683,6 @@ const DriverDashboard = () => {
       <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative rounded-t-3xl overflow-hidden">
         {renderContent()}
       </main>
-      {/* Footer is always visible unless PostRide or Messages modals are open */}
       {!showMessages && !showPostRide && (
         <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-lg z-10">
           <div className="flex justify-around py-2">
@@ -984,9 +707,7 @@ const DriverDashboard = () => {
 const App = () => {
   const [currentPage, setCurrentPage] = useState("welcome");
 
-  // Mocking react-router-dom's useNavigate for demonstration purposes
-  const useNavigate = () => {
-    return (path) => {
+  const navigate = (path) => {
       if (path === "/rider-dashboard") {
         setCurrentPage("rider-dashboard");
       } else if (path === "/driver-dashboard") {
@@ -995,18 +716,12 @@ const App = () => {
         setCurrentPage("welcome");
       }
     };
-  };
 
-  // The Welcome component to choose a role, styled like Back Market's mobile UI
   const Welcome = () => {
     const [selectedType, setSelectedType] = useState(null);
-    const navigate = useNavigate();
-
-    // Function to handle Telegram authentication callback
+    
     const onTelegramAuth = (user) => {
       console.log("Telegram Auth User:", user);
-      // Simulate role assignment based on Telegram user data
-      // In a real app, you'd likely have a backend to manage user roles
       if (user.username && user.username.toLowerCase().includes("driver")) {
         navigate("/driver-dashboard");
       } else {
@@ -1015,26 +730,29 @@ const App = () => {
     };
 
     useEffect(() => {
-      // Dynamically load the Telegram Login Widget script
       const scriptId = "telegram-login-script";
       if (!document.getElementById(scriptId)) {
         const script = document.createElement("script");
         script.id = scriptId;
         script.src = "https://telegram.org/js/telegram-widget.js?22";
-        script.setAttribute("data-telegram-login", "YOUR_BOT_USERNAME"); // Replace with your bot's username
+        script.setAttribute("data-telegram-login", "YOUR_BOT_USERNAME");
         script.setAttribute("data-size", "large");
-        script.setAttribute("data-onauth", "onTelegramAuthCallback"); // Global callback function
+        script.setAttribute("data-onauth", "onTelegramAuthCallback");
         script.setAttribute("data-request-access", "write");
         script.async = true;
-        document.body.appendChild(script);
+        
+        const container = document.getElementById("telegram-login-widget-container");
+        if(container) {
+            container.appendChild(script);
+        }
 
-        // Make the onTelegramAuth function globally accessible for the widget
         window.onTelegramAuthCallback = onTelegramAuth;
 
         return () => {
-          // Clean up the global function when component unmounts
           delete window.onTelegramAuthCallback;
-          // Optionally remove the script if needed, though often left for performance
+          if (container && script.parentNode === container) {
+             container.removeChild(script);
+          }
         };
       }
     }, []);
@@ -1048,13 +766,12 @@ const App = () => {
         } else if (role === "driver") {
           navigate("/driver-dashboard");
         }
-      }, 300); // Small delay for visual feedback
+      }, 300);
     };
 
     return (
       <div className="min-h-screen bg-[#F8F8F8] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
         <div className="text-center max-w-xl mx-auto space-y-8 bg-white p-6 sm:p-8 rounded-3xl shadow-lg border border-neutral-200">
-          {/* Main Header and Description */}
           <div className="space-y-4">
             <h1 className="text-4xl sm:text-5xl font-extrabold text-neutral-900 tracking-tight">
               Welcome
@@ -1064,20 +781,16 @@ const App = () => {
             </p>
           </div>
 
-          {/* Telegram Login Widget Container */}
           <div className="py-4">
             <h3 className="text-lg font-semibold text-neutral-800 mb-4">Or Login with Telegram</h3>
             <div id="telegram-login-widget-container" className="flex justify-center">
-              {/* The Telegram widget will render here */}
             </div>
             <p className="text-xs text-neutral-500 mt-2">
               (Note: Replace 'YOUR_BOT_USERNAME' in the code with your actual Telegram bot username.)
             </p>
           </div>
 
-          {/* Role Selection Buttons */}
           <div className="flex flex-col gap-4">
-            {/* Rider Button */}
             <button
               onClick={() => handleRoleSelect("rider")}
               className={`flex-1 flex items-center justify-center p-6 border-2 rounded-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#E1F87E]/50
@@ -1090,7 +803,6 @@ const App = () => {
               <span className="font-semibold text-xl">I'm a Rider</span>
             </button>
 
-            {/* Driver Button */}
             <button
               onClick={() => handleRoleSelect("driver")}
               className={`flex-1 flex items-center justify-center p-6 border-2 rounded-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#E1F87E]/50
@@ -1108,14 +820,13 @@ const App = () => {
     );
   };
 
-  // Mock components for the dashboards
   const RiderDashboard = () => (
     <div className="min-h-screen bg-gradient-to-br from-[#E1F87E]/20 to-neutral-200 flex items-center justify-center p-4 font-sans">
       <div className="text-center bg-white p-8 rounded-2xl shadow-xl space-y-4">
         <h2 className="text-4xl font-bold text-gray-800">Rider Dashboard</h2>
         <p className="text-lg text-neutral-600">Welcome, Rider! Find your next ride here.</p>
         <button
-          onClick={() => window.location.reload()} // Simple reload to go back to Welcome
+          onClick={() => navigate("/")} 
           className="mt-6 px-6 py-3 bg-[#E1F87E] text-[#121212] rounded-xl shadow-md hover:bg-opacity-80 transition-colors duration-300"
         >
           Go Back
@@ -1124,14 +835,6 @@ const App = () => {
     </div>
   );
 
-  // Override the global useNavigate for the Welcome component to use this App's state
-  React.useEffect(() => {
-    // This is a simplified way to ensure the mock useNavigate controls this App's state.
-    // Normally, react-router-dom handles navigation directly.
-    window.tempNavigate = useNavigate();
-  }, []);
-
-  // Render the appropriate component based on currentPage state
   switch (currentPage) {
     case "rider-dashboard":
       return <RiderDashboard />;
