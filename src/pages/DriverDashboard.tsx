@@ -684,7 +684,9 @@ const DriverDashboard = () => {
           <div className="w-8 h-8"></div> // Placeholder for alignment
         )}
         <h1 className="absolute left-1/2 -translate-x-1/2 text-xl font-bold text-gray-800">{headerTitle}</h1>
-        <div className="w-8 h-8"></div> {/* Placeholder for alignment */}
+         <button onClick={() => setShowMessages(true)} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
+          <MessageCircle className="h-8 w-8" />
+        </button>
       </header>
       <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative rounded-t-3xl overflow-hidden">
         {renderContent()}
@@ -709,147 +711,5 @@ const DriverDashboard = () => {
   );
 };
 
-// --- Main App component to simulate routing for the Welcome and DriverDashboard ---
-const App = () => {
-  const [currentPage, setCurrentPage] = useState("welcome");
 
-  const navigate = (path) => {
-      if (path === "/rider-dashboard") {
-        setCurrentPage("rider-dashboard");
-      } else if (path === "/driver-dashboard") {
-        setCurrentPage("driver-dashboard");
-      } else {
-        setCurrentPage("welcome");
-      }
-    };
-
-  const Welcome = () => {
-    const [selectedType, setSelectedType] = useState(null);
-    
-    const onTelegramAuth = (user) => {
-      console.log("Telegram Auth User:", user);
-      if (user.username && user.username.toLowerCase().includes("driver")) {
-        navigate("/driver-dashboard");
-      } else {
-        navigate("/rider-dashboard");
-      }
-    };
-
-    useEffect(() => {
-      const scriptId = "telegram-login-script";
-      if (!document.getElementById(scriptId)) {
-        const script = document.createElement("script");
-        script.id = scriptId;
-        script.src = "https://telegram.org/js/telegram-widget.js?22";
-        script.setAttribute("data-telegram-login", "YOUR_BOT_USERNAME");
-        script.setAttribute("data-size", "large");
-        script.setAttribute("data-onauth", "onTelegramAuthCallback");
-        script.setAttribute("data-request-access", "write");
-        script.async = true;
-        
-        const container = document.getElementById("telegram-login-widget-container");
-        if(container) {
-            container.appendChild(script);
-        }
-
-        window.onTelegramAuthCallback = onTelegramAuth;
-
-        return () => {
-          delete window.onTelegramAuthCallback;
-          if (container && script.parentNode === container) {
-             container.removeChild(script);
-          }
-        };
-      }
-    }, []);
-
-
-    const handleRoleSelect = (role) => {
-      setSelectedType(role);
-      setTimeout(() => {
-        if (role === "rider") {
-          navigate("/rider-dashboard");
-        } else if (role === "driver") {
-          navigate("/driver-dashboard");
-        }
-      }, 300);
-    };
-
-    return (
-      <div className="min-h-screen bg-[#F8F8F8] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
-        <div className="text-center max-w-xl mx-auto space-y-8 bg-white p-6 sm:p-8 rounded-3xl shadow-lg border border-neutral-200">
-          <div className="space-y-4">
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-neutral-900 tracking-tight">
-              Welcome
-            </h1>
-            <p className="text-lg text-neutral-600">
-              Choose your role to get started. Find rides or offer a spot in your car.
-            </p>
-          </div>
-
-          <div className="py-4">
-            <h3 className="text-lg font-semibold text-neutral-800 mb-4">Or Login with Telegram</h3>
-            <div id="telegram-login-widget-container" className="flex justify-center">
-            </div>
-            <p className="text-xs text-neutral-500 mt-2">
-              (Note: Replace 'YOUR_BOT_USERNAME' in the code with your actual Telegram bot username.)
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <button
-              onClick={() => handleRoleSelect("rider")}
-              className={`flex-1 flex items-center justify-center p-6 border-2 rounded-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#E1F87E]/50
-                ${selectedType === "rider"
-                  ? "bg-[#E1F87E] border-[#E1F87E] text-[#121212] shadow-md"
-                  : "bg-white border-neutral-300 text-neutral-800 hover:bg-neutral-50 hover:border-[#E1F87E]/20"
-                }`}
-            >
-              <Users className={`h-7 w-7 mr-3 ${selectedType === "rider" ? "text-[#121212]" : "text-[#E1F87E]"}`} />
-              <span className="font-semibold text-xl">I'm a Rider</span>
-            </button>
-
-            <button
-              onClick={() => handleRoleSelect("driver")}
-              className={`flex-1 flex items-center justify-center p-6 border-2 rounded-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#E1F87E]/50
-                ${selectedType === "driver"
-                  ? "bg-[#E1F87E] border-[#E1F87E] text-[#121212] shadow-md"
-                  : "bg-white border-neutral-300 text-neutral-800 hover:bg-neutral-50 hover:border-[#E1F87E]/20"
-                }`}
-            >
-              <Car className={`h-7 w-7 mr-3 ${selectedType === "driver" ? "text-[#121212]" : "text-[#E1F87E]"}`} />
-              <span className="font-semibold text-xl">I'm a Driver</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const RiderDashboard = () => (
-    <div className="min-h-screen bg-gradient-to-br from-[#E1F87E]/20 to-neutral-200 flex items-center justify-center p-4 font-sans">
-      <div className="text-center bg-white p-8 rounded-2xl shadow-xl space-y-4">
-        <h2 className="text-4xl font-bold text-gray-800">Rider Dashboard</h2>
-        <p className="text-lg text-neutral-600">Welcome, Rider! Find your next ride here.</p>
-        <button
-          onClick={() => navigate("/")} 
-          className="mt-6 px-6 py-3 bg-[#E1F87E] text-[#121212] rounded-xl shadow-md hover:bg-opacity-80 transition-colors duration-300"
-        >
-          Go Back
-        </button>
-      </div>
-    </div>
-  );
-
-  switch (currentPage) {
-    case "rider-dashboard":
-      return <RiderDashboard />;
-    case "driver-dashboard":
-      return <DriverDashboard />;
-    case "welcome":
-    default:
-      return <Welcome />;
-  }
-};
-
-export default App;
+export default DriverDashboard;
