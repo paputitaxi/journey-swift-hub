@@ -674,19 +674,17 @@ const DriverDashboard = () => {
   return (
     <div className="h-screen bg-[#F8F8F8] text-gray-800 flex flex-col font-sans">
       <CustomScrollbarStyles />
-      <header className="bg-white p-3 border-b border-neutral-200 flex justify-between items-center z-20 shadow-lg">
+      <header className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between z-20 shadow-lg relative">
         {(showPostRide || showMessages || activeTab !== "dashboard") && (
           <button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
             <ChevronLeft className="h-8 w-8" />
           </button>
         )}
         {!(showPostRide || showMessages || activeTab !== "dashboard") && (
-          <div className="w-8 h-8"></div>
+          <div className="w-8 h-8"></div> // Placeholder for alignment
         )}
-        <h1 className="text-xl font-bold text-gray-800">{headerTitle}</h1>
-        <button onClick={() => setShowMessages(!showMessages)} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
-          <MessageCircle className="h-8 w-8" />
-        </button>
+        <h1 className="absolute left-1/2 -translate-x-1/2 text-xl font-bold text-gray-800">{headerTitle}</h1>
+        <div className="w-8 h-8"></div> {/* Placeholder for alignment */}
       </header>
       <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative rounded-t-3xl overflow-hidden">
         {renderContent()}
