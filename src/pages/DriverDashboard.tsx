@@ -11,6 +11,7 @@ import {
   Navigation,
   MessageCircle,
   Users, // For Groups
+  Hash, // For Channels
   Store, // For Market
   Search, // For search bar
   X, // For closing modals
@@ -667,14 +668,16 @@ const SettingsModal = ({ title, isOpen, onClose, children }) => {
 
 
 // --- Profile Page Component ---
-const ProfilePage = ({ user, onUpdateUser, onUpdateCar }) => {
+const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
     const [showEditProfile, setShowEditProfile] = useState(false);
     const [showEditCar, setShowEditCar] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
     const [settingsModalTitle, setSettingsModalTitle] = useState("");
+    const [settingsModalContent, setSettingsModalContent] = useState(null);
 
-    const handleOpenSettings = (title) => {
+    const handleOpenSettings = (title, content) => {
         setSettingsModalTitle(title);
+        setSettingsModalContent(content);
         setShowSettingsModal(true);
     };
 
@@ -698,11 +701,37 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar }) => {
         </button>
     );
 
+    const RideHistoryContent = () => (
+        <div>
+            <h3 className="font-semibold mb-2">Past Rides</h3>
+            {myRides.filter(r => r.status === 'completed').map(ride => (
+                <div key={ride.id} className="mb-2 p-2 border-b">
+                    <p>{ride.fromLocation} to {ride.toLocation}</p>
+                    <p className="text-xs text-neutral-500">{ride.departureDate}</p>
+                </div>
+            ))}
+        </div>
+    );
+    
+    const UpcomingRidesContent = () => (
+         <div>
+            <h3 className="font-semibold mb-2">Upcoming Rides</h3>
+            {myRides.filter(r => r.status === 'upcoming').map(ride => (
+                <div key={ride.id} className="mb-2 p-2 border-b">
+                    <p>{ride.fromLocation} to {ride.toLocation}</p>
+                    <p className="text-xs text-neutral-500">{ride.departureDate}</p>
+                </div>
+            ))}
+        </div>
+    );
+
     return (
         <div className="p-4 space-y-6 text-gray-800 font-sans pb-20">
             <EditProfileModal user={user} isOpen={showEditProfile} onClose={() => setShowEditProfile(false)} onSave={onUpdateUser} />
             <EditCarModal car={user.car} isOpen={showEditCar} onClose={() => setShowEditCar(false)} onSave={onUpdateCar} />
-            <SettingsModal title={settingsModalTitle} isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} />
+            <SettingsModal title={settingsModalTitle} isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)}>
+                {settingsModalContent}
+            </SettingsModal>
 
             {/* --- Profile Header --- */}
             <div className="flex flex-col items-center space-y-3">
@@ -770,8 +799,8 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar }) => {
             {/* --- Activity & History --- */}
             <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
                  <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">Activity</h3>
-                 <SettingsItem icon={History} label="Ride History" action={() => handleOpenSettings("Ride History")} />
-                 <SettingsItem icon={Calendar} label="Upcoming Rides" action={() => handleOpenSettings("Upcoming Rides")} />
+                 <SettingsItem icon={History} label="Ride History" action={() => handleOpenSettings("Ride History", <RideHistoryContent />)} />
+                 <SettingsItem icon={Calendar} label="Upcoming Rides" action={() => handleOpenSettings("Upcoming Rides", <UpcomingRidesContent />)} />
             </div>
 
 
@@ -800,7 +829,10 @@ const App = () => {
   const [headerTitle, setHeaderTitle] = useState("Ride");
   const [showPostRide, setShowPostRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
-  const [myRides, setMyRides] = useState([]); // State to hold posted rides
+  const [myRides, setMyRides] = useState([
+    { id: 1, fromLocation: "Tashkent", toLocation: "Samarkand", departureDate: "2025-08-15", departureTime: "08:00", price: "10", freeSeats: 2, status: "completed" },
+    { id: 2, fromLocation: "Bukhara", toLocation: "Khiva", departureDate: "2025-08-16", departureTime: "10:00", price: "15", freeSeats: 1, status: "completed" },
+  ]);
   const [userData, setUserData] = useState({
         profilePicture: "https://placehold.co/100x100/E1F87E/121212?text=JD",
         fullName: "John Doe",
@@ -839,7 +871,7 @@ const App = () => {
 
   // Function to add a new ride to the state
   const handleAddRide = (newRide) => {
-    setMyRides(prevRides => [...prevRides, { ...newRide, id: Date.now() }]);
+    setMyRides(prevRides => [...prevRides, { ...newRide, id: Date.now(), status: "upcoming" }]);
   };
 
   const handleBack = () => {
@@ -958,7 +990,7 @@ const App = () => {
             )}
         </div>
       );
-      case "profile": return ( <ProfilePage user={userData} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} /> );
+      case "profile": return ( <ProfilePage user={userData} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} myRides={myRides} /> );
       default: return null;
     }
   };
