@@ -1,27 +1,21 @@
 // Driver Dashboard - With Custom Scrollbar Styling
 import React, { useState, useEffect, useRef } from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   Plus,
-  Play,
   User,
   MapPin,
   Calendar,
   Clock,
-  BarChart,
   Shield,
   Navigation,
   MessageCircle,
   Users, // For Groups
-  Hash, // For Channels
   Store, // For Market
   Search, // For search bar
   X, // For closing modals
   CheckCircle, // For submit button success state
-  ArrowUp,    // For Navigation
   ArrowLeft, // For Navigation
-  ArrowRight,// For Navigation
-  Flag,      // For Navigation
-  ChevronLeft, // For Navigation - used for back button
   Send, // For search button
   Loader2, // For loading state
   XCircle, // For ending a trip
@@ -29,6 +23,25 @@ import {
   Radar, // Speed cameras
   LocateFixed, // Recenter to user
   Car, // Added Car icon back for Welcome component
+  Sparkles, // For Gemini features
+  Newspaper, // For News
+  TrendingUp, // For Stats
+  Mail,
+  Phone,
+  Settings,
+  LogOut,
+  Edit2,
+  ChevronLeft, // Added missing icon
+  ChevronRight,
+  Star,
+  ShieldCheck,
+  CreditCard,
+  Bell,
+  Languages,
+  Lock,
+  Trash2,
+  History,
+  FileText,
 } from "lucide-react";
 
 // --- Custom Scrollbar Styles Component ---
@@ -47,10 +60,10 @@ const CustomScrollbarStyles = () => (
 
 
 // Helper component for a simple avatar
-const Avatar = ({ initials, bgColor }) => (
-  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold ${bgColor}`} >
-    {initials}
-  </div>
+const Avatar = ({ initials, bgColor, size = 'w-10 h-10', src }) => (
+    <div className={`relative rounded-full flex items-center justify-center text-white text-lg font-semibold ${bgColor} ${size}`} >
+        {src ? <img src={src} alt="profile" className="rounded-full w-full h-full object-cover" /> : initials}
+    </div>
 );
 
 // Message Dashboard component with Telegram-like UX
@@ -537,13 +550,292 @@ const SeatIndicator = ({ totalSeats = 4, availableSeats }) => {
   );
 };
 
+// --- Edit Profile Modal ---
+const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
+    const [formData, setFormData] = useState(user);
 
-const DriverDashboard = () => {
+    useEffect(() => {
+        setFormData(user);
+    }, [user]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+        onClose();
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
+                <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">Edit Profile</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100"> <X className="h-6 w-6" /> </button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-4 space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">Full Name</label>
+                        <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">Username</label>
+                        <input type="text" name="username" value={formData.username} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">Gender</label>
+                        <select name="gender" value={formData.gender} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]">
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div className="flex justify-end pt-4">
+                        <button type="submit" className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+// --- Edit Car Modal ---
+const EditCarModal = ({ car, isOpen, onClose, onSave }) => {
+    const [formData, setFormData] = useState(car);
+
+    useEffect(() => {
+        setFormData(car);
+    }, [car]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+        onClose();
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
+                <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">Edit Vehicle Details</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100"> <X className="h-6 w-6" /> </button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-4 space-y-4">
+                    <input type="text" name="brand" placeholder="Brand" value={formData.brand} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    <input type="text" name="model" placeholder="Model" value={formData.model} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    <input type="number" name="year" placeholder="Year" value={formData.year} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    <input type="text" name="color" placeholder="Color" value={formData.color} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    <input type="text" name="plate" placeholder="License Plate" value={formData.plate} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    <div className="flex justify-end pt-4">
+                        <button type="submit" className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+// --- Generic Settings Modal ---
+const SettingsModal = ({ title, isOpen, onClose, children }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col h-[60vh]">
+                <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100"> <X className="h-6 w-6" /> </button>
+                </div>
+                <div className="p-4 flex-grow overflow-y-auto custom-scrollbar">
+                    {children || <p className="text-neutral-500">Settings content goes here.</p>}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+// --- Profile Page Component ---
+const ProfilePage = ({ user, onUpdateUser, onUpdateCar }) => {
+    const [showEditProfile, setShowEditProfile] = useState(false);
+    const [showEditCar, setShowEditCar] = useState(false);
+    const [showSettingsModal, setShowSettingsModal] = useState(false);
+    const [settingsModalTitle, setSettingsModalTitle] = useState("");
+
+    const handleOpenSettings = (title) => {
+        setSettingsModalTitle(title);
+        setShowSettingsModal(true);
+    };
+
+    const InfoItem = ({ icon: Icon, label, value }) => (
+        <div className="flex items-center justify-between py-3">
+            <div className="flex items-center">
+                <Icon className="h-5 w-5 text-neutral-500 mr-3" />
+                <span className="text-sm text-neutral-600">{label}</span>
+            </div>
+            <span className="text-sm font-medium text-gray-800">{value}</span>
+        </div>
+    );
+
+    const SettingsItem = ({ icon: Icon, label, action = () => {} }) => (
+        <button onClick={action} className="w-full flex items-center justify-between py-3 text-left hover:bg-neutral-50 rounded-lg px-2 transition-colors">
+            <div className="flex items-center">
+                <Icon className="h-5 w-5 text-neutral-500 mr-3" />
+                <span className="text-sm font-medium text-gray-800">{label}</span>
+            </div>
+            <ChevronRight className="h-5 w-5 text-neutral-400" />
+        </button>
+    );
+
+    return (
+        <div className="p-4 space-y-6 text-gray-800 font-sans pb-20">
+            <EditProfileModal user={user} isOpen={showEditProfile} onClose={() => setShowEditProfile(false)} onSave={onUpdateUser} />
+            <EditCarModal car={user.car} isOpen={showEditCar} onClose={() => setShowEditCar(false)} onSave={onUpdateCar} />
+            <SettingsModal title={settingsModalTitle} isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} />
+
+            {/* --- Profile Header --- */}
+            <div className="flex flex-col items-center space-y-3">
+                <div className="relative">
+                    <Avatar src={user.profilePicture} size="w-24 h-24" initials="JD" bgColor="bg-gray-700" />
+                    <button onClick={() => setShowEditProfile(true)} className="absolute bottom-0 right-0 bg-white p-1.5 rounded-full shadow-md hover:bg-neutral-100 transition-colors">
+                        <Edit2 className="h-4 w-4 text-gray-800" />
+                    </button>
+                </div>
+                <h2 className="text-2xl font-bold">{user.fullName}</h2>
+                <div className="flex items-center space-x-4 text-sm text-neutral-600">
+                    <div className="flex items-center">
+                        <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                        <span className="font-semibold">{user.rating}</span> ({user.reviews} reviews)
+                    </div>
+                    <span>|</span>
+                    <span>{user.completedRides} rides</span>
+                </div>
+            </div>
+
+            {/* --- Basic Info Card --- */}
+            <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200">
+                <InfoItem icon={User} label="Username" value={`@${user.username}`} />
+                <InfoItem icon={Users} label="Gender" value={user.gender} />
+                <InfoItem icon={Calendar} label="Member Since" value={user.memberSince} />
+            </div>
+
+            {/* --- Contact & Verification Card --- */}
+            <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200">
+                <h3 className="text-sm font-semibold mb-2 text-neutral-800">Contact & Verification</h3>
+                <InfoItem icon={Phone} label="Phone Number" value={user.phone} />
+                <InfoItem icon={Mail} label="Email" value={user.email} />
+                <div className="flex items-center justify-between py-3">
+                    <div className="flex items-center">
+                        <ShieldCheck className="h-5 w-5 text-neutral-500 mr-3" />
+                        <span className="text-sm text-neutral-600">ID Verification</span>
+                    </div>
+                    <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${user.idVerified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {user.idVerified ? "Verified" : "Not Verified"}
+                    </span>
+                </div>
+            </div>
+            
+            {/* --- Driver Details Card --- */}
+            <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200">
+                <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-sm font-semibold text-neutral-800">Driver Details</h3>
+                    <button onClick={() => setShowEditCar(true)} className="p-1.5 rounded-full hover:bg-neutral-100 transition-colors">
+                        <Edit2 className="h-4 w-4 text-gray-800" />
+                    </button>
+                </div>
+                <InfoItem icon={Car} label="Vehicle" value={`${user.car.brand} ${user.car.model} (${user.car.year})`} />
+                <InfoItem icon={FileText} label="License Plate" value={user.car.plate} />
+                 <div className="flex items-center justify-between py-3">
+                    <div className="flex items-center">
+                        <ShieldCheck className="h-5 w-5 text-neutral-500 mr-3" />
+                        <span className="text-sm text-neutral-600">Driving License</span>
+                    </div>
+                    <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${user.licenseVerified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {user.licenseVerified ? "Verified" : "Not Verified"}
+                    </span>
+                </div>
+            </div>
+
+            {/* --- Activity & History --- */}
+            <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
+                 <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">Activity</h3>
+                 <SettingsItem icon={History} label="Ride History" action={() => handleOpenSettings("Ride History")} />
+                 <SettingsItem icon={Calendar} label="Upcoming Rides" action={() => handleOpenSettings("Upcoming Rides")} />
+            </div>
+
+
+            {/* --- Settings & Preferences --- */}
+            <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
+                <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">Settings</h3>
+                <SettingsItem icon={Languages} label="Language" action={() => handleOpenSettings("Language")} />
+                <SettingsItem icon={Bell} label="Notification Preferences" action={() => handleOpenSettings("Notifications")} />
+                <SettingsItem icon={CreditCard} label="Payment Methods" action={() => handleOpenSettings("Payment Methods")} />
+                <SettingsItem icon={Shield} label="Privacy Settings" action={() => handleOpenSettings("Privacy")} />
+            </div>
+
+            {/* --- Security --- */}
+            <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
+                <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">Security</h3>
+                <SettingsItem icon={Lock} label="Change Password" action={() => handleOpenSettings("Change Password")} />
+                <SettingsItem icon={LogOut} label="Logout" action={() => handleOpenSettings("Logout")} />
+            </div>
+        </div>
+    );
+};
+
+
+const App = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [headerTitle, setHeaderTitle] = useState("Ride");
   const [showPostRide, setShowPostRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [myRides, setMyRides] = useState([]); // State to hold posted rides
+  const [userData, setUserData] = useState({
+        profilePicture: "https://placehold.co/100x100/E1F87E/121212?text=JD",
+        fullName: "John Doe",
+        username: "johndoe99",
+        gender: "Male",
+        dob: "1990-05-15",
+        phone: "+998 90 123 45 67",
+        email: "john.doe@example.com",
+        idVerified: true,
+        rating: 4.9,
+        reviews: 124,
+        memberSince: "2022-01-20",
+        completedRides: 215,
+        car: {
+            brand: "Chevrolet",
+            model: "Cobalt",
+            year: 2023,
+            color: "White",
+            plate: "01 A 123 BC"
+        },
+        licenseVerified: true,
+        preferences: {
+            smoking: "No",
+            music: "Pop, Rock"
+        },
+        language: "English",
+    });
+
+  const handleUpdateUser = (updatedData) => {
+    setUserData(prev => ({...prev, ...updatedData}));
+  };
+
+  const handleUpdateCar = (updatedCarData) => {
+    setUserData(prev => ({...prev, car: updatedCarData}));
+  };
 
   // Function to add a new ride to the state
   const handleAddRide = (newRide) => {
@@ -666,7 +958,7 @@ const DriverDashboard = () => {
             )}
         </div>
       );
-      case "profile": return ( <div className="p-4 text-gray-800 font-sans"> <h2 className="text-xl font-bold">Advanced Profile Content</h2> <p className="text-neutral-600 mt-2">Manage your account details here.</p> </div> );
+      case "profile": return ( <ProfilePage user={userData} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} /> );
       default: return null;
     }
   };
@@ -712,4 +1004,4 @@ const DriverDashboard = () => {
 };
 
 
-export default DriverDashboard;
+export default App;
