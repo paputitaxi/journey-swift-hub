@@ -1,5 +1,5 @@
 // Driver Dashboard - With Custom Scrollbar Styling
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, createContext, useContext } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   Plus,
@@ -45,6 +45,83 @@ import {
   FileText,
 } from "lucide-react";
 
+// --- i18n Translations ---
+const translations = {
+  en: {
+    ride: "Ride", newRide: "New Ride", myLines: "My Lines", profile: "Profile",
+    totalEarnings: "Total Earnings", stats: "Stats", safety: "Safety", yourActivity: "Your Activity",
+    noLines: "No Lines Posted Yet", postRidePrompt: "Post a new ride to see it here.", active: "Active",
+    postNewRide: "Post a New Ride", fromWhere: "From where", toWhere: "To where", departureDate: "Departure date",
+    mailService: "Mail Service", yesCarryMail: "Yes, I do carry Mail", mailDescYes: "I can transport both passengers and mail packages",
+    noCarryMail: "No, I do not carry Mail", mailDescNo: "I only transport passengers, no mail service",
+    freeSeats: "Free Seats", departureType: "Departure Type", fixedDeparture: "Fixed Departure Time",
+    fixedDepartureDesc: "Leave at a specific time regardless of seat availability",
+    whenFills: "Leave When Seats Fill", whenFillsDesc: "Depart as soon as all available seats are booked",
+    price: "Price", enterPrice: "Enter price", postRide: "Post Ride", submitted: "Submitted!",
+    selectOrigin: "Select Origin", selectDestination: "Select Destination", searchCity: "Search for a city or region...",
+    noLocations: "No regions or cities found.", selectDepDate: "Select Departure Date",
+    reviews: "reviews", rides: "rides", username: "Username", gender: "Gender", memberSince: "Member Since",
+    contactVerification: "Contact & Verification", phone: "Phone Number", email: "Email", idVerification: "ID Verification",
+    verified: "Verified", notVerified: "Not Verified", driverDetails: "Driver Details", vehicle: "Vehicle",
+    licensePlate: "License Plate", drivingLicense: "Driving License", activity: "Activity", rideHistory: "Ride History",
+    upcomingRides: "Upcoming Rides", settings: "Settings", language: "Language", notifications: "Notification Preferences",
+    paymentMethods: "Payment Methods", privacy: "Privacy Settings", security: "Security", changePassword: "Change Password",
+    logout: "Logout", editProfile: "Edit Profile", fullName: "Full Name", saveChanges: "Save Changes",
+    editVehicle: "Edit Vehicle Details", uzbek: "Uzbek", english: "English", russian: "Russian",
+    pastRides: "Past Rides", noCompletedRides: "No completed rides.", noUpcomingRides: "No upcoming rides.",
+  },
+  uz: {
+    ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil",
+    totalEarnings: "Jami daromad", stats: "Statistika", safety: "Xavfsizlik", yourActivity: "Sizning faoliyatingiz",
+    noLines: "Hali e'lonlar joylanmagan", postRidePrompt: "Bu yerda ko'rish uchun yangi e'lon joylashtiring.", active: "Faol",
+    postNewRide: "Yangi e'lon joylash", fromWhere: "Qayerdan", toWhere: "Qayerga", departureDate: "Jo'nash sanasi",
+    mailService: "Pochta xizmati", yesCarryMail: "Ha, pochta olaman", mailDescYes: "Yo'lovchilar va pochta jo'natmalarini tashiyman",
+    noCarryMail: "Yo'q, pochta olmayman", mailDescNo: "Faqat yo'lovchilarni tashiyman, pochta xizmati yo'q",
+    freeSeats: "Bo'sh o'rindiqlar", departureType: "Jo'nash turi", fixedDeparture: "Belgilangan vaqtda jo'nash",
+    fixedDepartureDesc: "O'rindiqlar to'lishidan qat'i nazar, belgilangan vaqtda jo'nab ketish",
+    whenFills: "O'rindiqlar to'lganda", whenFillsDesc: "Barcha mavjud o'rindiqlar band qilingan zahoti jo'nab ketish",
+    price: "Narx", enterPrice: "Narxni kiriting", postRide: "E'lonni joylash", submitted: "Yuborildi!",
+    selectOrigin: "Boshlanish nuqtasini tanlang", selectDestination: "Manzilni tanlang", searchCity: "Shahar yoki viloyatni qidiring...",
+    noLocations: "Viloyat yoki shahar topilmadi.", selectDepDate: "Jo'nash sanasini tanlang",
+    reviews: "sharhlar", rides: "sayohatlar", username: "Foydalanuvchi nomi", gender: "Jins", memberSince: "Ro'yxatdan o'tgan sana",
+    contactVerification: "Aloqa va tekshiruv", phone: "Telefon raqami", email: "Elektron pochta", idVerification: "Shaxsni tasdiqlash",
+    verified: "Tasdiqlangan", notVerified: "Tasdiqlanmagan", driverDetails: "Haydovchi ma'lumotlari", vehicle: "Avtomobil",
+    licensePlate: "Davlat raqami", drivingLicense: "Haydovchilik guvohnomasi", activity: "Faoliyat", rideHistory: "Sayohatlar tarixi",
+    upcomingRides: "Kutilayotgan sayohatlar", settings: "Sozlamalar", language: "Til", notifications: "Bildirishnomalar",
+    paymentMethods: "To'lov usullari", privacy: "Maxfiylik", security: "Xavfsizlik", changePassword: "Parolni o'zgartirish",
+    logout: "Chiqish", editProfile: "Profilni tahrirlash", fullName: "To'liq ism", saveChanges: "O'zgarishlarni saqlash",
+    editVehicle: "Avtomobil ma'lumotlarini tahrirlash", uzbek: "O'zbekcha", english: "Inglizcha", russian: "Ruscha",
+    pastRides: "O'tgan Sayohatlar", noCompletedRides: "Tugallangan sayohatlar yo'q.", noUpcomingRides: "Kutilayotgan sayohatlar yo'q.",
+  },
+  ru: {
+    ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль",
+    totalEarnings: "Общий заработок", stats: "Статистика", safety: "Безопасность", yourActivity: "Ваша активность",
+    noLines: "Поездки еще не опубликованы", postRidePrompt: "Опубликуйте новую поездку, чтобы увидеть ее здесь.", active: "Активна",
+    postNewRide: "Опубликовать новую поездку", fromWhere: "Откуда", toWhere: "Куда", departureDate: "Дата отправления",
+    mailService: "Почтовая служба", yesCarryMail: "Да, перевожу посылки", mailDescYes: "Могу перевозить как пассажиров, так и посылки",
+    noCarryMail: "Нет, не перевожу посылки", mailDescNo: "Перевожу только пассажиров, без почтовых услуг",
+    freeSeats: "Свободные места", departureType: "Тип отправления", fixedDeparture: "Фиксированное время отправления",
+    fixedDepartureDesc: "Отправление в указанное время независимо от наличия пассажиров",
+    whenFills: "Когда места заполнятся", whenFillsDesc: "Отправление, как только все доступные места будут забронированы",
+    price: "Цена", enterPrice: "Введите цену", postRide: "Опубликовать", submitted: "Отправлено!",
+    selectOrigin: "Выберите место отправления", selectDestination: "Выберите пункт назначения", searchCity: "Поиск города или региона...",
+    noLocations: "Регионы или города не найдены.", selectDepDate: "Выберите дату отправления",
+    reviews: "отзывов", rides: "поездок", username: "Имя пользователя", gender: "Пол", memberSince: "На сайте с",
+    contactVerification: "Контакт и верификация", phone: "Номер телефона", email: "Электронная почта", idVerification: "Подтверждение личности",
+    verified: "Подтверждено", notVerified: "Не подтверждено", driverDetails: "Данные водителя", vehicle: "Автомобиль",
+    licensePlate: "Гос. номер", drivingLicense: "Водительское удостоверение", activity: "Активность", rideHistory: "История поездок",
+    upcomingRides: "Предстоящие поездки", settings: "Настройки", language: "Язык", notifications: "Настройки уведомлений",
+    paymentMethods: "Способы оплаты", privacy: "Конфиденциальность", security: "Безопасность", changePassword: "Изменить пароль",
+    logout: "Выйти", editProfile: "Редактировать профиль", fullName: "Полное имя", saveChanges: "Сохранить изменения",
+    editVehicle: "Редактировать данные автомобиля", uzbek: "Узбекский", english: "Английский", russian: "Русский",
+    pastRides: "Прошлые поездки", noCompletedRides: "Завершенных поездок нет.", noUpcomingRides: "Предстоящих поездок нет.",
+  },
+};
+
+// --- Language Context ---
+const LanguageContext = createContext();
+const useLanguage = () => useContext(LanguageContext);
+
 // --- Custom Scrollbar Styles Component ---
 const CustomScrollbarStyles = () => (
   <style>{`
@@ -69,6 +146,7 @@ const Avatar = ({ initials, bgColor, size = 'w-10 h-10', src }) => (
 
 // Message Dashboard component with Telegram-like UX
 const MessageDashboard = ({ onClose }) => {
+  const { t } = useLanguage();
   const [activeMessageTab, setActiveMessageTab] = useState("chats");
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -85,10 +163,10 @@ const MessageDashboard = ({ onClose }) => {
   });
 
   const messageNavItems = [
-    { id: "chats", label: "Chats", icon: MessageCircle },
-    { id: "groups", label: "Groups", icon: Users },
-    { id: "channels", label: "Channels", icon: Hash },
-    { id: "market", label: "Market", icon: Store },
+    { id: "chats", label: t('chats'), icon: MessageCircle },
+    { id: "groups", label: t('groups'), icon: Users },
+    { id: "channels", label: t('channels'), icon: Hash },
+    { id: "market", label: t('market'), icon: Store },
   ];
 
   const chatItems = {
@@ -156,7 +234,7 @@ const MessageDashboard = ({ onClose }) => {
           ))}
         </div>
       ) : (
-        <p className="text-neutral-500 text-center mt-10">No messages found.</p>
+        <p className="text-neutral-500 text-center mt-10">{t('noMessages')}</p>
       )}
     </div>
   );
@@ -179,7 +257,7 @@ const MessageDashboard = ({ onClose }) => {
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="Type a message"
+            placeholder={t('typeMessage')}
             className="flex-1 p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]"
           />
           <button type="submit" className="p-2 rounded-lg bg-[#E1F87E] text-[#121212] hover:bg-opacity-80">
@@ -207,7 +285,7 @@ const MessageDashboard = ({ onClose }) => {
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500" />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder={`${t('search')}...`}
                 className="w-full bg-neutral-100 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] text-gray-800"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -215,7 +293,7 @@ const MessageDashboard = ({ onClose }) => {
               />
             </div>
             <button onClick={() => { setIsSearching(false); setSearchQuery(''); }} className="text-sm font-semibold text-gray-700 hover:text-gray-900">
-              Cancel
+              {t('cancel')}
             </button>
           </>
         ) : (
@@ -274,6 +352,7 @@ const uzbekistanLocations = [
 
 // Location Selection Modal Component
 const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleClose = () => {
@@ -302,7 +381,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
         <div className="p-4 border-b border-neutral-200">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 h-5 w-5" />
-            <input type="text" placeholder="Search for a city or region..." className="w-full pl-10 pr-4 py-2 rounded-xl bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <input type="text" placeholder={t('searchCity')} className="w-full pl-10 pr-4 py-2 rounded-xl bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </div>
         <div className="flex-grow overflow-y-auto p-4 space-y-2 custom-scrollbar">
@@ -319,7 +398,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
                 ))}
               </div>
             ))
-          ) : ( <p className="text-neutral-500 text-center mt-10">No regions or cities found.</p> )}
+          ) : ( <p className="text-neutral-500 text-center mt-10">{t('noLocations')}</p> )}
         </div>
       </div>
     </div>
@@ -329,6 +408,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
 
 // Main Post Ride Form Component
 const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
+  const { t } = useLanguage();
   const [fromLocation, setFromLocation] = useState("");
   const [toLocation, setToLocation] = useState("");
   const [departureDate, setDepartureDate] = useState("");
@@ -380,7 +460,7 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
         <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
           <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-800">Select Departure Date</h2>
+            <h2 className="text-lg font-semibold text-gray-800">{t('selectDepDate')}</h2>
             <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> <X className="h-6 w-6" /> </button>
           </div>
           <div className="p-4 flex-grow overflow-y-auto custom-scrollbar">
@@ -415,45 +495,45 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 p-4 font-sans">
       <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[90vh] flex flex-col">
         <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-800">Post a New Ride</h2>
+          <h2 className="text-lg font-semibold text-gray-800">{t('postNewRide')}</h2>
           <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> <X className="h-6 w-6" /> </button>
         </div>
         <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-4 space-y-6 custom-scrollbar">
           <div>
             <div onClick={() => setShowFromModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${fromLocation ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
-              {fromLocation || "From where"}
+              {fromLocation || t('fromWhere')}
               <MapPin className="h-5 w-5 text-neutral-500" />
             </div>
-            <LocationSelectModal title="Select Origin" isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setFromLocation} />
+            <LocationSelectModal title={t('selectOrigin')} isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setFromLocation} />
           </div>
           <div>
             <div onClick={() => setShowToModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${toLocation ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
-              {toLocation || "To where"}
+              {toLocation || t('toWhere')}
               <MapPin className="h-5 w-5 text-neutral-500" />
             </div>
-            <LocationSelectModal title="Select Destination" isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setToLocation} />
+            <LocationSelectModal title={t('selectDestination')} isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setToLocation} />
           </div>
           <div>
             <div onClick={() => setShowDateModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${departureDate ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
-              {departureDate || "Departure date"}
+              {departureDate || t('departureDate')}
               <Calendar className="h-5 w-5 text-neutral-500" />
             </div>
             <DatePickerModal isOpen={showDateModal} onClose={() => setShowDateModal(false)} onSelectDate={setDepartureDate} />
           </div>
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Mail Service</label>
+            <label className="block text-neutral-800 text-sm font-medium mb-2">{t('mailService')}</label>
             <div className="space-y-3">
               <button type="button" onClick={() => setMailService("yes")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${mailService === "yes" ? "bg-green-600/30 border border-green-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="text-left">
-                  <p className="font-medium text-gray-800">Yes, I do carry Mail</p>
-                  <p className="text-sm text-neutral-600">I can transport both passengers and mail packages</p>
+                  <p className="font-medium text-gray-800">{t('yesCarryMail')}</p>
+                  <p className="text-sm text-neutral-600">{t('mailDescYes')}</p>
                 </div>
                 {mailService === "yes" && <CheckCircle className="h-6 w-6 text-green-400" />}
               </button>
               <button type="button" onClick={() => setMailService("no")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${mailService === "no" ? "bg-green-600/30 border border-green-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="text-left">
-                  <p className="font-medium text-gray-800">No, I do not carry Mail</p>
-                  <p className="text-sm text-neutral-600">I only transport passengers, no mail service</p>
+                  <p className="font-medium text-gray-800">{t('noCarryMail')}</p>
+                  <p className="text-sm text-neutral-600">{t('mailDescNo')}</p>
                 </div>
                 {mailService === "no" && <CheckCircle className="h-6 w-6 text-green-400" />}
               </button>
@@ -461,7 +541,7 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
           </div>
 
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Free Seats</label>
+            <label className="block text-neutral-800 text-sm font-medium mb-2">{t('freeSeats')}</label>
             <div className="flex justify-around space-x-2">
               {[1, 2, 3, 4].map((seats) => (
                 <button
@@ -481,14 +561,14 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
           </div>
 
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Departure Type</label>
+            <label className="block text-neutral-800 text-sm font-medium mb-2">{t('departureType')}</label>
             <div className="space-y-3">
               <button type="button" onClick={() => { setDepartureType("fixed"); }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${departureType === "fixed" ? "bg-teal-600/30 border border-teal-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="flex items-center">
                   <Clock className="h-6 w-6 mr-3 text-teal-400" />
                   <div className="text-left">
-                    <p className="font-medium text-gray-800">Fixed Departure Time</p>
-                    <p className="text-sm text-neutral-600">Leave at a specific time regardless of seat availability</p>
+                    <p className="font-medium text-gray-800">{t('fixedDeparture')}</p>
+                    <p className="text-sm text-neutral-600">{t('fixedDepartureDesc')}</p>
                   </div>
                 </div>
                 {departureType === "fixed" && <CheckCircle className="h-6 w-6 text-teal-400" />}
@@ -503,8 +583,8 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
                 <div className="flex items-center">
                   <Users className="h-6 w-6 mr-3 text-teal-400" />
                   <div className="text-left">
-                    <p className="font-medium text-gray-800">Leave When Seats Fill</p>
-                    <p className="text-sm text-neutral-600">Depart as soon as all available seats are booked</p>
+                    <p className="font-medium text-gray-800">{t('whenFills')}</p>
+                    <p className="text-sm text-neutral-600">{t('whenFillsDesc')}</p>
                   </div>
                 </div>
                 {departureType === "when_fills" && <CheckCircle className="h-6 w-6 text-teal-400" />}
@@ -512,14 +592,14 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
             </div>
           </div>
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Price</label>
+            <label className="block text-neutral-800 text-sm font-medium mb-2">{t('price')}</label>
             <div className="relative">
-              <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Enter price" className="w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={price} onChange={(e) => { const value = e.target.value; if (/^[0-9]*$/.test(value)) { setPrice(value); } }} />
+              <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder={t('enterPrice')} className="w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={price} onChange={(e) => { const value = e.target.value; if (/^[0-9]*$/.test(value)) { setPrice(value); } }} />
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">$</span>
             </div>
           </div>
           <button type="submit" disabled={!isFormValid || isSubmitted} className={`w-full py-3 rounded-xl text-lg font-semibold transition-colors flex items-center justify-center shadow-lg ${isFormValid && !isSubmitted ? "bg-green-500 hover:bg-green-600 text-white" : isSubmitted ? "bg-green-700 text-white cursor-not-allowed" : "bg-gray-600 text-gray-400 cursor-not-allowed"}`} >
-            {isSubmitted ? ( <> <CheckCircle className="h-6 w-6 mr-2" /> Submitted! </> ) : ( "Post Ride" )}
+            {isSubmitted ? ( <> <CheckCircle className="h-6 w-6 mr-2" /> {t('submitted')} </> ) : ( t('postRide') )}
           </button>
         </form>
       </div>
@@ -553,6 +633,7 @@ const SeatIndicator = ({ totalSeats = 4, availableSeats }) => {
 
 // --- Edit Profile Modal ---
 const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
+    const { t } = useLanguage();
     const [formData, setFormData] = useState(user);
 
     useEffect(() => {
@@ -576,20 +657,20 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
             <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
                 <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-gray-800">Edit Profile</h2>
+                    <h2 className="text-lg font-semibold text-gray-800">{t('editProfile')}</h2>
                     <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100"> <X className="h-6 w-6" /> </button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-1">Full Name</label>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">{t('fullName')}</label>
                         <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-1">Username</label>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">{t('username')}</label>
                         <input type="text" name="username" value={formData.username} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-1">Gender</label>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">{t('gender')}</label>
                         <select name="gender" value={formData.gender} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]">
                             <option>Male</option>
                             <option>Female</option>
@@ -597,7 +678,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
                         </select>
                     </div>
                     <div className="flex justify-end pt-4">
-                        <button type="submit" className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">Save Changes</button>
+                        <button type="submit" className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">{t('saveChanges')}</button>
                     </div>
                 </form>
             </div>
@@ -607,6 +688,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
 
 // --- Edit Car Modal ---
 const EditCarModal = ({ car, isOpen, onClose, onSave }) => {
+    const { t } = useLanguage();
     const [formData, setFormData] = useState(car);
 
     useEffect(() => {
@@ -630,7 +712,7 @@ const EditCarModal = ({ car, isOpen, onClose, onSave }) => {
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
             <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
                 <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-gray-800">Edit Vehicle Details</h2>
+                    <h2 className="text-lg font-semibold text-gray-800">{t('editVehicle')}</h2>
                     <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100"> <X className="h-6 w-6" /> </button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
@@ -638,9 +720,9 @@ const EditCarModal = ({ car, isOpen, onClose, onSave }) => {
                     <input type="text" name="model" placeholder="Model" value={formData.model} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
                     <input type="number" name="year" placeholder="Year" value={formData.year} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
                     <input type="text" name="color" placeholder="Color" value={formData.color} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
-                    <input type="text" name="plate" placeholder="License Plate" value={formData.plate} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    <input type="text" name="plate" placeholder={t('licensePlate')} value={formData.plate} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
                     <div className="flex justify-end pt-4">
-                        <button type="submit" className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">Save Changes</button>
+                        <button type="submit" className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">{t('saveChanges')}</button>
                     </div>
                 </form>
             </div>
@@ -653,7 +735,7 @@ const SettingsModal = ({ title, isOpen, onClose, children }) => {
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
-            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col h-[60vh]">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col h-auto max-h-[80vh]">
                 <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
                     <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
                     <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100"> <X className="h-6 w-6" /> </button>
@@ -669,6 +751,7 @@ const SettingsModal = ({ title, isOpen, onClose, children }) => {
 
 // --- Profile Page Component ---
 const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
+    const { t, language, setLanguage } = useLanguage();
     const [showEditProfile, setShowEditProfile] = useState(false);
     const [showEditCar, setShowEditCar] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -691,39 +774,67 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
         </div>
     );
 
-    const SettingsItem = ({ icon: Icon, label, action = () => {} }) => (
+    const SettingsItem = ({ icon: Icon, label, action = () => {}, value }) => (
         <button onClick={action} className="w-full flex items-center justify-between py-3 text-left hover:bg-neutral-50 rounded-lg px-2 transition-colors">
             <div className="flex items-center">
                 <Icon className="h-5 w-5 text-neutral-500 mr-3" />
                 <span className="text-sm font-medium text-gray-800">{label}</span>
             </div>
-            <ChevronRight className="h-5 w-5 text-neutral-400" />
+            <div className="flex items-center">
+                {value && <span className="text-sm text-neutral-500 mr-2">{value}</span>}
+                <ChevronRight className="h-5 w-5 text-neutral-400" />
+            </div>
         </button>
     );
 
     const RideHistoryContent = () => (
         <div>
-            <h3 className="font-semibold mb-2">Past Rides</h3>
-            {myRides.filter(r => r.status === 'completed').map(ride => (
+            <h3 className="font-semibold mb-2">{t('pastRides')}</h3>
+            {myRides.filter(r => r.status === 'completed').length > 0 ? myRides.filter(r => r.status === 'completed').map(ride => (
                 <div key={ride.id} className="mb-2 p-2 border-b">
                     <p>{ride.fromLocation} to {ride.toLocation}</p>
                     <p className="text-xs text-neutral-500">{ride.departureDate}</p>
                 </div>
-            ))}
+            )) : <p className="text-neutral-500">{t('noCompletedRides')}</p>}
         </div>
     );
     
     const UpcomingRidesContent = () => (
          <div>
-            <h3 className="font-semibold mb-2">Upcoming Rides</h3>
-            {myRides.filter(r => r.status === 'upcoming').map(ride => (
+            <h3 className="font-semibold mb-2">{t('upcomingRides')}</h3>
+            {myRides.filter(r => r.status === 'upcoming').length > 0 ? myRides.filter(r => r.status === 'upcoming').map(ride => (
                 <div key={ride.id} className="mb-2 p-2 border-b">
                     <p>{ride.fromLocation} to {ride.toLocation}</p>
                     <p className="text-xs text-neutral-500">{ride.departureDate}</p>
                 </div>
-            ))}
+            )) : <p className="text-neutral-500">{t('noUpcomingRides')}</p>}
         </div>
     );
+
+    const LanguageSelectionContent = ({ currentLanguage, onSelectLanguage }) => {
+        const languages = [
+            { key: "uz", name: t('uzbek')}, 
+            { key: "en", name: t('english')}, 
+            { key: "ru", name: t('russian')}
+        ];
+        return (
+            <div className="space-y-2">
+                {languages.map(lang => (
+                    <button
+                        key={lang.key}
+                        onClick={() => {
+                            onSelectLanguage(lang.key);
+                            setShowSettingsModal(false);
+                        }}
+                        className={`w-full p-3 rounded-lg text-left transition-colors flex justify-between items-center ${currentLanguage === lang.key ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-neutral-100'}`}
+                    >
+                        {lang.name}
+                        {currentLanguage === lang.key && <CheckCircle className="h-5 w-5" />}
+                    </button>
+                ))}
+            </div>
+        );
+    };
 
     return (
         <div className="p-4 space-y-6 text-gray-800 font-sans pb-20">
@@ -745,32 +856,32 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
                 <div className="flex items-center space-x-4 text-sm text-neutral-600">
                     <div className="flex items-center">
                         <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                        <span className="font-semibold">{user.rating}</span> ({user.reviews} reviews)
+                        <span className="font-semibold">{user.rating}</span> ({user.reviews} {t('reviews')})
                     </div>
                     <span>|</span>
-                    <span>{user.completedRides} rides</span>
+                    <span>{user.completedRides} {t('rides')}</span>
                 </div>
             </div>
 
             {/* --- Basic Info Card --- */}
             <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200">
-                <InfoItem icon={User} label="Username" value={`@${user.username}`} />
-                <InfoItem icon={Users} label="Gender" value={user.gender} />
-                <InfoItem icon={Calendar} label="Member Since" value={user.memberSince} />
+                <InfoItem icon={User} label={t('username')} value={`@${user.username}`} />
+                <InfoItem icon={Users} label={t('gender')} value={user.gender} />
+                <InfoItem icon={Calendar} label={t('memberSince')} value={user.memberSince} />
             </div>
 
             {/* --- Contact & Verification Card --- */}
             <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200">
-                <h3 className="text-sm font-semibold mb-2 text-neutral-800">Contact & Verification</h3>
-                <InfoItem icon={Phone} label="Phone Number" value={user.phone} />
-                <InfoItem icon={Mail} label="Email" value={user.email} />
+                <h3 className="text-sm font-semibold mb-2 text-neutral-800">{t('contactVerification')}</h3>
+                <InfoItem icon={Phone} label={t('phone')} value={user.phone} />
+                <InfoItem icon={Mail} label={t('email')} value={user.email} />
                 <div className="flex items-center justify-between py-3">
                     <div className="flex items-center">
                         <ShieldCheck className="h-5 w-5 text-neutral-500 mr-3" />
-                        <span className="text-sm text-neutral-600">ID Verification</span>
+                        <span className="text-sm text-neutral-600">{t('idVerification')}</span>
                     </div>
                     <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${user.idVerified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {user.idVerified ? "Verified" : "Not Verified"}
+                        {user.idVerified ? t('verified') : t('notVerified')}
                     </span>
                 </div>
             </div>
@@ -778,55 +889,76 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
             {/* --- Driver Details Card --- */}
             <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200">
                 <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-sm font-semibold text-neutral-800">Driver Details</h3>
+                    <h3 className="text-sm font-semibold text-neutral-800">{t('driverDetails')}</h3>
                     <button onClick={() => setShowEditCar(true)} className="p-1.5 rounded-full hover:bg-neutral-100 transition-colors">
                         <Edit2 className="h-4 w-4 text-gray-800" />
                     </button>
                 </div>
-                <InfoItem icon={Car} label="Vehicle" value={`${user.car.brand} ${user.car.model} (${user.car.year})`} />
-                <InfoItem icon={FileText} label="License Plate" value={user.car.plate} />
+                <InfoItem icon={Car} label={t('vehicle')} value={`${user.car.brand} ${user.car.model} (${user.car.year})`} />
+                <InfoItem icon={FileText} label={t('licensePlate')} value={user.car.plate} />
                  <div className="flex items-center justify-between py-3">
                     <div className="flex items-center">
                         <ShieldCheck className="h-5 w-5 text-neutral-500 mr-3" />
-                        <span className="text-sm text-neutral-600">Driving License</span>
+                        <span className="text-sm text-neutral-600">{t('drivingLicense')}</span>
                     </div>
                     <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${user.licenseVerified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {user.licenseVerified ? "Verified" : "Not Verified"}
+                        {user.licenseVerified ? t('verified') : t('notVerified')}
                     </span>
                 </div>
             </div>
 
             {/* --- Activity & History --- */}
             <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
-                 <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">Activity</h3>
-                 <SettingsItem icon={History} label="Ride History" action={() => handleOpenSettings("Ride History", <RideHistoryContent />)} />
-                 <SettingsItem icon={Calendar} label="Upcoming Rides" action={() => handleOpenSettings("Upcoming Rides", <UpcomingRidesContent />)} />
+                 <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('activity')}</h3>
+                 <SettingsItem icon={History} label={t('rideHistory')} action={() => handleOpenSettings(t('rideHistory'), <RideHistoryContent />)} />
+                 <SettingsItem icon={Calendar} label={t('upcomingRides')} action={() => handleOpenSettings(t('upcomingRides'), <UpcomingRidesContent />)} />
             </div>
 
 
             {/* --- Settings & Preferences --- */}
             <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
-                <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">Settings</h3>
-                <SettingsItem icon={Languages} label="Language" action={() => handleOpenSettings("Language")} />
-                <SettingsItem icon={Bell} label="Notification Preferences" action={() => handleOpenSettings("Notifications")} />
-                <SettingsItem icon={CreditCard} label="Payment Methods" action={() => handleOpenSettings("Payment Methods")} />
-                <SettingsItem icon={Shield} label="Privacy Settings" action={() => handleOpenSettings("Privacy")} />
+                <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('settings')}</h3>
+                <SettingsItem 
+                    icon={Languages} 
+                    label={t('language')} 
+                    value={t(language)}
+                    action={() => handleOpenSettings(t('language'), <LanguageSelectionContent currentLanguage={language} onSelectLanguage={setLanguage} />)} 
+                />
+                <SettingsItem icon={Bell} label={t('notifications')} action={() => handleOpenSettings(t('notifications'))} />
+                <SettingsItem icon={CreditCard} label={t('paymentMethods')} action={() => handleOpenSettings(t('paymentMethods'))} />
+                <SettingsItem icon={Shield} label={t('privacy')} action={() => handleOpenSettings(t('privacy'))} />
             </div>
 
             {/* --- Security --- */}
             <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
-                <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">Security</h3>
-                <SettingsItem icon={Lock} label="Change Password" action={() => handleOpenSettings("Change Password")} />
-                <SettingsItem icon={LogOut} label="Logout" action={() => handleOpenSettings("Logout")} />
+                <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('security')}</h3>
+                <SettingsItem icon={Lock} label={t('changePassword')} action={() => handleOpenSettings(t('changePassword'))} />
+                <SettingsItem icon={LogOut} label={t('logout')} action={() => handleOpenSettings(t('logout'))} />
             </div>
         </div>
     );
 };
 
+const LanguageProvider = ({ children }) => {
+    const [language, setLanguage] = useState("en"); // 'en', 'uz', 'ru'
 
-const App = () => {
+    const t = (key) => {
+        return translations[language][key] || key;
+    };
+
+    const value = { language, setLanguage, t };
+
+    return (
+        <LanguageContext.Provider value={value}>
+            {children}
+        </LanguageContext.Provider>
+    );
+};
+
+const AppContent = () => {
+  const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [headerTitle, setHeaderTitle] = useState("Ride");
+  const [headerTitle, setHeaderTitle] = useState(t('ride'));
   const [showPostRide, setShowPostRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [myRides, setMyRides] = useState([
@@ -858,7 +990,6 @@ const App = () => {
             smoking: "No",
             music: "Pop, Rock"
         },
-        language: "English",
     });
 
   const handleUpdateUser = (updatedData) => {
@@ -877,75 +1008,67 @@ const App = () => {
   const handleBack = () => {
     if (showPostRide) {
       setShowPostRide(false);
-      setHeaderTitle("Ride");
+      setHeaderTitle(t('ride'));
     } else if (showMessages) {
       setShowMessages(false);
-      setHeaderTitle("Ride");
+      setHeaderTitle(t('ride'));
     } else {
-      setHeaderTitle("Ride");
+      setHeaderTitle(t('ride'));
       setActiveTab("dashboard");
     }
   };
 
   useEffect(() => {
     switch (activeTab) {
-      case "dashboard":
-        setHeaderTitle("Ride");
-        break;
-      case "my-lines":
-        setHeaderTitle("My lines");
-        break;
-      case "profile":
-        setHeaderTitle("Profile");
-        break;
-      default:
-        setHeaderTitle("Driver");
+      case "dashboard": setHeaderTitle(t('ride')); break;
+      case "my-lines": setHeaderTitle(t('myLines')); break;
+      case "profile": setHeaderTitle(t('profile')); break;
+      default: setHeaderTitle("Driver");
     }
-  }, [activeTab]);
+  }, [activeTab, language]);
 
   const bottomNavItems = [
-    { id: "dashboard", label: "Ride", icon: MapPin },
-    { id: "my-lines", label: "My lines", icon: Navigation },
-    { id: "profile", label: "Profile", icon: User },
+    { id: "dashboard", label: t('ride'), icon: MapPin },
+    { id: "my-lines", label: t('myLines'), icon: Navigation },
+    { id: "profile", label: t('profile'), icon: User },
   ];
 
   const renderContent = () => {
-    if (showMessages) { return <MessageDashboard onClose={() => { setShowMessages(false); setHeaderTitle("Ride"); }} />; }
-    if (showPostRide) { return <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle("Ride"); }} onPostSuccess={() => setHeaderTitle("Ride")} onAddRide={handleAddRide} />; }
+    if (showMessages) { return <MessageDashboard onClose={() => { setShowMessages(false); setHeaderTitle(t('ride')); }} />; }
+    if (showPostRide) { return <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle(t('ride')); }} onPostSuccess={() => setHeaderTitle(t('ride'))} onAddRide={handleAddRide} />; }
 
     switch (activeTab) {
       case "dashboard": return (
           <div className="p-4 space-y-4 text-gray-800 font-sans">
             <div className="text-center py-4">
-              <h2 className="text-sm text-neutral-600">Total Earnings</h2>
+              <h2 className="text-sm text-neutral-600">{t('totalEarnings')}</h2>
               <p className="text-5xl font-extrabold mt-1 mb-4 text-gray-800">$0.00</p>
               <div className="flex justify-around items-center">
-                <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle("New Ride"); }} >
+                <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle(t('newRide')); }} >
                   <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
                     <Plus className="h-7 w-7 text-gray-800" />
                   </div>
-                  <span className="text-xs text-neutral-600">New Ride</span>
+                  <span className="text-xs text-neutral-600">{t('newRide')}</span>
                 </div>
                 <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105">
                   <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
                     <BarChart className="h-7 w-7 text-[#E1F87E]" />
                   </div>
-                  <span className="text-xs text-neutral-600">Stats</span>
+                  <span className="text-xs text-neutral-600">{t('stats')}</span>
                 </div>
                 <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105">
                   <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
                     <Shield className="h-7 w-7 text-[#E1F87E]" />
                   </div>
-                  <span className="text-xs text-neutral-600">Safety</span>
+                  <span className="text-xs text-neutral-600">{t('safety')}</span>
                 </div>
               </div>
             </div>
             <h3 className="flex items-center text-sm font-semibold mb-2 text-neutral-800">
               <Calendar className="h-4 w-4 mr-2 text-neutral-700" />
-              Your activity
+              {t('yourActivity')}
             </h3>
             <div className="p-4 bg-white border border-neutral-200 rounded-2xl space-y-3 shadow-lg">
-              {/* This is now a static example, dynamic rides are in "My Lines" */}
               <div className="flex justify-between items-center text-sm">
                 <div className="flex flex-col">
                   <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> Example Origin </div>
@@ -954,7 +1077,7 @@ const App = () => {
                   <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> 31.07.2025 <Clock className="h-4 w-4 mx-2" /> 16:15 </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full"> Active </span>
+                  <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full"> {t('active')} </span>
                   <button className="p-1 rounded-full hover:bg-neutral-100 transition-colors"> <Plus className="h-5 w-5 mt-2 text-neutral-500 rotate-45" /> </button>
                 </div>
               </div>
@@ -963,8 +1086,8 @@ const App = () => {
         );
       case "my-lines": return (
         <div className="p-4 text-gray-800 font-sans space-y-4">
-            {myRides.length > 0 ? (
-                myRides.map(ride => (
+            {myRides.filter(r => r.status === 'upcoming').length > 0 ? (
+                myRides.filter(r => r.status === 'upcoming').map(ride => (
                     <div key={ride.id} className="p-4 bg-white border border-neutral-200 rounded-2xl shadow-lg">
                         <div className="flex justify-between items-center text-sm">
                              <div className="flex flex-col space-y-1">
@@ -977,20 +1100,20 @@ const App = () => {
 
                             <div className="flex flex-col items-end space-y-2">
                                 <span className="text-xl font-bold text-gray-800">${ride.price}</span>
-                                <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full"> Active </span>
+                                <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full">{t('active')}</span>
                             </div>
                         </div>
                     </div>
                 ))
             ) : (
                 <div className="text-center py-10">
-                    <h2 className="text-xl font-bold">No Lines Posted Yet</h2>
-                    <p className="text-neutral-600 mt-2">Post a new ride to see it here.</p>
+                    <h2 className="text-xl font-bold">{t('noLines')}</h2>
+                    <p className="text-neutral-600 mt-2">{t('postRidePrompt')}</p>
                 </div>
             )}
         </div>
       );
-      case "profile": return ( <ProfilePage user={userData} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} myRides={myRides} /> );
+      case "profile": return ( <ProfilePage user={{...userData, language}} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} myRides={myRides} /> );
       default: return null;
     }
   };
@@ -1035,5 +1158,10 @@ const App = () => {
   );
 };
 
+const App = () => (
+    <LanguageProvider>
+        <AppContent />
+    </LanguageProvider>
+);
 
 export default App;
