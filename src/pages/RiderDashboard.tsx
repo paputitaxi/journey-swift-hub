@@ -1,47 +1,46 @@
  import React, { useState, useRef, useEffect } from 'react';
-import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info } from 'lucide-react';
+import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info, Car, MessageCircle, Send } from 'lucide-react';
 
-// Define Uzbekistan locations as a flat list of capital and regions
-const uzbekistanLocations = [
-  "Your location", // Mimicking the screenshot
-  "Tashkent", // Capital
-  "Tashkent Region",
-  "Fergana Region",
-  "Andijan Region",
-  "Namangan Region",
-  "Samarkand Region",
-  "Bukhara Region",
-  "Kashkadarya Region",
-  "Surkhandarya Region",
-  "Sirdaryo Region",
-  "Jizzakh Region",
-  "Navoiy Region",
-  "Khorezm Region",
-  "Republic of Karakalpakstan",
+// Expanded Data for Uzbekistan Regions and Cities - ALL 14 REGIONS INCLUDED
+const uzbekistanLocationsData = [
+  { region: "Andijan Region", cities: ["Andijan", "Asaka", "Baliqchi", "Bo'ston", "Buloqboshi", "Izboskan", "Jalaquduq", "Marhamat", "Oltinko'l", "Paxtaobod", "Qo'rg'ontepa", "Shahrixon", "Ulug'nor", "Xo'jaobod"] },
+  { region: "Bukhara Region", cities: ["Bukhara", "Galaosiyo", "G'ijduvon", "Jondor", "Kogon", "Olot", "Peshku", "Qorako'l", "Qorovulbozor", "Romitan", "Shofirkon", "Vobkent"] },
+  { region: "Fergana Region", cities: ["Fergana", "Margilan", "Kokand", "Quvasoy", "Quva", "Rishton", "Oltiariq", "Bag'dod", "Beshariq", "Buvayda", "Dang'ara", "Furqat", "Qo'shtepa", "Toshloq", "Uchko'prik", "Yozyovon", "So'x"] },
+  { region: "Jizzakh Region", cities: ["Jizzakh", "G'allaorol", "Sharof Rashidov", "Zomin", "Paxtakor", "Do'stlik", "Forish", "Mirzacho'l", "Yangiobod", "Arnasoy", "Baxmal", "Zarbdor"] },
+  { region: "Kashkadarya Region", cities: ["Karshi", "Shahrisabz", "Kitob", "G'uzor", "Nishon", "Kasbi", "Chiroqchi", "Dehqonobod", "Mirishkor", "Muborak", "Qarshi", "Yakkabog'", "Koson", "Qamashi"] },
+  { region: "Khorezm Region", cities: ["Urgench", "Khiva", "Shovot", "Hazorasp", "Bog'ot", "Yangiariq", "Yangibozor", "Urganch", "Tuproqqal'a", "Xonqa", "Qo'shko'pir"] },
+  { region: "Namangan Region", cities: ["Namangan", "Chust", "Pop", "Kosonsoy", "Mingbuloq", "Norin", "To'raqo'rg'on", "Uchqo'rg'on", "Yangiqo'rg'on", "Chortoq"] },
+  { region: "Navoiy Region", cities: ["Navoiy", "Zarafshan", "Uchquduq", "Konimex", "Nurota", "Tomdi", "Xatirchi", "Qiziltepa", "Karmana"] },
+  { region: "Samarkand Region", cities: ["Samarkand", "Urgut", "Jomboy", "Ishtixon", "Kattaqo'rg'on", "Nurobod", "Oqdaryo", "Paxtachi", "Pastdarg'om", "Tayloq", "Toyloq", "Bulung'ur", "Qo'shrabot"] },
+  { region: "Sirdaryo Region", cities: ["Guliston", "Yangiyer", "Shirin", "Mirzaobod", "Oqoltin", "Sayxunobod", "Sardoba", "Sirdaryo", "Xovos", "Boyovut"] },
+  { region: "Surkhandarya Region", cities: ["Termez", "Denov", "Boysun", "Sherobod", "Sho'rchi", "Qumqo'rg'on", "Muzrabot", "Angor", "Bandixon", "Jarqo'rg'on", "Oltinsoy", "Sariosiyo", "Uzun"] },
+  { region: "Tashkent Region", cities: ["Angren", "Chirchiq", "Olmaliq", "Bekabad", "Yangiyo'l", "Gazalkent", "Bo'ka", "Chinoz", "Oqqo'rg'on", "Parkent", "Piskent", "Qibray", "Quyichirchiq", "Yangiyo'l", "Yuqorichirchiq", "Zangiota"] },
+  { region: "Tashkent City", cities: ["Tashkent", "Bektemir", "Chilonzor", "Mirobod", "Mirzo Ulugbek", "Sergeli", "Shaykhontohur", "Uchtepa", "Yakkasaroy", "Yashnobod", "Yunusobod"] },
+  { region: "Republic of Karakalpakstan", cities: ["Nukus", "Beruniy", "Chimboy", "Ellikqala", "Kegeyli", "Qo'ng'irot", "Qorao'zak", "Shumanay", "Taxtako'pir", "To'rtko'l", "Xo'jayli", "Amudaryo", "Bo'zatov", "Qanliko'l", "Taxiatosh"] },
 ];
 
 // Helper to format date for display (e.g., "Sat Apr 23")
-const formatDate = (dateString: string) => {
+const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+  const options = { weekday: 'short', month: 'short', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
 };
 
 // Helper to format time for display (e.g., "11:45")
-const formatTime = (dateString: string) => {
+const formatTime = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
+  const options = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
   return date.toLocaleTimeString('en-US', options);
 };
 
 // Helper to calculate a dummy drop-off date (e.g., next day)
-const getDropOffDate = (pickupDateString: string) => {
+const getDropOffDate = (pickupDateString) => {
   if (!pickupDateString) return '';
   const pickupDate = new Date(pickupDateString);
   pickupDate.setDate(pickupDate.getDate() + 1); // Add one day
-  const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+  const options = { weekday: 'short', month: 'short', day: 'numeric' };
   return pickupDate.toLocaleDateString('en-US', options);
 };
 
@@ -204,7 +203,7 @@ const TipBar = ({ icon, text, onClose }) => {
 
 const CheapestIcon = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="#005f73" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
 );
 
@@ -225,7 +224,7 @@ const CalendarView = ({ onDayClick, selectedDate }) => {
     return (
       <div className="bg-white p-4 rounded-lg shadow-lg border mt-2">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold text-lg text-[#005f73]">{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
+          <h3 className="font-semibold text-lg text-gray-800">{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
           <div className="flex space-x-2">
             <button onClick={prevMonth} className="p-1 rounded-full hover:bg-gray-100"><ChevronLeft size={20} /></button>
             <button onClick={nextMonth} className="p-1 rounded-full hover:bg-gray-100"><ChevronRight size={20} /></button>
@@ -242,7 +241,7 @@ const CalendarView = ({ onDayClick, selectedDate }) => {
                 key={day}
                 onClick={() => onDayClick(date)}
                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                  isSelected ? 'bg-[#005f73] text-white' : 'hover:bg-gray-100'
+                  isSelected ? 'bg-green-500 text-white' : 'hover:bg-gray-100'
                 }`}
               >
                 {day}
@@ -254,6 +253,263 @@ const CalendarView = ({ onDayClick, selectedDate }) => {
     );
   };
   
+// --- Custom Scrollbar Styles Component ---
+const CustomScrollbarStyles = () => (
+  <style>{`
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F8F8F8; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #94a3b8; border-radius: 10px; border: 2px solid #F8F8F8; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #64748b; }
+  `}</style>
+);
+
+// Helper component for a simple avatar
+const Avatar = ({ initials, bgColor, size = 'w-10 h-10' }) => (
+  <div className={`rounded-full flex items-center justify-center text-white text-sm font-semibold ${bgColor} ${size}`} >
+    {initials}
+  </div>
+);
+
+// Message Dashboard component with Telegram-like UX
+const MessageDashboard = ({ onClose }) => {
+  const [activeMessageTab, setActiveMessageTab] = useState("chats");
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [draft, setDraft] = useState("");
+  const [conversations, setConversations] = useState({
+    1: [
+      { id: "m1", sender: "Jane Doe", text: "Hey, are you available for a ride?", time: "10:30 AM" },
+      { id: "m2", sender: "me", text: "Hi Jane, yes I am!", time: "10:31 AM" },
+    ],
+    2: [
+      { id: "m3", sender: "Mike Smith", text: "Thanks for the ride last week!", time: "Yesterday" },
+    ],
+  });
+
+  const messageNavItems = [
+    { id: "chats", label: "Chats", icon: MessageCircle },
+    { id: "groups", label: "Groups", icon: Users },
+    { id: "channels", label: "Channels", icon: Users },
+    { id: "market", label: "Market", icon: Users },
+  ];
+
+  const chatItems = {
+    chats: [
+      { id: 1, name: "Jane Doe", lastMessage: "Hey, are you available for a ride?", time: "10:30 AM", avatar: <Avatar initials="JD" bgColor="bg-purple-500" /> },
+      { id: 2, name: "Mike Smith", lastMessage: "Thanks for the ride last week!", time: "Yesterday", avatar: <Avatar initials="MS" bgColor="bg-blue-500" /> },
+    ],
+    groups: [ { id: 101, name: "Drivers Community", lastMessage: "New update on city regulations.", time: "1 hr ago", avatar: <Avatar initials="DC" bgColor="bg-yellow-500" /> } ],
+    channels: [ { id: 201, name: "Ride Alerts Official", lastMessage: "High demand in downtown area!", time: "15 min ago", avatar: <Avatar initials="RA" bgColor="bg-red-500" /> } ],
+    market: [ { id: 301, name: "Special Offers", lastMessage: "Discount on car maintenance this week.", time: "2 days ago", avatar: <Avatar initials="SO" bgColor="bg-indigo-500" /> } ],
+  };
+
+  const currentChats = chatItems[activeMessageTab] || [];
+  const filteredChats = currentChats.filter((chat) =>
+    chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+    if (!selectedChat || !draft.trim()) return;
+    setConversations((prev) => {
+      const msgs = prev[selectedChat.id] || [];
+      return {
+        ...prev,
+        [selectedChat.id]: [
+          ...msgs,
+          { id: `${Date.now()}`, sender: "me", text: draft.trim(), time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
+        ],
+      };
+    });
+    setDraft("");
+    // Simulate quick auto-reply
+    setTimeout(() => {
+      setConversations((prev) => {
+        const msgs = prev[selectedChat.id] || [];
+        return {
+          ...prev,
+          [selectedChat.id]: [
+            ...msgs,
+            { id: `${Date.now()}-r`, sender: selectedChat.name, text: "Got it!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
+          ],
+        };
+      });
+    }, 800);
+  };
+
+  const renderList = () => (
+    <div className="flex-grow overflow-y-auto custom-scrollbar">
+      {filteredChats.length > 0 ? (
+        <div className="space-y-1">
+          {filteredChats.map((chat) => (
+            <button
+              key={chat.id}
+              onClick={() => setSelectedChat(chat)}
+              className="w-full flex items-center p-3 hover:bg-neutral-100 cursor-pointer transition-colors text-left"
+            >
+              {chat.avatar}
+              <div className="ml-3 flex-grow">
+                <p className="font-medium text-gray-800">{chat.name}</p>
+                <p className="text-sm text-neutral-600 truncate">{chat.lastMessage}</p>
+              </div>
+              <span className="text-xs text-neutral-500">{chat.time}</span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="text-neutral-500 text-center mt-10">No messages found.</p>
+      )}
+    </div>
+  );
+
+  const renderChat = () => {
+    const msgs = conversations[selectedChat?.id] || [];
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
+          {msgs.map((m) => (
+            <div key={m.id} className={`flex ${m.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.sender === 'me' ? 'bg-[#E1F87E] text-[#121212]' : 'bg-neutral-100 text-gray-800'}`}>
+                <p className="whitespace-pre-wrap">{m.text}</p>
+                <div className="text-[10px] opacity-70 mt-1 text-right">{m.time}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <form onSubmit={sendMessage} className="p-3 border-t border-neutral-200 bg-white flex items-center gap-2">
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Type a message"
+            className="flex-1 p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]"
+          />
+          <button type="submit" className="p-2 rounded-lg bg-[#E1F87E] text-[#121212] hover:bg-opacity-80">
+            <Send className="h-5 w-5" />
+          </button>
+        </form>
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-white rounded-3xl overflow-hidden">
+      <div className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between gap-2">
+        {selectedChat ? (
+          <>
+            <button onClick={() => setSelectedChat(null)} className="text-neutral-800 hover:text-gray-900">
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <h2 className="text-lg font-semibold text-gray-800 flex-1 truncate">{selectedChat.name}</h2>
+            <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
+          </>
+        ) : isSearching ? (
+          <>
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full bg-neutral-100 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] text-gray-800"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <button onClick={() => { setIsSearching(false); setSearchQuery(''); }} className="text-sm font-semibold text-gray-700 hover:text-gray-900">
+              Cancel
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
+            <div className="flex-1"></div> {/* Placeholder to push search icon to the right */}
+            <button onClick={() => setIsSearching(true)} className="text-neutral-800 hover:text-gray-900">
+              <Search className="h-6 w-6" />
+            </button>
+          </>
+        )}
+      </div>
+
+      {!selectedChat && (
+        <div className="flex justify-around bg-white p-2 border-b border-neutral-200">
+          {messageNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeMessageTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => { setActiveMessageTab(item.id); setSearchQuery(""); setIsSearching(false); }}
+                className={`flex-1 flex flex-col items-center py-2 transition-colors relative ${isActive ? "text-gray-800" : "text-neutral-500"}`}
+              >
+                <Icon className="h-5 w-5 mb-1" />
+                <span className="text-xs">{item.label}</span>
+                {isActive && (<div className="absolute bottom-0 h-0.5 w-full bg-[#E1F87E] rounded-full"></div>)}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {selectedChat ? renderChat() : renderList()}
+    </div>
+  );
+};
+
+// Location Selection Modal Component
+const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleClose = () => {
+    setSearchTerm("");
+    onClose();
+  }
+
+  const filteredLocations = uzbekistanLocationsData.map(regionData => ({
+    ...regionData,
+    cities: regionData.cities.filter(city =>
+      city.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  })).filter(regionData => regionData.cities.length > 0 || regionData.region.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[80vh] flex flex-col">
+        <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+          <button onClick={handleClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        <div className="p-4 border-b border-neutral-200">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 h-5 w-5" />
+            <input type="text" placeholder="Search for a city or region..." className="w-full pl-10 pr-4 py-2 rounded-xl bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          </div>
+        </div>
+        <div className="flex-grow overflow-y-auto p-4 space-y-2 custom-scrollbar">
+          {filteredLocations.length > 0 ? (
+            filteredLocations.map(regionData => (
+              <div key={regionData.region}>
+                <h3 className="w-full text-left p-3 font-semibold text-gray-800 select-none">
+                  {regionData.region}
+                </h3>
+                {regionData.cities.map(city => (
+                  <button key={city} onClick={() => { onSelect(city); handleClose(); }} className="w-full text-left pl-6 py-2 text-neutral-600 hover:bg-neutral-50 rounded-lg text-sm transition-colors" >
+                    {city}
+                  </button>
+                ))}
+              </div>
+            ))
+          ) : ( <p className="text-neutral-500 text-center mt-10">No regions or cities found.</p> )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 // Main App component
 const App = () => {
@@ -271,7 +527,9 @@ const App = () => {
   const [selectedRide, setSelectedRide] = useState(null);
   const [isUnreliableRider, setIsUnreliableRider] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
-
+  const [showMessages, setShowMessages] = useState(false);
+  const [showFromModal, setShowFromModal] = useState(false);
+  const [showToModal, setShowToModal] = useState(false);
 
   const handleFilterClick = (filterType) => {
     const newFilter = activeFilter === filterType ? null : filterType;
@@ -317,12 +575,15 @@ const App = () => {
   }
 
   const renderContent = () => {
+    if (showMessages) {
+        return <MessageDashboard onClose={() => setShowMessages(false)} />;
+    }
     switch (activeTab) {
       case 'history':
         return (
           <div className="p-6 text-center">
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">Ride History</h2>
-            {/* ... history content ... */}
+            <p className="text-gray-600">Your past rides will appear here.</p>
           </div>
         );
       case 'search':
@@ -371,19 +632,19 @@ const App = () => {
           return (
             <div className="flex flex-col h-full">
               <div className="flex-shrink-0 bg-white shadow-sm z-10">
-                <div className="p-4 border-b border-gray-200">
+                <div className="p-4 border-b border-neutral-200">
                   <h2 className="text-lg font-semibold text-gray-800 text-left mb-3">Results</h2>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                       <div className="flex items-center space-x-2 flex-wrap gap-2">
-                          <button onClick={() => handleSortClick('cheapest')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'cheapest' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                          <button onClick={() => handleSortClick('cheapest')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'cheapest' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
                               <DollarSign size={16} />
                               <span>Cheapest</span>
                           </button>
-                          <button onClick={() => handleSortClick('fastest')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'fastest' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                          <button onClick={() => handleSortClick('fastest')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'fastest' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
                               <Wind size={16} />
                               <span>Fastest</span>
                           </button>
-                           <button onClick={() => handleFilterClick('mail')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'mail' ? 'bg-blue-100 text-blue-700 border border-blue-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                           <button onClick={() => handleFilterClick('mail')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'mail' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
                               {activeFilter === 'mail' ? <X size={16} /> : <AmazonMailLogo className="w-5 h-5"/>}
                               <span>Mail Only</span>
                           </button>
@@ -391,11 +652,11 @@ const App = () => {
 
                       <div className="flex items-center space-x-2">
                           <div className="w-px h-6 bg-gray-300 mx-1 hidden sm:block"></div>
-                          <button onClick={() => handleFilterClick('saved')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'saved' ? 'bg-blue-100 text-blue-700 border border-blue-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                          <button onClick={() => handleFilterClick('saved')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'saved' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
                               {activeFilter === 'saved' ? <X size={16} /> : <Bookmark size={16} />}
                               <span>Saved</span>
                           </button>
-                           <button onClick={() => handleFilterClick('recommended')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'recommended' ? 'bg-blue-100 text-blue-700 border border-blue-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                           <button onClick={() => handleFilterClick('recommended')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'recommended' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
                               {activeFilter === 'recommended' ? <X size={16} /> : <Lightbulb size={16} />}
                               <span>Recommended</span>
                           </button>
@@ -405,17 +666,17 @@ const App = () => {
                 
                 {tipToShow && <TipBar icon={tipContent[tipToShow].icon} text={tipContent[tipToShow].text} onClose={handleCloseTip} />}
 
-                <div className="bg-white py-2 px-4 border-b">
+                <div className="bg-white py-2 px-4 border-b border-neutral-200">
                     <h3 className="font-semibold text-gray-800">{stickyTitle}</h3>
                 </div>
               </div>
 
-              <div className="flex-grow overflow-y-auto bg-gray-100">
+              <div className="flex-grow overflow-y-auto bg-[#F8F8F8]">
                 <div className="p-4 space-y-4">
                     {results.map(item => (
-                      <div key={item.id} onClick={() => setSelectedRide(item)} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-left relative cursor-pointer hover:shadow-md transition-shadow">
+                      <div key={item.id} onClick={() => setSelectedRide(item)} className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 text-left relative cursor-pointer hover:shadow-xl transition-shadow">
                         <button onClick={(e) => { e.stopPropagation(); handleSaveRide(item.id); }} className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition-colors">
-                            <Bookmark size={20} className="text-gray-500 hover:text-blue-600" fill={savedRides.includes(item.id) ? '#2563eb' : 'none'} />
+                            <Bookmark size={20} className="text-gray-500 hover:text-green-600" fill={savedRides.includes(item.id) ? '#10B981' : 'none'} />
                         </button>
                         <div className="flex flex-col sm:flex-row justify-between items-start mb-3">
                           <div className="flex flex-col">
@@ -425,13 +686,13 @@ const App = () => {
                               <span className="text-gray-600 text-xs ml-1">({item.reliabilityStars})</span>
                             </div>
                              <div className="flex items-center space-x-2 text-sm text-gray-800 mb-2">
-                                <CarIcon model={item.carModel} />
+                                <Car size={16} className="text-gray-600" />
                                 <span>{item.carYear} {item.carModel}</span>
                             </div>
                              <PlateNumber plate={item.plateNumber} />
                           </div>
                           <div className="text-right mt-2 sm:mt-0 sm:mr-10">
-                            <div className="text-2xl font-bold text-[#005f73] flex items-center justify-end">
+                            <div className="text-2xl font-bold text-green-700 flex items-center justify-end">
                                 {item.id === cheapestRideId && <CheapestIcon />}
                                 {activeFilter === 'mail' ? item.mailPayout : `$${calculatePayout(item.basePrice).toFixed(2)}`}
                             </div>
@@ -444,8 +705,8 @@ const App = () => {
                         <div className="flex items-stretch mt-4">
                             <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
                                 <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-gray-300 rounded-full"></div>
-                                <MapPin size={20} className="text-[#005f73] bg-white z-10" />
-                                <Target size={20} className="text-[#005f73] bg-white z-10" />
+                                <MapPin size={20} className="text-green-600 bg-white z-10" />
+                                <Target size={20} className="text-red-600 bg-white z-10" />
                             </div>
                             <div className="flex flex-col justify-between w-full">
                                 <div className="mb-4">
@@ -464,37 +725,12 @@ const App = () => {
                             <span>{item.estimatedMiles}</span><span className="mx-1">•</span><span>{item.tripTime}</span>
                             {activeFilter !== 'mail' && <><span className="mx-1">•</span><Users size={16} className="text-gray-500" /><span>{item.sitsAvailable}</span></>}
                           </div>
-                          <button onClick={(e) => e.stopPropagation()} className="bg-[#005f73] text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-[#007a8d] transition duration-200">Book</button>
+                          <button onClick={(e) => e.stopPropagation()} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-600 transition duration-200 shadow">Book</button>
                         </div>
                       </div>
                     ))}
                 </div>
               </div>
-            </div>
-          );
-        } else if (pickupLocation && destinationLocation && pickupDate) {
-          // Display "Your Selected Route" confirmation
-          return (
-            <div className="p-6 text-center">
-              <h2 className="text-2xl font-semibold mb-2 text-gray-800">Your Selected Route</h2>
-              <p className="text-md text-gray-600 mb-6">Confirm your journey details below.</p>
-              <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                <div className="flex items-center justify-center mb-6 py-4 px-2 border border-gray-300 rounded-lg">
-                  <div className="flex flex-col items-center text-left flex-1 min-w-0">
-                    <span className="text-sm text-gray-500 mb-1">From</span>
-                    <p className="font-semibold text-gray-800 text-base truncate">{pickupLocation}</p>
-                    <p className="text-sm text-gray-600 mt-1">{formatDate(pickupDate)}</p>
-                  </div>
-                  <ChevronRight size={24} className="text-gray-500 mx-4 flex-shrink-0" />
-                  <div className="flex flex-col items-center text-right flex-1 min-w-0">
-                    <span className="text-sm text-gray-500 mb-1">To</span>
-                    <p className="font-semibold text-gray-800 text-base truncate">{destinationLocation}</p>
-                    <p className="text-sm text-gray-600 mt-1">{getDropOffDate(pickupDate)}</p>
-                  </div>
-                </div>
-                <button className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition duration-300 shadow-md mb-4" onClick={() => { setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setShowSearchResults(false); setActiveFilter(null); }}>Change Locations & Date</button>
-              </div>
-              <p className="mt-6 text-gray-700 font-medium">Ready to hit the road? Let's find your perfect ride!</p>
             </div>
           );
         } else {
@@ -503,32 +739,26 @@ const App = () => {
             <div className="p-6 text-center">
               <h2 className="text-2xl font-semibold mb-2 text-gray-800">Find Your Next Ride</h2>
               <p className="text-md text-gray-600 mb-6">Select your pickup and destination locations.</p>
-              <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                <div className="relative mb-4 text-left">
-                  <label htmlFor="pickup-location" className="block text-gray-700 text-sm font-medium mb-1">Origin</label>
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 mt-2" size={20} />
-                  <select id="pickup-location" className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition duration-200 shadow-sm appearance-none bg-white text-gray-700 text-base" value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value)}>
-                    <option value="" disabled className="text-gray-400">Search by city or domicile</option>
-                    {uzbekistanLocations.map((location, index) => <option key={index} value={location}>{location}</option>)}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 top-1/2 -translate-y-1/2 mt-2"><svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 6.757 7.586 5.343 9z"/></svg></div>
+              <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200 space-y-4">
+                
+                <div onClick={() => setShowFromModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${pickupLocation ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
+                    <span>{pickupLocation || "Origin"}</span>
+                    <MapPin className="h-5 w-5 text-neutral-500" />
                 </div>
-                <div className="relative mb-4 text-left">
-                  <label htmlFor="destination-location" className="block text-gray-700 text-sm font-medium mb-1">Destination</label>
-                  <Target className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 mt-2" size={20} />
-                  <select id="destination-location" className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition duration-200 shadow-sm appearance-none bg-white text-gray-700 text-base" value={destinationLocation} onChange={(e) => setDestinationLocation(e.target.value)}>
-                    <option value="" disabled className="text-gray-400">Search by city or domicile</option>
-                    {uzbekistanLocations.map((location, index) => <option key={index} value={location}>{location}</option>)}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 top-1/2 -translate-y-1/2 mt-2"><svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 6.757 7.586 5.343 9z"/></svg></div>
+                <LocationSelectModal title="Select Origin" isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setPickupLocation} />
+
+                <div onClick={() => setShowToModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${destinationLocation ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
+                    <span>{destinationLocation || "Destination"}</span>
+                    <Target className="h-5 w-5 text-neutral-500" />
                 </div>
-                <div className="relative mb-6 text-left">
-                  <label htmlFor="pickup-date" className="block text-gray-700 text-sm font-medium mb-1">Pickup Date</label>
-                   <button onClick={() => setShowCalendar(!showCalendar)} className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition duration-200 shadow-sm bg-white text-gray-700 text-base text-left">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        {pickupDate ? formatDate(pickupDate) : 'Select a date'}
+                <LocationSelectModal title="Select Destination" isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setDestinationLocation} />
+                
+                <div className="relative text-left">
+                   <button onClick={() => setShowCalendar(!showCalendar)} className="w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border text-gray-800 font-semibold border-green-700">
+                        <span>{pickupDate ? formatDate(pickupDate) : 'Select a date'}</span>
+                        <Calendar className="h-5 w-5 text-neutral-500" />
                     </button>
-                    {showCalendar && <CalendarView selectedDate={pickupDate} onDayClick={(date) => { setPickupDate(date); setShowCalendar(false);}}/>}
+                    {showCalendar && <CalendarView selectedDate={pickupDate} onDayClick={(date) => { setPickupDate(date.toISOString().split('T')[0]); setShowCalendar(false);}}/>}
                 </div>
               </div>
               <p className="mt-6 text-gray-700 font-medium">Ready to hit the road? Let's find your perfect ride!</p>
@@ -539,7 +769,7 @@ const App = () => {
         return (
           <div className="p-6 text-center">
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">User Profile</h2>
-            {/* ... profile content ... */}
+            <p className="text-gray-600">Your profile details will appear here.</p>
           </div>
         );
       default:
@@ -548,26 +778,31 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100 font-sans antialiased">
-      <header className="bg-[#005f73] text-white p-4 flex items-center justify-between shadow-md">
-        {showSearchResults || selectedRide ? (<button className="p-2 rounded-full hover:bg-opacity-20 hover:bg-white transition-colors" onClick={() => { if(selectedRide) {setSelectedRide(null)} else {setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setShowSearchResults(false); setActiveFilter(null); setActiveSort(null); } }}><ChevronLeft size={24} /></button>) : (<div className="w-8"></div>)}
-        <h1 className="text-xl font-semibold">Rider's Dashboard</h1>
-        <div className="w-8"></div>
+    <div className="min-h-screen flex flex-col bg-[#F8F8F8] font-sans antialiased">
+      <CustomScrollbarStyles />
+      <header className="bg-white text-gray-800 p-3 flex items-center justify-between shadow-md border-b border-neutral-200 z-20 relative">
+        {showSearchResults || selectedRide || showMessages ? (<button className="p-2 rounded-full hover:bg-neutral-100 transition-colors" onClick={() => { if(selectedRide) {setSelectedRide(null)} else if (showMessages) {setShowMessages(false)} else {setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setShowSearchResults(false); setActiveFilter(null); setActiveSort(null); } }}><ChevronLeft size={24} /></button>) : (<div className="w-10"></div>)}
+        <h1 className="text-xl font-bold absolute left-1/2 -translate-x-1/2">Rider's Dashboard</h1>
+        <button onClick={() => setShowMessages(true)} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors">
+            <MessageCircle className="h-8 w-8" />
+        </button>
       </header>
 
       <main className="flex-grow overflow-hidden flex flex-col">
         {renderContent()}
       </main>
 
-      {pickupLocation && destinationLocation && pickupDate && !showSearchResults && (<div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40"><button className="w-full bg-blue-700 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition duration-300 shadow-xl transform hover:scale-105" onClick={() => setShowSearchResults(true)}>See my results</button></div>)}
+      {pickupLocation && destinationLocation && pickupDate && !showSearchResults && (<div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40"><button className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300 shadow-xl transform hover:scale-105" onClick={() => setShowSearchResults(true)}>See my results</button></div>)}
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-xl z-50">
-        <div className="flex justify-around items-center h-16">
-          <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 ${activeTab === 'search' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600'}`} onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setActiveFilter(null); setActiveSort(null); setSelectedRide(null); }}><Search size={24} strokeWidth={2} /><span className="text-xs mt-1">Search</span></button>
-          <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 ${activeTab === 'history' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600'}`} onClick={() => setActiveTab('history')}><History size={24} strokeWidth={2} /><span className="text-xs mt-1">History</span></button>
-          <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 ${activeTab === 'profile' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600'}`} onClick={() => setActiveTab('profile')}><User size={24} strokeWidth={2} /><span className="text-xs mt-1">Profile</span></button>
-        </div>
-      </nav>
+      {!showMessages && (
+          <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50">
+            <div className="flex justify-around items-center h-16">
+              <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'search' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setActiveFilter(null); setActiveSort(null); setSelectedRide(null); }}><Search size={24} strokeWidth={activeTab === 'search' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'search' ? 'text-gray-800' : 'text-neutral-500'}`}>Search</span></button>
+              <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'history' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => setActiveTab('history')}><History size={24} strokeWidth={activeTab === 'history' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'history' ? 'text-gray-800' : 'text-neutral-500'}`}>History</span></button>
+              <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'profile' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => setActiveTab('profile')}><User size={24} strokeWidth={activeTab === 'profile' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'profile' ? 'text-gray-800' : 'text-neutral-500'}`}>Profile</span></button>
+            </div>
+          </nav>
+      )}
     </div>
   );
 };
@@ -575,11 +810,11 @@ const App = () => {
 const AccordionItem = ({ icon, title, value, children }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-        <div className="border-b last:border-b-0">
-            <button onClick={() => setIsOpen(!isOpen)} className="p-4 flex justify-between items-center w-full hover:bg-gray-50">
+        <div className="border-b last:border-b-0 border-neutral-200">
+            <button onClick={() => setIsOpen(!isOpen)} className="p-4 flex justify-between items-center w-full hover:bg-neutral-50">
                 <div className="flex items-center space-x-3">
                     {icon}
-                    <span className="font-medium">{title}</span>
+                    <span className="font-medium text-gray-800">{title}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                     <span className="text-gray-600 text-sm truncate max-w-[120px]">{value}</span>
@@ -587,27 +822,13 @@ const AccordionItem = ({ icon, title, value, children }) => {
                 </div>
             </button>
             <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96' : 'max-h-0'}`}>
-                <div className="p-4 bg-gray-50 text-gray-700">
+                <div className="p-4 bg-neutral-50 text-gray-700">
                     {children}
                 </div>
             </div>
         </div>
     );
 };
-
-const CarIcon = ({ model }) => {
-    if (model === 'Chevrolet Cobalt') {
-        return (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19.5 8.5H4.5C3.94772 8.5 3.5 8.94772 3.5 9.5V15.5C3.5 16.0523 3.94772 16.5 4.5 16.5H19.5C20.0523 16.5 20.5 16.0523 20.5 15.5V9.5C20.5 8.94772 20.0523 8.5 19.5 8.5Z" stroke="#4A5568" strokeWidth="1.5"/>
-                <path d="M7 8.5L9 6.5H15L17 8.5" stroke="#4A5568" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <circle cx="7.5" cy="16.5" r="1" fill="#4A5568"/>
-                <circle cx="16.5" cy="16.5" r="1" fill="#4A5568"/>
-            </svg>
-        );
-    }
-    return <Briefcase className="text-gray-600" />;
-}
 
 const SpecialService = ({ service }) => {
     const iconMap = {
@@ -625,42 +846,42 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack }) => {
     const finalPrice = isUnreliable ? ride.basePrice : ride.basePrice - discount;
 
     return (
-        <div className="flex flex-col h-full">
-            <div className="bg-[#005f73] text-white p-4 flex-shrink-0">
+        <div className="flex flex-col h-full bg-[#F8F8F8]">
+            <div className="bg-white text-gray-800 p-4 flex-shrink-0 border-b border-neutral-200">
                  <div className="flex items-center">
-                    <button onClick={onBack} className="mr-3 text-white/90 hover:text-white"><ChevronLeft size={24} /></button>
+                    <button onClick={onBack} className="mr-3 text-gray-600 hover:text-gray-800"><ChevronLeft size={24} /></button>
                     <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4"/>
                     <div className="flex items-stretch w-full">
                         <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
-                            <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-gray-400 rounded-full"></div>
-                            <MapPin size={20} className="text-white bg-[#005f73] z-10" />
-                            <Target size={20} className="text-white bg-[#005f73] z-10" />
+                            <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-neutral-300 rounded-full"></div>
+                            <MapPin size={20} className="text-green-600 bg-white z-10" />
+                            <Target size={20} className="text-red-600 bg-white z-10" />
                         </div>
                         <div className="flex flex-col justify-between w-full">
                             <div className="mb-2">
-                                <p className="font-semibold text-white text-lg">{ride.origin}</p>
-                                <p className="text-gray-300 text-sm">{formatDate(ride.originDate)} {formatTime(ride.originDate)}</p>
+                                <p className="font-semibold text-gray-800 text-lg">{ride.origin}</p>
+                                <p className="text-neutral-600 text-sm">{formatDate(ride.originDate)} {formatTime(ride.originDate)}</p>
                             </div>
                             <div>
-                                <p className="font-semibold text-white text-lg">{ride.destination}</p>
-                                <p className="text-gray-300 text-sm">{formatDate(ride.destinationDate)} {formatTime(ride.destinationDate)}</p>
+                                <p className="font-semibold text-gray-800 text-lg">{ride.destination}</p>
+                                <p className="text-neutral-600 text-sm">{formatDate(ride.destinationDate)} {formatTime(ride.destinationDate)}</p>
                             </div>
                         </div>
                     </div>
                  </div>
             </div>
-            <div className="flex-grow overflow-y-auto bg-gray-100">
+            <div className="flex-grow overflow-y-auto">
                 <div className="p-4 space-y-4">
                     <div className="flex items-center justify-between text-sm p-2 bg-red-100 rounded-lg">
-                        <span>Simulate Unreliable Rider:</span>
+                        <span className="text-red-800">Simulate Unreliable Rider:</span>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input type="checkbox" checked={isUnreliable} onChange={onToggleReliability} className="sr-only peer" />
-                          <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                          <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-red-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                         </label>
                     </div>
 
                     <h2 className="text-lg font-semibold text-gray-800">About the trip</h2>
-                    <div className="bg-white rounded-lg shadow-sm border">
+                    <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
                         <AccordionItem icon={<DollarSign className="text-gray-600" />} title="Payout (est.)" value={`$${finalPrice.toFixed(2)}`}>
                             <div className="space-y-2 text-sm">
                                 <div className="flex justify-between"><span>Base Fare:</span><span>${ride.basePrice.toFixed(2)}</span></div>
@@ -674,7 +895,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack }) => {
                                         <span>Your discount was removed due to a previous no-show. Be reliable on your next trip to reinstate it.</span>
                                     </div>
                                 )}
-                                <hr className="my-2"/>
+                                <hr className="my-2 border-neutral-200"/>
                                 <div className="flex justify-between font-bold"><span>Final Price:</span><span>${finalPrice.toFixed(2)}</span></div>
                                 <div className="flex justify-between text-xs text-gray-500 pt-2"><span>Avg. Fuel Cost/Mile:</span><span>{ride.avgFuelPerMile}</span></div>
                             </div>
@@ -692,7 +913,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack }) => {
                                         ({ride.reliabilityStars})
                                     </div>
                                     <div className="flex items-center space-x-2 mt-2 text-sm text-gray-800">
-                                        <CarIcon model={ride.carModel} />
+                                        <Car size={16} className="text-gray-600" />
                                         <span>{ride.carYear} {ride.carModel}</span>
                                     </div>
                                     <div className="mt-2"><PlateNumber plate={ride.plateNumber}/></div>
@@ -702,12 +923,12 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack }) => {
                     </div>
                 </div>
             </div>
-            <div className="p-4 bg-white border-t flex-shrink-0 flex justify-between items-center">
+            <div className="p-4 bg-white border-t border-neutral-200 flex-shrink-0 flex justify-between items-center shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
                 <div>
-                    <p className="text-2xl font-bold">${finalPrice.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-gray-800">${finalPrice.toFixed(2)}</p>
                     <p className="text-sm text-gray-600">{ride.ratePerMail || ride.avgFuelPerMile}</p>
                 </div>
-                <button className="bg-[#005f73] text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-[#007a8d] transition-colors">Book</button>
+                <button className="bg-green-500 text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-green-600 transition-colors shadow-lg">Book</button>
             </div>
         </div>
     );
