@@ -1,13 +1,12 @@
 // Driver Dashboard - With Custom Scrollbar Styling
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, createContext, useContext } from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   Plus,
-  Play,
   User,
   MapPin,
   Calendar,
   Clock,
-  BarChart,
   Shield,
   Navigation,
   MessageCircle,
@@ -17,11 +16,7 @@ import {
   Search, // For search bar
   X, // For closing modals
   CheckCircle, // For submit button success state
-  ArrowUp,    // For Navigation
   ArrowLeft, // For Navigation
-  ArrowRight,// For Navigation
-  Flag,      // For Navigation
-  ChevronLeft, // For Navigation - used for back button
   Send, // For search button
   Loader2, // For loading state
   XCircle, // For ending a trip
@@ -29,7 +24,103 @@ import {
   Radar, // Speed cameras
   LocateFixed, // Recenter to user
   Car, // Added Car icon back for Welcome component
-} from "lucide"; // Changed to 'lucide' as per standard usage
+  Sparkles, // For Gemini features
+  Newspaper, // For News
+  TrendingUp, // For Stats
+  Mail,
+  Phone,
+  Settings,
+  LogOut,
+  Edit2,
+  ChevronLeft, // Added missing icon
+  ChevronRight,
+  Star,
+  ShieldCheck,
+  CreditCard,
+  Bell,
+  Languages,
+  Lock,
+  Trash2,
+  History,
+  FileText,
+} from "lucide-react";
+
+// --- i18n Translations ---
+const translations = {
+  en: {
+    ride: "Ride", newRide: "New Ride", myLines: "My Lines", profile: "Profile",
+    totalEarnings: "Total Earnings", stats: "Stats", safety: "Safety", yourActivity: "Your Activity",
+    noLines: "No Lines Posted Yet", postRidePrompt: "Post a new ride to see it here.", active: "Active",
+    postNewRide: "Post a New Ride", fromWhere: "From where", toWhere: "To where", departureDate: "Departure date",
+    mailService: "Mail Service", yesCarryMail: "Yes, I do carry Mail", mailDescYes: "I can transport both passengers and mail packages",
+    noCarryMail: "No, I do not carry Mail", mailDescNo: "I only transport passengers, no mail service",
+    freeSeats: "Free Seats", departureType: "Departure Type", fixedDeparture: "Fixed Departure Time",
+    fixedDepartureDesc: "Leave at a specific time regardless of seat availability",
+    whenFills: "Leave When Seats Fill", whenFillsDesc: "Depart as soon as all available seats are booked",
+    price: "Price", enterPrice: "Enter price", postRide: "Post Ride", submitted: "Submitted!",
+    selectOrigin: "Select Origin", selectDestination: "Select Destination", searchCity: "Search for a city or region...",
+    noLocations: "No regions or cities found.", selectDepDate: "Select Departure Date",
+    reviews: "reviews", rides: "rides", username: "Username", gender: "Gender", memberSince: "Member Since",
+    contactVerification: "Contact & Verification", phone: "Phone Number", email: "Email", idVerification: "ID Verification",
+    verified: "Verified", notVerified: "Not Verified", driverDetails: "Driver Details", vehicle: "Vehicle",
+    licensePlate: "License Plate", drivingLicense: "Driving License", activity: "Activity", rideHistory: "Ride History",
+    upcomingRides: "Upcoming Rides", settings: "Settings", language: "Language", notifications: "Notification Preferences",
+    paymentMethods: "Payment Methods", privacy: "Privacy Settings", security: "Security", changePassword: "Change Password",
+    logout: "Logout", editProfile: "Edit Profile", fullName: "Full Name", saveChanges: "Save Changes",
+    editVehicle: "Edit Vehicle Details", uzbek: "Uzbek", english: "English", russian: "Russian",
+    pastRides: "Past Rides", noCompletedRides: "No completed rides.", noUpcomingRides: "No upcoming rides.",
+  },
+  uz: {
+    ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil",
+    totalEarnings: "Jami daromad", stats: "Statistika", safety: "Xavfsizlik", yourActivity: "Sizning faoliyatingiz",
+    noLines: "Hali e'lonlar joylanmagan", postRidePrompt: "Bu yerda ko'rish uchun yangi e'lon joylashtiring.", active: "Faol",
+    postNewRide: "Yangi e'lon joylash", fromWhere: "Qayerdan", toWhere: "Qayerga", departureDate: "Jo'nash sanasi",
+    mailService: "Pochta xizmati", yesCarryMail: "Ha, pochta olaman", mailDescYes: "Yo'lovchilar va pochta jo'natmalarini tashiyman",
+    noCarryMail: "Yo'q, pochta olmayman", mailDescNo: "Faqat yo'lovchilarni tashiyman, pochta xizmati yo'q",
+    freeSeats: "Bo'sh o'rindiqlar", departureType: "Jo'nash turi", fixedDeparture: "Belgilangan vaqtda jo'nash",
+    fixedDepartureDesc: "O'rindiqlar to'lishidan qat'i nazar, belgilangan vaqtda jo'nab ketish",
+    whenFills: "O'rindiqlar to'lganda", whenFillsDesc: "Barcha mavjud o'rindiqlar band qilingan zahoti jo'nab ketish",
+    price: "Narx", enterPrice: "Narxni kiriting", postRide: "E'lonni joylash", submitted: "Yuborildi!",
+    selectOrigin: "Boshlanish nuqtasini tanlang", selectDestination: "Manzilni tanlang", searchCity: "Shahar yoki viloyatni qidiring...",
+    noLocations: "Viloyat yoki shahar topilmadi.", selectDepDate: "Jo'nash sanasini tanlang",
+    reviews: "sharhlar", rides: "sayohatlar", username: "Foydalanuvchi nomi", gender: "Jins", memberSince: "Ro'yxatdan o'tgan sana",
+    contactVerification: "Aloqa va tekshiruv", phone: "Telefon raqami", email: "Elektron pochta", idVerification: "Shaxsni tasdiqlash",
+    verified: "Tasdiqlangan", notVerified: "Tasdiqlanmagan", driverDetails: "Haydovchi ma'lumotlari", vehicle: "Avtomobil",
+    licensePlate: "Davlat raqami", drivingLicense: "Haydovchilik guvohnomasi", activity: "Faoliyat", rideHistory: "Sayohatlar tarixi",
+    upcomingRides: "Kutilayotgan sayohatlar", settings: "Sozlamalar", language: "Til", notifications: "Bildirishnomalar",
+    paymentMethods: "To'lov usullari", privacy: "Maxfiylik", security: "Xavfsizlik", changePassword: "Parolni o'zgartirish",
+    logout: "Chiqish", editProfile: "Profilni tahrirlash", fullName: "To'liq ism", saveChanges: "O'zgarishlarni saqlash",
+    editVehicle: "Avtomobil ma'lumotlarini tahrirlash", uzbek: "O'zbekcha", english: "Inglizcha", russian: "Ruscha",
+    pastRides: "O'tgan Sayohatlar", noCompletedRides: "Tugallangan sayohatlar yo'q.", noUpcomingRides: "Kutilayotgan sayohatlar yo'q.",
+  },
+  ru: {
+    ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль",
+    totalEarnings: "Общий заработок", stats: "Статистика", safety: "Безопасность", yourActivity: "Ваша активность",
+    noLines: "Поездки еще не опубликованы", postRidePrompt: "Опубликуйте новую поездку, чтобы увидеть ее здесь.", active: "Активна",
+    postNewRide: "Опубликовать новую поездку", fromWhere: "Откуда", toWhere: "Куда", departureDate: "Дата отправления",
+    mailService: "Почтовая служба", yesCarryMail: "Да, перевожу посылки", mailDescYes: "Могу перевозить как пассажиров, так и посылки",
+    noCarryMail: "Нет, не перевожу посылки", mailDescNo: "Перевожу только пассажиров, без почтовых услуг",
+    freeSeats: "Свободные места", departureType: "Тип отправления", fixedDeparture: "Фиксированное время отправления",
+    fixedDepartureDesc: "Отправление в указанное время независимо от наличия пассажиров",
+    whenFills: "Когда места заполнятся", whenFillsDesc: "Отправление, как только все доступные места будут забронированы",
+    price: "Цена", enterPrice: "Введите цену", postRide: "Опубликовать", submitted: "Отправлено!",
+    selectOrigin: "Выберите место отправления", selectDestination: "Выберите пункт назначения", searchCity: "Поиск города или региона...",
+    noLocations: "Регионы или города не найдены.", selectDepDate: "Выберите дату отправления",
+    reviews: "отзывов", rides: "поездок", username: "Имя пользователя", gender: "Пол", memberSince: "На сайте с",
+    contactVerification: "Контакт и верификация", phone: "Номер телефона", email: "Электронная почта", idVerification: "Подтверждение личности",
+    verified: "Подтверждено", notVerified: "Не подтверждено", driverDetails: "Данные водителя", vehicle: "Автомобиль",
+    licensePlate: "Гос. номер", drivingLicense: "Водительское удостоверение", activity: "Активность", rideHistory: "История поездок",
+    upcomingRides: "Предстоящие поездки", settings: "Настройки", language: "Язык", notifications: "Настройки уведомлений",
+    paymentMethods: "Способы оплаты", privacy: "Конфиденциальность", security: "Безопасность", changePassword: "Изменить пароль",
+    logout: "Выйти", editProfile: "Редактировать профиль", fullName: "Полное имя", saveChanges: "Сохранить изменения",
+    editVehicle: "Редактировать данные автомобиля", uzbek: "Узбекский", english: "Английский", russian: "Русский",
+    pastRides: "Прошлые поездки", noCompletedRides: "Завершенных поездок нет.", noUpcomingRides: "Предстоящих поездок нет.",
+  },
+};
+
+// --- Language Context ---
+const LanguageContext = createContext();
+const useLanguage = () => useContext(LanguageContext);
 
 // --- Custom Scrollbar Styles Component ---
 const CustomScrollbarStyles = () => (
@@ -47,16 +138,17 @@ const CustomScrollbarStyles = () => (
 
 
 // Helper component for a simple avatar
-const Avatar = ({ initials, bgColor }) => (
-  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold ${bgColor}`} >
-    {initials}
-  </div>
+const Avatar = ({ initials, bgColor, size = 'w-10 h-10', src }) => (
+    <div className={`relative rounded-full flex items-center justify-center text-white text-lg font-semibold ${bgColor} ${size}`} >
+        {src ? <img src={src} alt="profile" className="rounded-full w-full h-full object-cover" /> : initials}
+    </div>
 );
 
 // Message Dashboard component with Telegram-like UX
 const MessageDashboard = ({ onClose }) => {
+  const { t } = useLanguage();
   const [activeMessageTab, setActiveMessageTab] = useState("chats");
-  const [showSearchInput, setShowSearchInput] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedChat, setSelectedChat] = useState(null);
   const [draft, setDraft] = useState("");
@@ -71,10 +163,10 @@ const MessageDashboard = ({ onClose }) => {
   });
 
   const messageNavItems = [
-    { id: "chats", label: "Chats", icon: MessageCircle },
-    { id: "groups", label: "Groups", icon: Users },
-    { id: "channels", label: "Channels", icon: Hash },
-    { id: "market", label: "Market", icon: Store },
+    { id: "chats", label: t('chats'), icon: MessageCircle },
+    { id: "groups", label: t('groups'), icon: Users },
+    { id: "channels", label: t('channels'), icon: Hash },
+    { id: "market", label: t('market'), icon: Store },
   ];
 
   const chatItems = {
@@ -86,8 +178,6 @@ const MessageDashboard = ({ onClose }) => {
     channels: [ { id: 201, name: "Ride Alerts Official", lastMessage: "High demand in downtown area!", time: "15 min ago", avatar: <Avatar initials="RA" bgColor="bg-red-500" /> } ],
     market: [ { id: 301, name: "Special Offers", lastMessage: "Discount on car maintenance this week.", time: "2 days ago", avatar: <Avatar initials="SO" bgColor="bg-indigo-500" /> } ],
   };
-
-  const currentTabLabel = selectedChat?.name || messageNavItems.find(item => item.id === activeMessageTab)?.label;
 
   const currentChats = chatItems[activeMessageTab] || [];
   const filteredChats = currentChats.filter((chat) =>
@@ -136,15 +226,15 @@ const MessageDashboard = ({ onClose }) => {
             >
               {chat.avatar}
               <div className="ml-3 flex-grow">
-                <p className="font-medium text-gray-800">{chat.name}</p> {/* Updated text color */}
-                <p className="text-sm text-neutral-600 truncate">{chat.lastMessage}</p> {/* Updated text color */}
+                <p className="font-medium text-gray-800">{chat.name}</p>
+                <p className="text-sm text-neutral-600 truncate">{chat.lastMessage}</p>
               </div>
-              <span className="text-xs text-neutral-500">{chat.time}</span> {/* Updated text color */}
+              <span className="text-xs text-neutral-500">{chat.time}</span>
             </button>
           ))}
         </div>
       ) : (
-        <p className="text-neutral-500 text-center mt-10">No messages found.</p>
+        <p className="text-neutral-500 text-center mt-10">{t('noMessages')}</p>
       )}
     </div>
   );
@@ -156,21 +246,21 @@ const MessageDashboard = ({ onClose }) => {
         <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
           {msgs.map((m) => (
             <div key={m.id} className={`flex ${m.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.sender === 'me' ? 'bg-[#E1F87E] text-[#121212]' : 'bg-neutral-100 text-gray-800'}`}> {/* Updated sent message bubble background and text */}
+              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.sender === 'me' ? 'bg-[#E1F87E] text-[#121212]' : 'bg-neutral-100 text-gray-800'}`}>
                 <p className="whitespace-pre-wrap">{m.text}</p>
                 <div className="text-[10px] opacity-70 mt-1 text-right">{m.time}</div>
               </div>
             </div>
           ))}
         </div>
-        <form onSubmit={sendMessage} className="p-3 border-t border-neutral-200 bg-white flex items-center gap-2"> {/* Updated background and border */}
+        <form onSubmit={sendMessage} className="p-3 border-t border-neutral-200 bg-white flex items-center gap-2">
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="Type a message"
-            className="flex-1 p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" // Updated background, text, placeholder, focus ring
+            placeholder={t('typeMessage')}
+            className="flex-1 p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]"
           />
-          <button type="submit" className="p-2 rounded-lg bg-[#E1F87E] text-[#121212] hover:bg-opacity-80"> {/* Updated send button */}
+          <button type="submit" className="p-2 rounded-lg bg-[#E1F87E] text-[#121212] hover:bg-opacity-80">
             <Send className="h-5 w-5" />
           </button>
         </form>
@@ -179,36 +269,53 @@ const MessageDashboard = ({ onClose }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-3xl overflow-hidden"> {/* Updated background */}
-      <div className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between"> {/* Updated background and border */}
-        <button onClick={() => { if (selectedChat) setSelectedChat(null); else onClose(); }} className="text-neutral-800 hover:text-gray-900"> {/* Updated text color */}
-          <ChevronLeft className="h-6 w-6" />
-        </button>
-        <h2 className="text-lg font-semibold text-gray-800">{currentTabLabel}</h2> {/* Updated text color */}
-        <button onClick={() => setShowSearchInput(!showSearchInput)} className="text-neutral-800 hover:text-gray-900"> {/* Updated text color */}
-          <Search className="h-6 w-6" />
-        </button>
+    <div className="flex flex-col h-full bg-white rounded-3xl overflow-hidden">
+      <div className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between gap-2">
+        {selectedChat ? (
+          <>
+            <button onClick={() => setSelectedChat(null)} className="text-neutral-800 hover:text-gray-900">
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <h2 className="text-lg font-semibold text-gray-800 flex-1 truncate">{selectedChat.name}</h2>
+            <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
+          </>
+        ) : isSearching ? (
+          <>
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500" />
+              <input
+                type="text"
+                placeholder={`${t('search')}...`}
+                className="w-full bg-neutral-100 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] text-gray-800"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <button onClick={() => { setIsSearching(false); setSearchQuery(''); }} className="text-sm font-semibold text-gray-700 hover:text-gray-900">
+              {t('cancel')}
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
+            <div className="flex-1"></div> {/* Placeholder to push search icon to the right */}
+            <button onClick={() => setIsSearching(true)} className="text-neutral-800 hover:text-gray-900">
+              <Search className="h-6 w-6" />
+            </button>
+          </>
+        )}
       </div>
-      {showSearchInput && !selectedChat && (
-        <div className="p-3 bg-white border-b border-neutral-200"> {/* Updated background and border */}
-          <input
-            type="text"
-            placeholder="Search messages..."
-            className="w-full p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" // Updated background, text, placeholder, focus ring
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-      )}
+
       {!selectedChat && (
-        <div className="flex justify-around bg-white p-2 border-b border-neutral-200"> {/* Updated background and border */}
+        <div className="flex justify-around bg-white p-2 border-b border-neutral-200">
           {messageNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeMessageTab === item.id;
             return (
               <button
                 key={item.id}
-                onClick={() => { setActiveMessageTab(item.id); setSearchQuery(""); setShowSearchInput(false); }}
+                onClick={() => { setActiveMessageTab(item.id); setSearchQuery(""); setIsSearching(false); }}
                 className={`flex-1 flex flex-col items-center py-2 transition-colors relative ${isActive ? "text-gray-800" : "text-neutral-500"}`}
               >
                 <Icon className="h-5 w-5 mb-1" />
@@ -245,6 +352,7 @@ const uzbekistanLocations = [
 
 // Location Selection Modal Component
 const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleClose = () => {
@@ -263,35 +371,34 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
-      <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[80vh] flex flex-col"> {/* Updated background */}
-        <div className="p-4 border-b border-neutral-200 flex justify-between items-center"> {/* Updated border */}
-          <h2 className="text-lg font-semibold text-gray-800">{title}</h2> {/* Updated text color */}
-          <button onClick={handleClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> {/* Updated text color and hover */}
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[80vh] flex flex-col">
+        <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+          <button onClick={handleClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors">
             <X className="h-6 w-6" />
           </button>
         </div>
-        <div className="p-4 border-b border-neutral-200"> {/* Updated border */}
+        <div className="p-4 border-b border-neutral-200">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 h-5 w-5" /> {/* Updated text color */}
-            <input type="text" placeholder="Search for a city or region..." className="w-full pl-10 pr-4 py-2 rounded-xl bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /> {/* Updated background, text, placeholder, focus ring */}
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 h-5 w-5" />
+            <input type="text" placeholder={t('searchCity')} className="w-full pl-10 pr-4 py-2 rounded-xl bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </div>
         <div className="flex-grow overflow-y-auto p-4 space-y-2 custom-scrollbar">
           {filteredLocations.length > 0 ? (
             filteredLocations.map(regionData => (
               <div key={regionData.region}>
-                {/* Region is now a non-clickable header */}
-                <h3 className="w-full text-left p-3 font-semibold text-gray-800 select-none"> {/* Removed onClick, added select-none */}
+                <h3 className="w-full text-left p-3 font-semibold text-gray-800 select-none">
                   {regionData.region}
                 </h3>
                 {regionData.cities.map(city => (
-                  <button key={city} onClick={() => { onSelect(city); handleClose(); }} className="w-full text-left pl-6 py-2 text-neutral-600 hover:bg-neutral-50 rounded-lg text-sm transition-colors" > {/* Updated text and hover colors */}
+                  <button key={city} onClick={() => { onSelect(city); handleClose(); }} className="w-full text-left pl-6 py-2 text-neutral-600 hover:bg-neutral-50 rounded-lg text-sm transition-colors" >
                     {city}
                   </button>
                 ))}
               </div>
             ))
-          ) : ( <p className="text-neutral-500 text-center mt-10">No regions or cities found.</p> )} {/* Updated text color */}
+          ) : ( <p className="text-neutral-500 text-center mt-10">{t('noLocations')}</p> )}
         </div>
       </div>
     </div>
@@ -300,7 +407,8 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
 
 
 // Main Post Ride Form Component
-const PostRideForm = ({ onClose, onPostSuccess }) => {
+const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
+  const { t } = useLanguage();
   const [fromLocation, setFromLocation] = useState("");
   const [toLocation, setToLocation] = useState("");
   const [departureDate, setDepartureDate] = useState("");
@@ -329,7 +437,9 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isFormValid) {
-      console.log("Ride Posted:", { fromLocation, toLocation, departureDate, mailService, freeSeats, departureType, departureTime, price });
+      const newRideData = { fromLocation, toLocation, departureDate, mailService, freeSeats, departureType, departureTime, price };
+      onAddRide(newRideData); // Pass the data up to the parent component
+      console.log("Ride Posted:", newRideData);
       setIsSubmitted(true);
       setTimeout(() => {
         onClose();
@@ -348,14 +458,14 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
     const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     return (
       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
-        <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col"> {/* Updated background */}
-          <div className="p-4 border-b border-neutral-200 flex justify-between items-center"> {/* Updated border */}
-            <h2 className="text-lg font-semibold text-gray-800">Select Departure Date</h2> {/* Updated text color */}
-            <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> <X className="h-6 w-6" /> </button> {/* Updated text color and hover */}
+        <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
+          <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-gray-800">{t('selectDepDate')}</h2>
+            <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> <X className="h-6 w-6" /> </button>
           </div>
           <div className="p-4 flex-grow overflow-y-auto custom-scrollbar">
-            <div className="text-center text-gray-800 text-lg font-medium mb-4">{currentMonth}</div> {/* Updated text color */}
-            <div className="grid grid-cols-7 gap-2 text-center text-neutral-600 text-sm mb-2"> {/* Updated text color */}
+            <div className="text-center text-gray-800 text-lg font-medium mb-4">{currentMonth}</div>
+            <div className="grid grid-cols-7 gap-2 text-center text-neutral-600 text-sm mb-2">
               <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
             </div>
             <div className="grid grid-cols-7 gap-2">
@@ -368,7 +478,7 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
                 const isPast = date < today; // Compare normalized dates
                 const dateString = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
                 return (
-                  <button key={day} onClick={() => { if (!isPast) { onSelectDate(dateString); onClose(); } }} className={`p-2 rounded-full text-gray-800 text-sm font-medium ${isToday ? 'bg-neutral-100 border border-neutral-300' : 'hover:bg-neutral-100'} ${isPast ? 'text-neutral-400 cursor-not-allowed' : ''}`} disabled={isPast} > {/* Updated text and background colors */}
+                  <button key={day} onClick={() => { if (!isPast) { onSelectDate(dateString); onClose(); } }} className={`p-2 rounded-full text-gray-800 text-sm font-medium ${isToday ? 'bg-neutral-100 border border-neutral-300' : 'hover:bg-neutral-100'} ${isPast ? 'text-neutral-400 cursor-not-allowed' : ''}`} disabled={isPast} >
                     {day}
                   </button>
                 );
@@ -383,60 +493,55 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 p-4 font-sans">
-      <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[90vh] flex flex-col"> {/* Updated background */}
-        <div className="p-4 border-b border-neutral-200 flex justify-between items-center"> {/* Updated border */}
-          <h2 className="text-lg font-semibold text-gray-800">Post a New Ride</h2> {/* Updated text color */}
-          <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> <X className="h-6 w-6" /> </button> {/* Updated text color and hover */}
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[90vh] flex flex-col">
+        <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-800">{t('postNewRide')}</h2>
+          <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> <X className="h-6 w-6" /> </button>
         </div>
         <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-4 space-y-6 custom-scrollbar">
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">From Where</label> {/* Updated text color */}
-            <div onClick={() => setShowFromModal(true)} className="w-full p-3 bg-neutral-100 rounded-xl text-neutral-600 flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" > {/* Updated background, text, focus ring */}
-              {fromLocation || "Select origin"}
-              <MapPin className="h-5 w-5 text-neutral-500" /> {/* Updated text color */}
+            <div onClick={() => setShowFromModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${fromLocation ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
+              {fromLocation || t('fromWhere')}
+              <MapPin className="h-5 w-5 text-neutral-500" />
             </div>
-            <LocationSelectModal title="Select Origin" isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setFromLocation} />
+            <LocationSelectModal title={t('selectOrigin')} isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setFromLocation} />
           </div>
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">To Where</label> {/* Updated text color */}
-            <div onClick={() => setShowToModal(true)} className="w-full p-3 bg-neutral-100 rounded-xl text-neutral-600 flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" > {/* Updated background, text, focus ring */}
-              {toLocation || "Select destination"}
-              <MapPin className="h-5 w-5 text-neutral-500" /> {/* Updated text color */}
+            <div onClick={() => setShowToModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${toLocation ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
+              {toLocation || t('toWhere')}
+              <MapPin className="h-5 w-5 text-neutral-500" />
             </div>
-            <LocationSelectModal title="Select Destination" isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setToLocation} />
+            <LocationSelectModal title={t('selectDestination')} isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setToLocation} />
           </div>
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Departure Date</label> {/* Updated text color */}
-            <div onClick={() => setShowDateModal(true)} className="w-full p-3 bg-neutral-100 rounded-xl text-neutral-600 flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" > {/* Updated background, text, focus ring */}
-              {departureDate || "Select date"}
-              <Calendar className="h-5 w-5 text-neutral-500" /> {/* Updated text color */}
+            <div onClick={() => setShowDateModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${departureDate ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
+              {departureDate || t('departureDate')}
+              <Calendar className="h-5 w-5 text-neutral-500" />
             </div>
             <DatePickerModal isOpen={showDateModal} onClose={() => setShowDateModal(false)} onSelectDate={setDepartureDate} />
           </div>
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Mail Service</label> {/* Updated text color */}
+            <label className="block text-neutral-800 text-sm font-medium mb-2">{t('mailService')}</label>
             <div className="space-y-3">
-              <button type="button" onClick={() => setMailService("yes")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${mailService === "yes" ? "bg-green-600/30 border border-green-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} > {/* Updated background and hover */}
+              <button type="button" onClick={() => setMailService("yes")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${mailService === "yes" ? "bg-green-600/30 border border-green-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="text-left">
-                  <p className="font-medium text-gray-800">Yes, I do carry Mail</p> {/* Updated text color */}
-                  <p className="text-sm text-neutral-600">I can transport both passengers and mail packages</p> {/* Updated text color */}
+                  <p className="font-medium text-gray-800">{t('yesCarryMail')}</p>
+                  <p className="text-sm text-neutral-600">{t('mailDescYes')}</p>
                 </div>
                 {mailService === "yes" && <CheckCircle className="h-6 w-6 text-green-400" />}
               </button>
-              <button type="button" onClick={() => setMailService("no")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${mailService === "no" ? "bg-green-600/30 border border-green-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} > {/* Updated to green for selection, not red */}
+              <button type="button" onClick={() => setMailService("no")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${mailService === "no" ? "bg-green-600/30 border border-green-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="text-left">
-                  <p className="font-medium text-gray-800">No, I do not carry Mail</p> {/* Updated text color */}
-                  <p className="text-sm text-neutral-600">I only transport passengers, no mail service</p> {/* Updated text color */}
+                  <p className="font-medium text-gray-800">{t('noCarryMail')}</p>
+                  <p className="text-sm text-neutral-600">{t('mailDescNo')}</p>
                 </div>
-                {mailService === "no" && <CheckCircle className="h-6 w-6 text-green-400" />} {/* Updated to green icon */}
+                {mailService === "no" && <CheckCircle className="h-6 w-6 text-green-400" />}
               </button>
-              {/* Removed "I carry Mail Only Not Riders" button */}
             </div>
           </div>
 
-          {/* New Free Seats Section */}
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Free Seats</label>
+            <label className="block text-neutral-800 text-sm font-medium mb-2">{t('freeSeats')}</label>
             <div className="flex justify-around space-x-2">
               {[1, 2, 3, 4].map((seats) => (
                 <button
@@ -456,30 +561,30 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
           </div>
 
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Departure Type</label> {/* Updated text color */}
+            <label className="block text-neutral-800 text-sm font-medium mb-2">{t('departureType')}</label>
             <div className="space-y-3">
-              <button type="button" onClick={() => { setDepartureType("fixed"); }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${departureType === "fixed" ? "bg-teal-600/30 border border-teal-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} > {/* Updated background and hover */}
+              <button type="button" onClick={() => { setDepartureType("fixed"); }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${departureType === "fixed" ? "bg-teal-600/30 border border-teal-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="flex items-center">
                   <Clock className="h-6 w-6 mr-3 text-teal-400" />
                   <div className="text-left">
-                    <p className="font-medium text-gray-800">Fixed Departure Time</p> {/* Updated text color */}
-                    <p className="text-sm text-neutral-600">Leave at a specific time regardless of seat availability</p> {/* Updated text color */}
+                    <p className="font-medium text-gray-800">{t('fixedDeparture')}</p>
+                    <p className="text-sm text-neutral-600">{t('fixedDepartureDesc')}</p>
                   </div>
                 </div>
                 {departureType === "fixed" && <CheckCircle className="h-6 w-6 text-teal-400" />}
               </button>
               {departureType === "fixed" && (
-                <div className="w-full p-3 bg-neutral-100 rounded-xl flex items-center border border-neutral-200 mt-2"> {/* Updated background and border */}
-                  <input type="time" value={departureTime} onChange={(e) => setDepartureTime(e.target.value)} className="flex-grow bg-transparent text-gray-800 placeholder-neutral-500 focus:outline-none" /> {/* Updated text and placeholder */}
-                  <Clock className="h-5 w-5 text-neutral-500 ml-2" /> {/* Updated text color */}
+                <div className="w-full p-3 bg-neutral-100 rounded-xl flex items-center border border-neutral-200 mt-2">
+                  <input type="time" value={departureTime} onChange={(e) => setDepartureTime(e.target.value)} className="flex-grow bg-transparent text-gray-800 placeholder-neutral-500 focus:outline-none" />
+                  <Clock className="h-5 w-5 text-neutral-500 ml-2" />
                 </div>
               )}
-              <button type="button" onClick={() => { setDepartureType("when_fills"); setDepartureTime(""); }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${departureType === "when_fills" ? "bg-teal-600/30 border border-teal-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} > {/* Updated background and hover */}
+              <button type="button" onClick={() => { setDepartureType("when_fills"); setDepartureTime(""); }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${departureType === "when_fills" ? "bg-teal-600/30 border border-teal-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="flex items-center">
                   <Users className="h-6 w-6 mr-3 text-teal-400" />
                   <div className="text-left">
-                    <p className="font-medium text-gray-800">Leave When Seats Fill</p> {/* Updated text color */}
-                    <p className="text-sm text-neutral-600">Depart as soon as all available seats are booked</p> {/* Updated text color */}
+                    <p className="font-medium text-gray-800">{t('whenFills')}</p>
+                    <p className="text-sm text-neutral-600">{t('whenFillsDesc')}</p>
                   </div>
                 </div>
                 {departureType === "when_fills" && <CheckCircle className="h-6 w-6 text-teal-400" />}
@@ -487,14 +592,14 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
             </div>
           </div>
           <div>
-            <label className="block text-neutral-800 text-sm font-medium mb-2">Price</label> {/* Updated text color */}
+            <label className="block text-neutral-800 text-sm font-medium mb-2">{t('price')}</label>
             <div className="relative">
-              <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Enter price" className="w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={price} onChange={(e) => { const value = e.target.value; if (/^[0-9]*$/.test(value)) { setPrice(value); } }} /> {/* Updated background, text, placeholder, focus ring */}
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">$</span> {/* Updated text color */}
+              <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder={t('enterPrice')} className="w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" value={price} onChange={(e) => { const value = e.target.value; if (/^[0-9]*$/.test(value)) { setPrice(value); } }} />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">$</span>
             </div>
           </div>
           <button type="submit" disabled={!isFormValid || isSubmitted} className={`w-full py-3 rounded-xl text-lg font-semibold transition-colors flex items-center justify-center shadow-lg ${isFormValid && !isSubmitted ? "bg-green-500 hover:bg-green-600 text-white" : isSubmitted ? "bg-green-700 text-white cursor-not-allowed" : "bg-gray-600 text-gray-400 cursor-not-allowed"}`} >
-            {isSubmitted ? ( <> <CheckCircle className="h-6 w-6 mr-2" /> Submitted! </> ) : ( "Post Ride" )}
+            {isSubmitted ? ( <> <CheckCircle className="h-6 w-6 mr-2" /> {t('submitted')} </> ) : ( t('postRide') )}
           </button>
         </form>
       </div>
@@ -502,436 +607,513 @@ const PostRideForm = ({ onClose, onPostSuccess }) => {
   );
 };
 
-// --- New, Advanced Navigation View Component ---
-// This component is currently not used in the main App rendering due to previous user request
-// but its styling has been updated for consistency if it were to be re-introduced.
-const NavigationView = ({ onClose }) => {
-  const [origin, setOrigin] = useState(null);
-  const [geoError, setGeoError] = useState(null);
-  const [destInput, setDestInput] = useState("");
-  const [destCoords, setDestCoords] = useState(null);
-  const [isGeocoding, setIsGeocoding] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [isRouting, setIsRouting] = useState(false);
-  const [instructions, setInstructions] = useState([]);
-  const [summary, setSummary] = useState({ distance: 0, time: 0 });
-  const [stepIndex, setStepIndex] = useState(0);
-  const [layers, setLayers] = useState({ drivers: false, gas: false, market: false, radar: false });
-  const [recenterTick, setRecenterTick] = useState(0);
-
-  // --- Helper Functions ---
-  const formatDistance = (m) => {
-    if (m === undefined || m === null) return "";
-    if (m >= 1000) return `${(m / 1000).toFixed(1)} km`;
-    return `${Math.round(m)} m`;
-  };
-  const formatTime = (s) => {
-    if (s === undefined || s === null) return "";
-    const min = Math.round(s / 60);
-    if (min < 60) return `${min} min`;
-    const h = Math.floor(min / 60);
-    const m = min % 60;
-    return `${h}h ${m}m`;
-  };
-
-  // --- Dynamic Icon for Current Step ---
-  const CurrentIcon = (() => {
-    const t = instructions[stepIndex]?.text?.toLowerCase() || "";
-    if (t.includes("left")) return ArrowLeft;
-    if (t.includes("right")) return ArrowRight;
-    if (t.includes("destination") || t.includes("arrive")) return Flag;
-    return ArrowUp;
-  })();
-  
-  // --- Calculate Trip Progress ---
-  const initialDistance = summary.distance;
-  const distanceCovered = instructions.slice(0, stepIndex).reduce((acc, curr) => acc + curr.distance, 0);
-  const tripProgress = initialDistance > 0 ? (distanceCovered / initialDistance) * 100 : 0;
-
-  // --- Effects ---
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setGeoError("Geolocation is not supported by this browser.");
-      return;
-    }
-    const id = navigator.geolocation.watchPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setOrigin({ lat: latitude, lng: longitude });
-        if (geoError) setGeoError(null);
-      },
-      (err) => {
-        if (err.code === 1) setGeoError("Geolocation permission denied. Enable it in your browser settings.");
-        else setGeoError("Could not retrieve location.");
-      },
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
-    );
-    return () => navigator.geolocation.clearWatch(id);
-  }, [geoError]);
-
-  useEffect(() => {
-    if (!isNavigating || instructions.length === 0 || stepIndex >= instructions.length - 1) return;
-    const timeout = setTimeout(() => setStepIndex((i) => i + 1), 6000); // Simulate progress every 6 seconds
-    return () => clearTimeout(timeout);
-  }, [isNavigating, stepIndex, instructions]);
-  
-  useEffect(() => { setIsRouting(isNavigating); }, [isNavigating]);
-
-  // --- Action Handlers ---
-  const geocodeDestination = async () => {
-    if (!destInput.trim()) return;
-    if (!origin) {
-      setGeoError("Waiting for your current location...");
-      return;
-    }
-    setIsGeocoding(true);
-    try {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destInput)}&limit=1`;
-      const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-      const data = await res.json();
-      if (!data?.length) throw new Error("Destination not found.");
-      const { lat, lon, display_name } = data[0];
-      setDestCoords({ lat: parseFloat(lat), lng: parseFloat(lon), name: display_name });
-      setIsNavigating(true);
-      setStepIndex(0);
-    } catch (e) {
-      setGeoError(e.message || "Geocoding failed. Try another address.");
-    } finally {
-      setIsGeocoding(false);
-    }
-  };
-
-  const endTrip = () => {
-    setIsNavigating(false);
-    setDestCoords(null);
-    setInstructions([]);
-    setSummary({ distance: 0, time: 0 });
-    setStepIndex(0);
-  };
-  
-  const handleRouteFound = ({ instructions, summary }) => {
-    setIsRouting(false);
-    setInstructions(instructions);
-    setSummary({ distance: summary.totalDistance, time: summary.totalTime });
-  };
-
-  // --- Map Component (Internal) ---
-  const MapComponent = ({ origin, destinationCoords, navigating, onRouteFound, showLayers, recenterTrigger }) => {
-    const mapRef = useRef(null);
-    const userMarkerRef = useRef(null);
-    const routingRef = useRef(null);
-    const gasLayerRef = useRef(null);
-    const marketLayerRef = useRef(null);
-    const radarLayerRef = useRef(null);
-    const driversLayerRef = useRef(null);
-
-    // Ensure Leaflet & LRM are loaded
-    const ensureLeaflet = () => new Promise<void>((resolve) => {
-      const ready = () =>
-        typeof window !== 'undefined' && window.L && window.L.Routing;
-      if (ready()) return resolve();
-      const i = setInterval(() => {
-        if (ready()) {
-          clearInterval(i);
-          resolve();
-        }
-      }, 100);
-    });
-
-    useEffect(() => {
-      let mounted = true;
-      (async () => {
-        await ensureLeaflet();
-        if (!mounted || !window.L) return;
-        if (!mapRef.current) {
-          const map = window.L.map('leaflet-map', { zoomControl: false, attributionControl: false });
-          mapRef.current = map;
-          // Using a light basemap for consistency
-          window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap & CARTO' }).addTo(map);
-          if (origin) map.setView([origin.lat, origin.lng], 14);
-          gasLayerRef.current = window.L.layerGroup().addTo(map);
-          marketLayerRef.current = window.L.layerGroup().addTo(map);
-          radarLayerRef.current = window.L.layerGroup().addTo(map);
-          driversLayerRef.current = window.L.layerGroup().addTo(map);
-        }
-      })();
-      return () => { mounted = false; };
-    }, []);
-
-    useEffect(() => {
-      (async () => {
-        await ensureLeaflet();
-        const L = window.L; const map = mapRef.current; if (!map || !origin) return;
-        if (!userMarkerRef.current) {
-          userMarkerRef.current = L.circleMarker([origin.lat, origin.lng], { radius: 8, color: '#34d399', weight: 3, fillColor: '#34d399', fillOpacity: 0.9 }).addTo(map);
-        } else userMarkerRef.current.setLatLng([origin.lat, origin.lng]);
-        if (!navigating) map.setView([origin.lat, origin.lng], 14);
-      })();
-    }, [origin, navigating]);
-
-    useEffect(() => {
-      if (!recenterTrigger || !origin || !mapRef.current) return;
-      mapRef.current.setView([origin.lat, origin.lng], 15, { animate: true });
-    }, [recenterTrigger]);
-
-    useEffect(() => {
-      (async () => {
-        await ensureLeaflet();
-        const L = window.L; const map = mapRef.current; if (!map) return;
-        if (routingRef.current) { routingRef.current.setWaypoints([]); map.removeControl(routingRef.current); routingRef.current = null; }
-        if (navigating && origin && destinationCoords) {
-          const ctrl = L.Routing.control({
-            waypoints: [L.latLng(origin.lat, origin.lng), L.latLng(destinationCoords.lat, destinationCoords.lng)],
-            routeWhileDragging: false, addWaypoints: false, show: false, fitSelectedRoutes: true,
-            lineOptions: { styles: [{ color: '#3b82f6', opacity: 0.95, weight: 6 }] },
-            createMarker: (_i, wp) => L.marker(wp.latLng, { opacity: 0.9 })
-          }).addTo(map);
-          routingRef.current = ctrl;
-          ctrl.on('routesfound', function(e) {
-            const r = e.routes?.[0];
-            if (!r) return;
-            const instr = (r.instructions || []).map((it) => ({ text: it.text, distance: it.distance, time: it.time }));
-            onRouteFound({ instructions: instr, summary: r.summary });
-          });
-        }
-      })();
-    }, [navigating, origin?.lat, origin?.lng, destinationCoords?.lat, destinationCoords?.lng]);
-
-    const fetchAndAddPOIs = async (layerRef, query, color) => {
-        await ensureLeaflet();
-        const L = window.L;
-        const map = mapRef.current;
-        if (!map || !layerRef.current) return;
-        layerRef.current.clearLayers();
-
-        try {
-            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(`[out:json];${query}(around:2000,${origin.lat},${origin.lng});out center;`)}`;
-            const res = await fetch(url);
-            if (!res.ok) throw new Error('Overpass request failed');
-            const data = await res.json();
-            data.elements.forEach((el) => {
-                const lat = el.lat || el.center?.lat;
-                const lon = el.lon || el.center?.lon;
-                if (lat && lon) {
-                    L.circleMarker([lat, lon], { radius: 6, color, weight: 2, fillColor: color, fillOpacity: 0.85 }).addTo(layerRef.current);
-                }
-            });
-        } catch (e) {
-            console.error("POI Fetch Error:", e);
-        }
-    };
-
-    useEffect(() => { if (showLayers.gas && origin) fetchAndAddPOIs(gasLayerRef, 'node["amenity"="fuel"]', '#f59e0b'); else gasLayerRef.current?.clearLayers(); }, [showLayers.gas, origin]);
-    useEffect(() => { if (showLayers.market && origin) fetchAndAddPOIs(marketLayerRef, '(node["shop"="supermarket"];node["amenity"="marketplace"];)', '#3b82f6'); else marketLayerRef.current?.clearLayers(); }, [showLayers.market, origin]);
-    useEffect(() => { if (showLayers.radar && origin) fetchAndAddPOIs(radarLayerRef, 'node["highway"="speed_camera"]', '#ef4444'); else radarLayerRef.current?.clearLayers(); }, [showLayers.radar, origin]);
-    
-    useEffect(() => {
-        (async () => {
-            await ensureLeaflet();
-            if (!driversLayerRef.current || !origin) return;
-            driversLayerRef.current.clearLayers();
-            if (showLayers.drivers) {
-                for (let i = 0; i < 10; i++) {
-                    const lat = origin.lat + (Math.random() - 0.5) * 0.008;
-                    const lng = origin.lng + (Math.random() - 0.5) * 0.008;
-                    window.L.circleMarker([lat, lng], { radius: 7, color: '#22c55e', weight: 2, fillColor: '#22c55e', fillOpacity: 0.85 }).addTo(driversLayerRef.current);
-                }
-            }
-        })();
-    }, [showLayers.drivers, origin]);
-
-    return <div id="leaflet-map" className="absolute inset-0" />;
-  };
-
+// --- Seat Indicator Component ---
+const SeatIndicator = ({ totalSeats = 4, availableSeats }) => {
   return (
-    <div className="relative h-full w-full text-gray-800 font-sans"> {/* Changed text color for light background */}
-      <MapComponent origin={origin} destinationCoords={destCoords} navigating={isNavigating} onRouteFound={handleRouteFound} showLayers={layers} recenterTrigger={recenterTick} />
-      
-      {/* Header */}
-      <header className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/50 to-transparent flex items-center justify-between z-10">
-        <button onClick={onClose} className="p-2 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm"> <ChevronLeft className="h-6 w-6 text-white" /> </button> {/* Ensure icon is visible on dark gradient */}
-        <div className="text-center">
-            {isNavigating && destCoords?.name && <p className="text-sm text-white/80 truncate max-w-[60vw]">To: {destCoords.name}</p>}
-        </div>
-        <div className="w-10 h-10"/> {/* Placeholder for alignment */}
-      </header>
-
-      {/* Side Controls */}
-      <aside className="absolute right-4 top-24 z-10 flex flex-col space-y-2">
-        <button onClick={() => setLayers((s) => ({ ...s, drivers: !s.drivers }))} className={`p-3 rounded-xl backdrop-blur bg-white/40 border border-neutral-200 hover:bg-white/50 transition-all shadow-md ${layers.drivers ? 'ring-2 ring-neutral-300 bg-white/60' : ''}`} aria-label="Toggle drivers nearby"> <Users className="h-5 w-5 text-gray-800" /> </button> {/* Updated background, border, text */}
-        <button onClick={() => setLayers((s) => ({ ...s, gas: !s.gas }))} className={`p-3 rounded-xl backdrop-blur bg-white/40 border border-neutral-200 hover:bg-white/50 transition-all shadow-md ${layers.gas ? 'ring-2 ring-neutral-300 bg-white/60' : ''}`} aria-label="Toggle gas stations nearby"> <Fuel className="h-5 w-5 text-gray-800" /> </button> {/* Updated background, border, text */}
-        <button onClick={() => setLayers((s) => ({ ...s, market: !s.market }))} className={`p-3 rounded-xl backdrop-blur bg-white/40 border border-neutral-200 hover:bg-white/50 transition-all shadow-md ${layers.market ? 'ring-2 ring-neutral-300 bg-white/60' : ''}`} aria-label="Toggle markets nearby"> <Store className="h-5 w-5 text-gray-800" /> </button> {/* Updated background, border, text */}
-        <button onClick={() => setLayers((s) => ({ ...s, radar: !s.radar }))} className={`p-3 rounded-xl backdrop-blur bg-white/40 border border-neutral-200 hover:bg-white/50 transition-all shadow-md ${layers.radar ? 'ring-2 ring-neutral-300 bg-white/60' : ''}`} aria-label="Toggle speed cameras"> <Radar className="h-5 w-5 text-gray-800" /> </button> {/* Updated background, border, text */}
-      </aside>
-      
-      {/* Recenter Button */}
-      <div className="absolute left-4 bottom-32 z-10">
-        <button onClick={() => setRecenterTick((n) => n + 1)} className="p-3 rounded-xl backdrop-blur bg-white/40 border border-neutral-200 hover:bg-white/50 shadow-md" aria-label="Recenter on me"> <LocateFixed className="h-5 w-5 text-gray-800" /> </button> {/* Updated background, border, text */}
+    <div className="flex flex-col items-center">
+      <div className="flex space-x-2">
+        {Array.from({ length: totalSeats }).map((_, index) => {
+          const isAvailable = index < availableSeats;
+          return (
+            <div
+              key={index}
+              className={`w-6 h-6 rounded-full border-2 ${
+                isAvailable
+                  ? 'bg-green-700 border-green-600'
+                  : 'border-gray-400'
+              }`}
+            ></div>
+          );
+        })}
       </div>
-
-      {/* Bottom Panels */}
-      {!isNavigating ? (
-        // Search Panel
-        <section className="absolute bottom-0 left-0 right-0 p-4 z-10">
-          <div className="bg-white/80 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-neutral-200"> {/* Updated background and border */}
-            <h2 className="text-lg font-semibold mb-3 text-gray-800">Where to?</h2> {/* Updated text color */}
-            <div className="flex gap-2">
-              <input value={destInput} onChange={(e) => setDestInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && geocodeDestination()} placeholder="Enter address or place" className="w-full p-3 bg-neutral-100 rounded-lg text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#E1F87E]" disabled={isGeocoding} /> {/* Updated background, text, placeholder, focus ring */}
-              <button onClick={geocodeDestination} className="p-3 rounded-lg bg-[#E1F87E] text-[#121212] hover:bg-opacity-80 disabled:bg-opacity-50 disabled:cursor-not-allowed transition-colors shadow-md" disabled={!origin || !destInput || isGeocoding}>
-                {isGeocoding ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
-              </button>
-            </div>
-            {geoError && <p className="text-red-600 text-sm mt-3">{geoError}</p>} {/* Updated text color */}
-            {!geoError && !origin && <p className="text-amber-600 text-sm mt-3 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin"/> Acquiring current location...</p>} {/* Updated text color */}
-            {!geoError && origin && <p className="text-emerald-600 text-sm mt-3">Ready to navigate.</p>} {/* Updated text color */}
-          </div>
-        </section>
-      ) : (
-        // Navigation Panel
-        <section className="absolute bottom-0 left-0 right-0 p-4 z-10">
-          <div className="bg-white/80 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-neutral-200"> {/* Updated background and border */}
-            {/* Instruction */}
-            <div className="flex items-center gap-4">
-              <div className="bg-[#E1F87E] p-3 rounded-xl shadow-md"> <CurrentIcon className="h-8 w-8 text-[#121212]" /> </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold text-gray-800">{formatDistance(instructions[stepIndex]?.distance)}</h3> {/* Updated text color */}
-                <p className="text-neutral-700 leading-snug">{instructions[stepIndex]?.text || 'Starting navigation...'}</p> {/* Updated text color */}
-              </div>
-              <div className="flex items-center gap-2">
-                <button aria-label="Previous step" onClick={() => setStepIndex((i) => Math.max(0, i - 1))} className="p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 disabled:opacity-40 shadow-sm" disabled={stepIndex <= 0}> {/* Updated background and border */}
-                  <ArrowLeft className="h-5 w-5 text-gray-800" /> {/* Updated text color */}
-                </button>
-                <button aria-label="Next step" onClick={() => setStepIndex((i) => Math.min(instructions.length - 1, i + 1))} className="p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 disabled:opacity-40 shadow-sm" disabled={stepIndex >= instructions.length - 1}> {/* Updated background and border */}
-                  <ArrowRight className="h-5 w-5 text-gray-800" /> {/* Updated text color */}
-                </button>
-                {isRouting && <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />} {/* Updated text color */}
-              </div>
-            </div>
-              {/* Summary & End Button */}
-            <div className="flex justify-between items-center pt-2 border-t border-neutral-200"> {/* Updated border */}
-                <p className="text-neutral-600 text-sm"> {/* Updated text color */}
-                  {formatDistance(summary.distance)} • ETA {formatTime(summary.time)}
-                </p>
-                <button onClick={endTrip} className="flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-600 transition-colors shadow-sm"> {/* Updated text color */}
-                  <XCircle className="h-5 w-5" />
-                  End
-                </button>
-            </div>
-          </div>
-        </section>
-      )}
+      <p className="text-xs text-neutral-600 mt-1">{availableSeats} seats available</p>
     </div>
   );
 };
 
+// --- Edit Profile Modal ---
+const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
+    const { t } = useLanguage();
+    const [formData, setFormData] = useState(user);
 
-const DriverDashboard = () => {
+    useEffect(() => {
+        setFormData(user);
+    }, [user]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+        onClose();
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
+                <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">{t('editProfile')}</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100"> <X className="h-6 w-6" /> </button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-4 space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">{t('fullName')}</label>
+                        <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">{t('username')}</label>
+                        <input type="text" name="username" value={formData.username} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">{t('gender')}</label>
+                        <select name="gender" value={formData.gender} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]">
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div className="flex justify-end pt-4">
+                        <button type="submit" className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">{t('saveChanges')}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+// --- Edit Car Modal ---
+const EditCarModal = ({ car, isOpen, onClose, onSave }) => {
+    const { t } = useLanguage();
+    const [formData, setFormData] = useState(car);
+
+    useEffect(() => {
+        setFormData(car);
+    }, [car]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+        onClose();
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
+                <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">{t('editVehicle')}</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100"> <X className="h-6 w-6" /> </button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-4 space-y-4">
+                    <input type="text" name="brand" placeholder="Brand" value={formData.brand} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    <input type="text" name="model" placeholder="Model" value={formData.model} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    <input type="number" name="year" placeholder="Year" value={formData.year} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    <input type="text" name="color" placeholder="Color" value={formData.color} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    <input type="text" name="plate" placeholder={t('licensePlate')} value={formData.plate} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
+                    <div className="flex justify-end pt-4">
+                        <button type="submit" className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">{t('saveChanges')}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+// --- Generic Settings Modal ---
+const SettingsModal = ({ title, isOpen, onClose, children }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col h-auto max-h-[80vh]">
+                <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100"> <X className="h-6 w-6" /> </button>
+                </div>
+                <div className="p-4 flex-grow overflow-y-auto custom-scrollbar">
+                    {children || <p className="text-neutral-500">Settings content goes here.</p>}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+// --- Profile Page Component ---
+const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
+    const { t, language, setLanguage } = useLanguage();
+    const [showEditProfile, setShowEditProfile] = useState(false);
+    const [showEditCar, setShowEditCar] = useState(false);
+    const [showSettingsModal, setShowSettingsModal] = useState(false);
+    const [settingsModalTitle, setSettingsModalTitle] = useState("");
+    const [settingsModalContent, setSettingsModalContent] = useState(null);
+
+    const handleOpenSettings = (title, content) => {
+        setSettingsModalTitle(title);
+        setSettingsModalContent(content);
+        setShowSettingsModal(true);
+    };
+
+    const InfoItem = ({ icon: Icon, label, value }) => (
+        <div className="flex items-center justify-between py-3">
+            <div className="flex items-center">
+                <Icon className="h-5 w-5 text-neutral-500 mr-3" />
+                <span className="text-sm text-neutral-600">{label}</span>
+            </div>
+            <span className="text-sm font-medium text-gray-800">{value}</span>
+        </div>
+    );
+
+    const SettingsItem = ({ icon: Icon, label, action = () => {}, value }) => (
+        <button onClick={action} className="w-full flex items-center justify-between py-3 text-left hover:bg-neutral-50 rounded-lg px-2 transition-colors">
+            <div className="flex items-center">
+                <Icon className="h-5 w-5 text-neutral-500 mr-3" />
+                <span className="text-sm font-medium text-gray-800">{label}</span>
+            </div>
+            <div className="flex items-center">
+                {value && <span className="text-sm text-neutral-500 mr-2">{value}</span>}
+                <ChevronRight className="h-5 w-5 text-neutral-400" />
+            </div>
+        </button>
+    );
+
+    const RideHistoryContent = () => (
+        <div>
+            <h3 className="font-semibold mb-2">{t('pastRides')}</h3>
+            {myRides.filter(r => r.status === 'completed').length > 0 ? myRides.filter(r => r.status === 'completed').map(ride => (
+                <div key={ride.id} className="mb-2 p-2 border-b">
+                    <p>{ride.fromLocation} to {ride.toLocation}</p>
+                    <p className="text-xs text-neutral-500">{ride.departureDate}</p>
+                </div>
+            )) : <p className="text-neutral-500">{t('noCompletedRides')}</p>}
+        </div>
+    );
+    
+    const UpcomingRidesContent = () => (
+         <div>
+            <h3 className="font-semibold mb-2">{t('upcomingRides')}</h3>
+            {myRides.filter(r => r.status === 'upcoming').length > 0 ? myRides.filter(r => r.status === 'upcoming').map(ride => (
+                <div key={ride.id} className="mb-2 p-2 border-b">
+                    <p>{ride.fromLocation} to {ride.toLocation}</p>
+                    <p className="text-xs text-neutral-500">{ride.departureDate}</p>
+                </div>
+            )) : <p className="text-neutral-500">{t('noUpcomingRides')}</p>}
+        </div>
+    );
+
+    const LanguageSelectionContent = ({ currentLanguage, onSelectLanguage }) => {
+        const languages = [
+            { key: "uz", name: t('uzbek')}, 
+            { key: "en", name: t('english')}, 
+            { key: "ru", name: t('russian')}
+        ];
+        return (
+            <div className="space-y-2">
+                {languages.map(lang => (
+                    <button
+                        key={lang.key}
+                        onClick={() => {
+                            onSelectLanguage(lang.key);
+                            setShowSettingsModal(false);
+                        }}
+                        className={`w-full p-3 rounded-lg text-left transition-colors flex justify-between items-center ${currentLanguage === lang.key ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-neutral-100'}`}
+                    >
+                        {lang.name}
+                        {currentLanguage === lang.key && <CheckCircle className="h-5 w-5" />}
+                    </button>
+                ))}
+            </div>
+        );
+    };
+
+    return (
+        <div className="p-4 space-y-6 text-gray-800 font-sans pb-20">
+            <EditProfileModal user={user} isOpen={showEditProfile} onClose={() => setShowEditProfile(false)} onSave={onUpdateUser} />
+            <EditCarModal car={user.car} isOpen={showEditCar} onClose={() => setShowEditCar(false)} onSave={onUpdateCar} />
+            <SettingsModal title={settingsModalTitle} isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)}>
+                {settingsModalContent}
+            </SettingsModal>
+
+            {/* --- Profile Header --- */}
+            <div className="flex flex-col items-center space-y-3">
+                <div className="relative">
+                    <Avatar src={user.profilePicture} size="w-24 h-24" initials="JD" bgColor="bg-gray-700" />
+                    <button onClick={() => setShowEditProfile(true)} className="absolute bottom-0 right-0 bg-white p-1.5 rounded-full shadow-md hover:bg-neutral-100 transition-colors">
+                        <Edit2 className="h-4 w-4 text-gray-800" />
+                    </button>
+                </div>
+                <h2 className="text-2xl font-bold">{user.fullName}</h2>
+                <div className="flex items-center space-x-4 text-sm text-neutral-600">
+                    <div className="flex items-center">
+                        <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                        <span className="font-semibold">{user.rating}</span> ({user.reviews} {t('reviews')})
+                    </div>
+                    <span>|</span>
+                    <span>{user.completedRides} {t('rides')}</span>
+                </div>
+            </div>
+
+            {/* --- Basic Info Card --- */}
+            <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200">
+                <InfoItem icon={User} label={t('username')} value={`@${user.username}`} />
+                <InfoItem icon={Users} label={t('gender')} value={user.gender} />
+                <InfoItem icon={Calendar} label={t('memberSince')} value={user.memberSince} />
+            </div>
+
+            {/* --- Contact & Verification Card --- */}
+            <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200">
+                <h3 className="text-sm font-semibold mb-2 text-neutral-800">{t('contactVerification')}</h3>
+                <InfoItem icon={Phone} label={t('phone')} value={user.phone} />
+                <InfoItem icon={Mail} label={t('email')} value={user.email} />
+                <div className="flex items-center justify-between py-3">
+                    <div className="flex items-center">
+                        <ShieldCheck className="h-5 w-5 text-neutral-500 mr-3" />
+                        <span className="text-sm text-neutral-600">{t('idVerification')}</span>
+                    </div>
+                    <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${user.idVerified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {user.idVerified ? t('verified') : t('notVerified')}
+                    </span>
+                </div>
+            </div>
+            
+            {/* --- Driver Details Card --- */}
+            <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200">
+                <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-sm font-semibold text-neutral-800">{t('driverDetails')}</h3>
+                    <button onClick={() => setShowEditCar(true)} className="p-1.5 rounded-full hover:bg-neutral-100 transition-colors">
+                        <Edit2 className="h-4 w-4 text-gray-800" />
+                    </button>
+                </div>
+                <InfoItem icon={Car} label={t('vehicle')} value={`${user.car.brand} ${user.car.model} (${user.car.year})`} />
+                <InfoItem icon={FileText} label={t('licensePlate')} value={user.car.plate} />
+                 <div className="flex items-center justify-between py-3">
+                    <div className="flex items-center">
+                        <ShieldCheck className="h-5 w-5 text-neutral-500 mr-3" />
+                        <span className="text-sm text-neutral-600">{t('drivingLicense')}</span>
+                    </div>
+                    <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${user.licenseVerified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {user.licenseVerified ? t('verified') : t('notVerified')}
+                    </span>
+                </div>
+            </div>
+
+            {/* --- Activity & History --- */}
+            <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
+                 <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('activity')}</h3>
+                 <SettingsItem icon={History} label={t('rideHistory')} action={() => handleOpenSettings(t('rideHistory'), <RideHistoryContent />)} />
+                 <SettingsItem icon={Calendar} label={t('upcomingRides')} action={() => handleOpenSettings(t('upcomingRides'), <UpcomingRidesContent />)} />
+            </div>
+
+
+            {/* --- Settings & Preferences --- */}
+            <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
+                <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('settings')}</h3>
+                <SettingsItem 
+                    icon={Languages} 
+                    label={t('language')} 
+                    value={t(language)}
+                    action={() => handleOpenSettings(t('language'), <LanguageSelectionContent currentLanguage={language} onSelectLanguage={setLanguage} />)} 
+                />
+                <SettingsItem icon={Bell} label={t('notifications')} action={() => handleOpenSettings(t('notifications'))} />
+                <SettingsItem icon={CreditCard} label={t('paymentMethods')} action={() => handleOpenSettings(t('paymentMethods'))} />
+                <SettingsItem icon={Shield} label={t('privacy')} action={() => handleOpenSettings(t('privacy'))} />
+            </div>
+
+            {/* --- Security --- */}
+            <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
+                <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('security')}</h3>
+                <SettingsItem icon={Lock} label={t('changePassword')} action={() => handleOpenSettings(t('changePassword'))} />
+                <SettingsItem icon={LogOut} label={t('logout')} action={() => handleOpenSettings(t('logout'))} />
+            </div>
+        </div>
+    );
+};
+
+const LanguageProvider = ({ children }) => {
+    const [language, setLanguage] = useState("en"); // 'en', 'uz', 'ru'
+
+    const t = (key) => {
+        return translations[language][key] || key;
+    };
+
+    const value = { language, setLanguage, t };
+
+    return (
+        <LanguageContext.Provider value={value}>
+            {children}
+        </LanguageContext.Provider>
+    );
+};
+
+const AppContent = () => {
+  const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [headerTitle, setHeaderTitle] = useState("Ride"); // State for dynamic header title
+  const [headerTitle, setHeaderTitle] = useState(t('ride'));
   const [showPostRide, setShowPostRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
+  const [myRides, setMyRides] = useState([
+    { id: 1, fromLocation: "Tashkent", toLocation: "Samarkand", departureDate: "2025-08-15", departureTime: "08:00", price: "10", freeSeats: 2, status: "completed" },
+    { id: 2, fromLocation: "Bukhara", toLocation: "Khiva", departureDate: "2025-08-16", departureTime: "10:00", price: "15", freeSeats: 1, status: "completed" },
+  ]);
+  const [userData, setUserData] = useState({
+        profilePicture: "https://placehold.co/100x100/E1F87E/121212?text=JD",
+        fullName: "John Doe",
+        username: "johndoe99",
+        gender: "Male",
+        dob: "1990-05-15",
+        phone: "+998 90 123 45 67",
+        email: "john.doe@example.com",
+        idVerified: true,
+        rating: 4.9,
+        reviews: 124,
+        memberSince: "2022-01-20",
+        completedRides: 215,
+        car: {
+            brand: "Chevrolet",
+            model: "Cobalt",
+            year: 2023,
+            color: "White",
+            plate: "01 A 123 BC"
+        },
+        licenseVerified: true,
+        preferences: {
+            smoking: "No",
+            music: "Pop, Rock"
+        },
+    });
 
-  // Function to handle back button logic
+  const handleUpdateUser = (updatedData) => {
+    setUserData(prev => ({...prev, ...updatedData}));
+  };
+
+  const handleUpdateCar = (updatedCarData) => {
+    setUserData(prev => ({...prev, car: updatedCarData}));
+  };
+
+  // Function to add a new ride to the state
+  const handleAddRide = (newRide) => {
+    setMyRides(prevRides => [...prevRides, { ...newRide, id: Date.now(), status: "upcoming" }]);
+  };
+
   const handleBack = () => {
     if (showPostRide) {
       setShowPostRide(false);
-      setHeaderTitle("Ride"); // Go back to "Ride" when closing PostRide
+      setHeaderTitle(t('ride'));
     } else if (showMessages) {
       setShowMessages(false);
-      setHeaderTitle("Ride"); // Go back to "Ride" when closing Messages
+      setHeaderTitle(t('ride'));
     } else {
-      // Handle actual navigation back if this were a real router setup
-      // For this mock, we'll just set it back to "Ride"
-      setHeaderTitle("Ride");
+      setHeaderTitle(t('ride'));
       setActiveTab("dashboard");
     }
   };
 
-  // Update header title when activeTab changes
   useEffect(() => {
     switch (activeTab) {
-      case "dashboard":
-        setHeaderTitle("Ride");
-        break;
-      case "my-lines":
-        setHeaderTitle("My lines");
-        break;
-      case "profile":
-        setHeaderTitle("Profile");
-        break;
-      default:
-        setHeaderTitle("Driver");
+      case "dashboard": setHeaderTitle(t('ride')); break;
+      case "my-lines": setHeaderTitle(t('myLines')); break;
+      case "profile": setHeaderTitle(t('profile')); break;
+      default: setHeaderTitle("Driver");
     }
-  }, [activeTab]);
+  }, [activeTab, language]);
 
   const bottomNavItems = [
-    { id: "dashboard", label: "Ride", icon: MapPin },
-    { id: "my-lines", label: "My lines", icon: Navigation }, // Moved My lines to bottom nav
-    { id: "profile", label: "Profile", icon: User },
+    { id: "dashboard", label: t('ride'), icon: MapPin },
+    { id: "my-lines", label: t('myLines'), icon: Navigation },
+    { id: "profile", label: t('profile'), icon: User },
   ];
 
   const renderContent = () => {
-    if (showMessages) { return <MessageDashboard onClose={() => { setShowMessages(false); setHeaderTitle("Ride"); }} />; }
-    if (showPostRide) { return <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle("Ride"); }} onPostSuccess={() => setHeaderTitle("Ride")} />; }
+    if (showMessages) { return <MessageDashboard onClose={() => { setShowMessages(false); setHeaderTitle(t('ride')); }} />; }
+    if (showPostRide) { return <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle(t('ride')); }} onPostSuccess={() => setHeaderTitle(t('ride'))} onAddRide={handleAddRide} />; }
 
     switch (activeTab) {
       case "dashboard": return (
           <div className="p-4 space-y-4 text-gray-800 font-sans">
             <div className="text-center py-4">
-              <h2 className="text-sm text-neutral-600">Total Earnings</h2>
+              <h2 className="text-sm text-neutral-600">{t('totalEarnings')}</h2>
               <p className="text-5xl font-extrabold mt-1 mb-4 text-gray-800">$0.00</p>
               <div className="flex justify-around items-center">
-                <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle("New Ride"); }} > {/* Update header on click */}
+                <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle(t('newRide')); }} >
                   <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
                     <Plus className="h-7 w-7 text-gray-800" />
                   </div>
-                  <span className="text-xs text-neutral-600">New Ride</span>
+                  <span className="text-xs text-neutral-600">{t('newRide')}</span>
                 </div>
-                {/* My lines moved to bottom nav */}
                 <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105">
                   <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
                     <BarChart className="h-7 w-7 text-[#E1F87E]" />
                   </div>
-                  <span className="text-xs text-neutral-600">Stats</span>
+                  <span className="text-xs text-neutral-600">{t('stats')}</span>
                 </div>
                 <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105">
                   <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
                     <Shield className="h-7 w-7 text-[#E1F87E]" />
                   </div>
-                  <span className="text-xs text-neutral-600">Safety</span>
+                  <span className="text-xs text-neutral-600">{t('safety')}</span>
                 </div>
               </div>
             </div>
             <h3 className="flex items-center text-sm font-semibold mb-2 text-neutral-800">
               <Calendar className="h-4 w-4 mr-2 text-neutral-700" />
-              Your activity
+              {t('yourActivity')}
             </h3>
             <div className="p-4 bg-white border border-neutral-200 rounded-2xl space-y-3 shadow-lg">
               <div className="flex justify-between items-center text-sm">
                 <div className="flex flex-col">
-                  <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> Ggg </div>
-                  <div className="flex items-center text-gray-800 ml-6 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> Ttgt </div>
+                  <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> Example Origin </div>
+                  <div className="flex items-center text-gray-800 ml-6 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> Example Destination </div>
                   <div className="flex items-center text-neutral-600 mt-2"> <User className="h-4 w-4 mr-2" /> 2/4 passengers </div>
                   <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> 31.07.2025 <Clock className="h-4 w-4 mx-2" /> 16:15 </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full"> Active </span>
+                  <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full"> {t('active')} </span>
                   <button className="p-1 rounded-full hover:bg-neutral-100 transition-colors"> <Plus className="h-5 w-5 mt-2 text-neutral-500 rotate-45" /> </button>
                 </div>
-              </div>
-              <div className="h-px bg-neutral-200 my-3" />
-              <div className="flex justify-between items-center text-sm text-neutral-600">
-                <div className="flex flex-col">
-                  <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2" /> wfwewrf </div>
-                  <div className="flex items-center text-gray-800 ml-6 font-medium"> <MapPin className="h-4 w-4 mr-2" /> fwewfw </div>
-                </div>
-                <div className="text-xs">24.07.2025</div>
               </div>
             </div>
           </div>
         );
-      case "my-lines": return ( <div className="p-4 text-gray-800 font-sans"> <h2 className="text-xl font-bold">My Lines Content</h2> <p className="text-neutral-600 mt-2">Manage your saved routes and lines here.</p> </div> );
-      case "profile": return ( <div className="p-4 text-gray-800 font-sans"> <h2 className="text-xl font-bold">Advanced Profile Content</h2> <p className="text-neutral-600 mt-2">Manage your account details here.</p> </div> );
+      case "my-lines": return (
+        <div className="p-4 text-gray-800 font-sans space-y-4">
+            {myRides.filter(r => r.status === 'upcoming').length > 0 ? (
+                myRides.filter(r => r.status === 'upcoming').map(ride => (
+                    <div key={ride.id} className="p-4 bg-white border border-neutral-200 rounded-2xl shadow-lg">
+                        <div className="flex justify-between items-center text-sm">
+                             <div className="flex flex-col space-y-1">
+                                <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> {ride.fromLocation} </div>
+                                <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> {ride.toLocation} </div>
+                                <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> {ride.departureDate} {ride.departureTime && <><Clock className="h-4 w-4 mx-2" /> {ride.departureTime}</>} </div>
+                            </div>
+                            
+                            <SeatIndicator availableSeats={ride.freeSeats} />
+
+                            <div className="flex flex-col items-end space-y-2">
+                                <span className="text-xl font-bold text-gray-800">${ride.price}</span>
+                                <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full">{t('active')}</span>
+                            </div>
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <div className="text-center py-10">
+                    <h2 className="text-xl font-bold">{t('noLines')}</h2>
+                    <p className="text-neutral-600 mt-2">{t('postRidePrompt')}</p>
+                </div>
+            )}
+        </div>
+      );
+      case "profile": return ( <ProfilePage user={{...userData, language}} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} myRides={myRides} /> );
       default: return null;
     }
   };
@@ -939,27 +1121,23 @@ const DriverDashboard = () => {
   return (
     <div className="h-screen bg-[#F8F8F8] text-gray-800 flex flex-col font-sans">
       <CustomScrollbarStyles />
-      {/* Header is always visible unless PostRide or Messages modals are open */}
-      <header className="bg-white p-3 border-b border-neutral-200 flex justify-between items-center z-20 shadow-lg">
-        {/* Back button logic */}
+      <header className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between z-20 shadow-lg relative">
         {(showPostRide || showMessages || activeTab !== "dashboard") && (
           <button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
             <ChevronLeft className="h-8 w-8" />
           </button>
         )}
-        {/* Placeholder for alignment if no back button */}
         {!(showPostRide || showMessages || activeTab !== "dashboard") && (
-          <div className="w-8 h-8"></div>
+          <div className="w-8 h-8"></div> // Placeholder for alignment
         )}
-        <h1 className="text-xl font-bold text-gray-800">{headerTitle}</h1>
-        <button onClick={() => setShowMessages(!showMessages)} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
+        <h1 className="absolute left-1/2 -translate-x-1/2 text-xl font-bold text-gray-800">{headerTitle}</h1>
+         <button onClick={() => setShowMessages(true)} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
           <MessageCircle className="h-8 w-8" />
         </button>
       </header>
       <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative rounded-t-3xl overflow-hidden">
         {renderContent()}
       </main>
-      {/* Footer is always visible unless PostRide or Messages modals are open */}
       {!showMessages && !showPostRide && (
         <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-lg z-10">
           <div className="flex justify-around py-2">
@@ -980,167 +1158,10 @@ const DriverDashboard = () => {
   );
 };
 
-// --- Main App component to simulate routing for the Welcome and DriverDashboard ---
-const App = () => {
-  const [currentPage, setCurrentPage] = useState("welcome");
-
-  // Mocking react-router-dom's useNavigate for demonstration purposes
-  const useNavigate = () => {
-    return (path) => {
-      if (path === "/rider-dashboard") {
-        setCurrentPage("rider-dashboard");
-      } else if (path === "/driver-dashboard") {
-        setCurrentPage("driver-dashboard");
-      } else {
-        setCurrentPage("welcome");
-      }
-    };
-  };
-
-  // The Welcome component to choose a role, styled like Back Market's mobile UI
-  const Welcome = () => {
-    const [selectedType, setSelectedType] = useState(null);
-    const navigate = useNavigate();
-
-    // Function to handle Telegram authentication callback
-    const onTelegramAuth = (user) => {
-      console.log("Telegram Auth User:", user);
-      // Simulate role assignment based on Telegram user data
-      // In a real app, you'd likely have a backend to manage user roles
-      if (user.username && user.username.toLowerCase().includes("driver")) {
-        navigate("/driver-dashboard");
-      } else {
-        navigate("/rider-dashboard");
-      }
-    };
-
-    useEffect(() => {
-      // Dynamically load the Telegram Login Widget script
-      const scriptId = "telegram-login-script";
-      if (!document.getElementById(scriptId)) {
-        const script = document.createElement("script");
-        script.id = scriptId;
-        script.src = "https://telegram.org/js/telegram-widget.js?22";
-        script.setAttribute("data-telegram-login", "YOUR_BOT_USERNAME"); // Replace with your bot's username
-        script.setAttribute("data-size", "large");
-        script.setAttribute("data-onauth", "onTelegramAuthCallback"); // Global callback function
-        script.setAttribute("data-request-access", "write");
-        script.async = true;
-        document.body.appendChild(script);
-
-        // Make the onTelegramAuth function globally accessible for the widget
-        window.onTelegramAuthCallback = onTelegramAuth;
-
-        return () => {
-          // Clean up the global function when component unmounts
-          delete window.onTelegramAuthCallback;
-          // Optionally remove the script if needed, though often left for performance
-        };
-      }
-    }, []);
-
-
-    const handleRoleSelect = (role) => {
-      setSelectedType(role);
-      setTimeout(() => {
-        if (role === "rider") {
-          navigate("/rider-dashboard");
-        } else if (role === "driver") {
-          navigate("/driver-dashboard");
-        }
-      }, 300); // Small delay for visual feedback
-    };
-
-    return (
-      <div className="min-h-screen bg-[#F8F8F8] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
-        <div className="text-center max-w-xl mx-auto space-y-8 bg-white p-6 sm:p-8 rounded-3xl shadow-lg border border-neutral-200">
-          {/* Main Header and Description */}
-          <div className="space-y-4">
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-neutral-900 tracking-tight">
-              Welcome
-            </h1>
-            <p className="text-lg text-neutral-600">
-              Choose your role to get started. Find rides or offer a spot in your car.
-            </p>
-          </div>
-
-          {/* Telegram Login Widget Container */}
-          <div className="py-4">
-            <h3 className="text-lg font-semibold text-neutral-800 mb-4">Or Login with Telegram</h3>
-            <div id="telegram-login-widget-container" className="flex justify-center">
-              {/* The Telegram widget will render here */}
-            </div>
-            <p className="text-xs text-neutral-500 mt-2">
-              (Note: Replace 'YOUR_BOT_USERNAME' in the code with your actual Telegram bot username.)
-            </p>
-          </div>
-
-          {/* Role Selection Buttons */}
-          <div className="flex flex-col gap-4">
-            {/* Rider Button */}
-            <button
-              onClick={() => handleRoleSelect("rider")}
-              className={`flex-1 flex items-center justify-center p-6 border-2 rounded-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#E1F87E]/50
-                ${selectedType === "rider"
-                  ? "bg-[#E1F87E] border-[#E1F87E] text-[#121212] shadow-md"
-                  : "bg-white border-neutral-300 text-neutral-800 hover:bg-neutral-50 hover:border-[#E1F87E]/20"
-                }`}
-            >
-              <Users className={`h-7 w-7 mr-3 ${selectedType === "rider" ? "text-[#121212]" : "text-[#E1F87E]"}`} />
-              <span className="font-semibold text-xl">I'm a Rider</span>
-            </button>
-
-            {/* Driver Button */}
-            <button
-              onClick={() => handleRoleSelect("driver")}
-              className={`flex-1 flex items-center justify-center p-6 border-2 rounded-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#E1F87E]/50
-                ${selectedType === "driver"
-                  ? "bg-[#E1F87E] border-[#E1F87E] text-[#121212] shadow-md"
-                  : "bg-white border-neutral-300 text-neutral-800 hover:bg-neutral-50 hover:border-[#E1F87E]/20"
-                }`}
-            >
-              <Car className={`h-7 w-7 mr-3 ${selectedType === "driver" ? "text-[#121212]" : "text-[#E1F87E]"}`} />
-              <span className="font-semibold text-xl">I'm a Driver</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Mock components for the dashboards
-  const RiderDashboard = () => (
-    <div className="min-h-screen bg-gradient-to-br from-[#E1F87E]/20 to-neutral-200 flex items-center justify-center p-4 font-sans">
-      <div className="text-center bg-white p-8 rounded-2xl shadow-xl space-y-4">
-        <h2 className="text-4xl font-bold text-gray-800">Rider Dashboard</h2>
-        <p className="text-lg text-neutral-600">Welcome, Rider! Find your next ride here.</p>
-        <button
-          onClick={() => window.location.reload()} // Simple reload to go back to Welcome
-          className="mt-6 px-6 py-3 bg-[#E1F87E] text-[#121212] rounded-xl shadow-md hover:bg-opacity-80 transition-colors duration-300"
-        >
-          Go Back
-        </button>
-      </div>
-    </div>
-  );
-
-  // Override the global useNavigate for the Welcome component to use this App's state
-  React.useEffect(() => {
-    // This is a simplified way to ensure the mock useNavigate controls this App's state.
-    // Normally, react-router-dom handles navigation directly.
-    window.tempNavigate = useNavigate();
-  }, []);
-
-  // Render the appropriate component based on currentPage state
-  switch (currentPage) {
-    case "rider-dashboard":
-      return <RiderDashboard />;
-    case "driver-dashboard":
-      return <DriverDashboard />;
-    case "welcome":
-    default:
-      return <Welcome />;
-  }
-};
+const App = () => (
+    <LanguageProvider>
+        <AppContent />
+    </LanguageProvider>
+);
 
 export default App;
