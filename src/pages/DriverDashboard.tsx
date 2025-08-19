@@ -119,7 +119,7 @@ const translations = {
 };
 
 // --- Language Context ---
-const LanguageContext = createContext();
+const LanguageContext = createContext({ language: 'en', setLanguage: (lang) => {}, t: (key) => key });
 const useLanguage = () => useContext(LanguageContext);
 
 // --- Custom Scrollbar Styles Component ---
@@ -138,7 +138,7 @@ const CustomScrollbarStyles = () => (
 
 
 // Helper component for a simple avatar
-const Avatar = ({ initials, bgColor, size = 'w-10 h-10', src }) => (
+const Avatar = ({ initials, bgColor, size = 'w-10 h-10', src = null }) => (
     <div className={`relative rounded-full flex items-center justify-center text-white text-lg font-semibold ${bgColor} ${size}`} >
         {src ? <img src={src} alt="profile" className="rounded-full w-full h-full object-cover" /> : initials}
     </div>
@@ -171,12 +171,12 @@ const MessageDashboard = ({ onClose }) => {
 
   const chatItems = {
     chats: [
-      { id: 1, name: "Jane Doe", lastMessage: "Hey, are you available for a ride?", time: "10:30 AM", avatar: <Avatar initials="JD" bgColor="bg-purple-500" /> },
-      { id: 2, name: "Mike Smith", lastMessage: "Thanks for the ride last week!", time: "Yesterday", avatar: <Avatar initials="MS" bgColor="bg-blue-500" /> },
+      { id: 1, name: "Jane Doe", lastMessage: "Hey, are you available for a ride?", time: "10:30 AM", avatar: <Avatar initials="JD" bgColor="bg-purple-500" src={null} /> },
+      { id: 2, name: "Mike Smith", lastMessage: "Thanks for the ride last week!", time: "Yesterday", avatar: <Avatar initials="MS" bgColor="bg-blue-500" src={null} /> },
     ],
-    groups: [ { id: 101, name: "Drivers Community", lastMessage: "New update on city regulations.", time: "1 hr ago", avatar: <Avatar initials="DC" bgColor="bg-yellow-500" /> } ],
-    channels: [ { id: 201, name: "Ride Alerts Official", lastMessage: "High demand in downtown area!", time: "15 min ago", avatar: <Avatar initials="RA" bgColor="bg-red-500" /> } ],
-    market: [ { id: 301, name: "Special Offers", lastMessage: "Discount on car maintenance this week.", time: "2 days ago", avatar: <Avatar initials="SO" bgColor="bg-indigo-500" /> } ],
+    groups: [ { id: 101, name: "Drivers Community", lastMessage: "New update on city regulations.", time: "1 hr ago", avatar: <Avatar initials="DC" bgColor="bg-yellow-500" src={null} /> } ],
+    channels: [ { id: 201, name: "Ride Alerts Official", lastMessage: "High demand in downtown area!", time: "15 min ago", avatar: <Avatar initials="RA" bgColor="bg-red-500" src={null} /> } ],
+    market: [ { id: 301, name: "Special Offers", lastMessage: "Discount on car maintenance this week.", time: "2 days ago", avatar: <Avatar initials="SO" bgColor="bg-indigo-500" src={null} /> } ],
   };
 
   const currentChats = chatItems[activeMessageTab] || [];
@@ -774,7 +774,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
         </div>
     );
 
-    const SettingsItem = ({ icon: Icon, label, action = () => {}, value }) => (
+    const SettingsItem = ({ icon: Icon, label, action = () => {}, value = null }) => (
         <button onClick={action} className="w-full flex items-center justify-between py-3 text-left hover:bg-neutral-50 rounded-lg px-2 transition-colors">
             <div className="flex items-center">
                 <Icon className="h-5 w-5 text-neutral-500 mr-3" />
@@ -924,16 +924,16 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
                     value={t(language)}
                     action={() => handleOpenSettings(t('language'), <LanguageSelectionContent currentLanguage={language} onSelectLanguage={setLanguage} />)} 
                 />
-                <SettingsItem icon={Bell} label={t('notifications')} action={() => handleOpenSettings(t('notifications'))} />
-                <SettingsItem icon={CreditCard} label={t('paymentMethods')} action={() => handleOpenSettings(t('paymentMethods'))} />
-                <SettingsItem icon={Shield} label={t('privacy')} action={() => handleOpenSettings(t('privacy'))} />
+                <SettingsItem icon={Bell} label={t('notifications')} action={() => handleOpenSettings(t('notifications'), <div>{t('notifications')}</div>)} />
+                <SettingsItem icon={CreditCard} label={t('paymentMethods')} action={() => handleOpenSettings(t('paymentMethods'), <div>{t('paymentMethods')}</div>)} />
+                <SettingsItem icon={Shield} label={t('privacy')} action={() => handleOpenSettings(t('privacy'), <div>{t('privacy')}</div>)} />
             </div>
 
             {/* --- Security --- */}
             <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
                 <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('security')}</h3>
-                <SettingsItem icon={Lock} label={t('changePassword')} action={() => handleOpenSettings(t('changePassword'))} />
-                <SettingsItem icon={LogOut} label={t('logout')} action={() => handleOpenSettings(t('logout'))} />
+                <SettingsItem icon={Lock} label={t('changePassword')} action={() => handleOpenSettings(t('changePassword'), <div>{t('changePassword')}</div>)} />
+                <SettingsItem icon={LogOut} label={t('logout')} action={() => handleOpenSettings(t('logout'), <div>{t('logout')}</div>)} />
             </div>
         </div>
     );
