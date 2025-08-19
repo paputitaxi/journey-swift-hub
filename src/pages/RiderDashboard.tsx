@@ -23,7 +23,7 @@ const uzbekistanLocationsData = [
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { weekday: 'short', month: 'short', day: 'numeric' };
+  const options = { weekday: 'short' as const, month: 'short' as const, day: 'numeric' as const };
   return date.toLocaleDateString('en-US', options);
 };
 
@@ -31,7 +31,7 @@ const formatDate = (dateString) => {
 const formatTime = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
+  const options = { hour: '2-digit' as const, minute: '2-digit' as const, hourCycle: 'h23' as const }; // 24-hour format
   return date.toLocaleTimeString('en-US', options);
 };
 
@@ -40,7 +40,7 @@ const getDropOffDate = (pickupDateString) => {
   if (!pickupDateString) return '';
   const pickupDate = new Date(pickupDateString);
   pickupDate.setDate(pickupDate.getDate() + 1); // Add one day
-  const options = { weekday: 'short', month: 'short', day: 'numeric' };
+  const options = { weekday: 'short' as const, month: 'short' as const, day: 'numeric' as const };
   return pickupDate.toLocaleDateString('en-US', options);
 };
 
