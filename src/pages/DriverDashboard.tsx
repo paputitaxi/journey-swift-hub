@@ -74,6 +74,8 @@ const translations = {
     pastRides: "Past Rides", noCompletedRides: "No completed rides.", noUpcomingRides: "No upcoming rides.",
     submitting: "Submitting...", noActiveRide: "No active ride.", passengers: "passengers", iTookAClient: "I took a client",
     editRide: "Edit Ride", updateRide: "Update Ride",
+    chats: "Chats", groups: "Groups", channels: "Channels", market: "Market", noMessages: "No messages here yet.",
+    typeMessage: "Type a message...", cancel: "Cancel", letsGo: "Let's Go!", areYouSure: "Are you sure?", okay: "Okay",
   },
   uz: {
     ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil",
@@ -99,6 +101,8 @@ const translations = {
     pastRides: "O'tgan Sayohatlar", noCompletedRides: "Tugallangan sayohatlar yo'q.", noUpcomingRides: "Kutilayotgan sayohatlar yo'q.",
     submitting: "Yuborilmoqda...", noActiveRide: "Faol sayohat yo'q.", passengers: "yo'lovchilar", iTookAClient: "Mijoz oldim",
     editRide: "Sayohatni tahrirlash", updateRide: "Yangilash",
+    chats: "Suhbatlar", groups: "Guruhlar", channels: "Kanallar", market: "Bozor", noMessages: "Bu yerda hali xabarlar yo'q.",
+    typeMessage: "Xabar yozing...", cancel: "Bekor qilish", letsGo: "Ketdik!", areYouSure: "Ishonchingiz komilmi?", okay: "Ha",
   },
   ru: {
     ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль",
@@ -116,7 +120,7 @@ const translations = {
     reviews: "отзывов", rides: "поездок", username: "Имя пользователя", gender: "Пол", memberSince: "На сайте с",
     contactVerification: "Контакт и верификация", phone: "Номер телефона", email: "Электронная почта", idVerification: "Подтверждение личности",
     verified: "Подтверждено", notVerified: "Не подтверждено", driverDetails: "Данные водителя", vehicle: "Автомобиль",
-    licensePlate: "Гос. номер", drivingLicense: "Водительское удостоверение", activity: "Активность", rideHistory: "История поездок",
+    licensePlate: "Гос. номер", drivingLicense: "Водительское удостоверение", activity: "Активность", history: "История поездок",
     upcomingRides: "Предстоящие поездки", settings: "Настройки", language: "Язык", notifications: "Настройки уведомлений",
     paymentMethods: "Способы оплаты", privacy: "Конфиденциальность", security: "Безопасность", changePassword: "Изменить пароль",
     logout: "Выйти", editProfile: "Редактировать профиль", fullName: "Полное имя", saveChanges: "Сохранить изменения",
@@ -124,6 +128,8 @@ const translations = {
     pastRides: "Прошлые поездки", noCompletedRides: "Завершенных поездок нет.", noUpcomingRides: "Предстоящих поездок нет.",
     submitting: "Отправка...", noActiveRide: "Активных поездок нет.", passengers: "пассажиров", iTookAClient: "Я взял клиента",
     editRide: "Редактировать поездку", updateRide: "Обновить",
+    chats: "Чаты", groups: "Группы", channels: "Каналы", market: "Маркет", noMessages: "Здесь пока нет сообщений.",
+    typeMessage: "Введите сообщение...", cancel: "Отмена", letsGo: "Поехали!", areYouSure: "Вы уверены?", okay: "Да",
   },
 };
 
@@ -152,6 +158,30 @@ const Avatar = ({ initials, bgColor, size = 'w-10 h-10', src = null }) => (
         {src ? <img src={src} alt="profile" className="rounded-full w-full h-full object-cover" /> : initials}
     </div>
 );
+
+// --- Confirmation Modal ---
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
+    if (!isOpen) return null;
+    const { t } = useLanguage();
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
+                <h2 className="text-xl font-bold text-gray-800 mb-2">{title}</h2>
+                <p className="text-neutral-600 mb-6">{message}</p>
+                <div className="flex justify-center gap-4">
+                    <button onClick={onClose} className="flex-1 py-2 px-4 bg-neutral-200 text-neutral-800 font-semibold rounded-xl hover:bg-neutral-300 transition-colors">
+                        {t('cancel')}
+                    </button>
+                    <button onClick={onConfirm} className="flex-1 py-2 px-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors">
+                        {t('okay')}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 // Message Dashboard component with Telegram-like UX
 const MessageDashboard = ({ onClose }) => {
@@ -358,7 +388,6 @@ const uzbekistanLocations = [
   { region: "Republic of Karakalpakstan", cities: ["Nukus", "Beruniy", "Chimboy", "Ellikqala", "Kegeyli", "Qo'ng'irot", "Qorao'zak", "Shumanay", "Taxtako'pir", "To'rtko'l", "Xo'jayli", "Amudaryo", "Bo'zatov", "Qanliko'l", "Taxiatosh"] },
 ];
 
-
 // Location Selection Modal Component
 const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
   const { t } = useLanguage();
@@ -414,18 +443,17 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
   );
 };
 
-
 // Main Post Ride Form Component
-const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
+const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEditing }) => {
   const { t } = useLanguage();
-  const [fromLocation, setFromLocation] = useState("");
-  const [toLocation, setToLocation] = useState("");
-  const [departureDate, setDepartureDate] = useState("");
-  const [mailService, setMailService] = useState(""); // "yes", "no"
-  const [freeSeats, setFreeSeats] = useState(null); // New state for free seats
-  const [departureType, setDepartureType] = useState(""); // "fixed", "when_fills"
-  const [departureTime, setDepartureTime] = useState(""); // Only for fixed departure
-  const [price, setPrice] = useState("");
+  const [fromLocation, setFromLocation] = useState(initialValues?.fromLocation || "");
+  const [toLocation, setToLocation] = useState(initialValues?.toLocation || "");
+  const [departureDate, setDepartureDate] = useState(initialValues?.departureDate || "");
+  const [mailService, setMailService] = useState(initialValues?.mailService || ""); // "yes", "no"
+  const [freeSeats, setFreeSeats] = useState(initialValues?.freeSeats || null); // New state for free seats
+  const [departureType, setDepartureType] = useState(initialValues?.departureType || ""); // "fixed", "when_fills"
+  const [departureTime, setDepartureTime] = useState(initialValues?.departureTime || ""); // Only for fixed departure
+  const [price, setPrice] = useState(initialValues?.price || "");
   const [submissionState, setSubmissionState] = useState('idle'); // 'idle', 'submitting', 'submitted'
 
   const [showFromModal, setShowFromModal] = useState(false);
@@ -447,8 +475,8 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
     e.preventDefault();
     if (isFormValid) {
       setSubmissionState('submitting');
-      const newRideData = { fromLocation, toLocation, departureDate, mailService, freeSeats, departureType, departureTime, price, totalSeats: freeSeats };
-      
+      const newRideData = { ...initialValues, fromLocation, toLocation, departureDate, mailService, freeSeats, departureType, departureTime, price, totalSeats: freeSeats };
+
       setTimeout(() => {
         onAddRide(newRideData); // Pass the data up to the parent component
         setSubmissionState('submitted');
@@ -502,12 +530,11 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
     );
   };
 
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 p-4 font-sans">
       <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[90vh] flex flex-col">
         <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-800">{t('postNewRide')}</h2>
+          <h2 className="text-lg font-semibold text-gray-800">{isEditing ? t('editRide') : t('postNewRide')}</h2>
           <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> <X className="h-6 w-6" /> </button>
         </div>
         <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-4 space-y-6 custom-scrollbar">
@@ -617,7 +644,7 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
             "bg-gray-600 text-gray-400 cursor-not-allowed"}`} >
             {submissionState === 'submitting' ? <><Loader2 className="h-6 w-6 mr-2 animate-spin" /> {t('submitting')}</> : 
              submissionState === 'submitted' ? <><CheckCircle className="h-6 w-6 mr-2" /> {t('submitted')}</> : 
-             t('postRide')}
+             isEditing ? t('updateRide') : t('postRide')}
           </button>
         </form>
       </div>
@@ -765,7 +792,6 @@ const SettingsModal = ({ title, isOpen, onClose, children }) => {
         </div>
     );
 };
-
 
 // --- Profile Page Component ---
 const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
@@ -939,7 +965,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
                 <SettingsItem 
                     icon={Languages} 
                     label={t('language')} 
-                    value={t(language)}
+                    value={t(language === 'en' ? 'english' : language === 'uz' ? 'uzbek' : 'russian')}
                     action={() => handleOpenSettings(t('language'), <LanguageSelectionContent currentLanguage={language} onSelectLanguage={setLanguage} />)} 
                 />
                 <SettingsItem icon={Bell} label={t('notifications')} value="" action={() => handleOpenSettings(t('notifications'), <div className="p-4">Notification settings</div>)} />
@@ -980,6 +1006,7 @@ const AppContent = () => {
   const [showPostRide, setShowPostRide] = useState(false);
   const [showEditRide, setShowEditRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [myRides, setMyRides] = useState([]);
   const [activeRide, setActiveRide] = useState(null);
   const [userData, setUserData] = useState({
@@ -1023,7 +1050,7 @@ const AppContent = () => {
     setMyRides(prevRides => [...prevRides, rideWithId]);
     setActiveRide(rideWithId);
   };
-  
+ 
   const handleUpdateRide = (updatedRideData) => {
       setActiveRide(updatedRideData);
       setMyRides(prev => prev.map(ride => ride.id === updatedRideData.id ? updatedRideData : ride));
@@ -1038,8 +1065,10 @@ const AppContent = () => {
       });
   };
 
-  const handleCancelRide = () => {
-      setActiveRide(null);
+  const handleStartRide = () => {
+      console.log("Ride started!");
+      // Here you would add logic to change the ride status, etc.
+      setShowConfirmationModal(false);
   };
 
   const handleBack = () => {
@@ -1074,11 +1103,28 @@ const AppContent = () => {
     { id: "profile", label: t('profile'), icon: User },
   ];
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingRide, setEditingRide] = useState(null);
+
+  const handleEditRideClick = (ride) => {
+    setEditingRide(ride);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEditedRide = (updatedRide) => {
+    setMyRides(prev => 
+      prev.map(ride => ride.id === updatedRide.id ? { ...ride, ...updatedRide } : ride)
+    );
+    if (activeRide && activeRide.id === updatedRide.id) {
+        setActiveRide(prev => ({...prev, ...updatedRide}));
+    }
+    setIsEditModalOpen(false);
+    setEditingRide(null);
+  };
+
   const renderContent = () => {
     if (showMessages) { return <MessageDashboard onClose={() => { setShowMessages(false); setHeaderTitle(t('ride')); }} />; }
-    if (showPostRide) { return <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle(t('ride')); }} onPostSuccess={() => setHeaderTitle(t('ride'))} onAddRide={handleAddRide} />; }
-    if (showEditRide && activeRide) { return <div className="p-4"><p>Edit ride feature coming soon</p><button onClick={() => setShowEditRide(false)} className="mt-4 px-4 py-2 bg-gray-200 rounded">Close</button></div>; }
-
+    
     switch (activeTab) {
       case "dashboard": return (
           <div className="p-4 space-y-4 text-gray-800 font-sans">
@@ -1094,76 +1140,83 @@ const AppContent = () => {
                 </div>
                 <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105">
                   <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
-                    <BarChart className="h-7 w-7 text-[#E1F87E]" />
+                    <TrendingUp className="h-7 w-7 text-gray-800" />
                   </div>
                   <span className="text-xs text-neutral-600">{t('stats')}</span>
                 </div>
                 <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105">
                   <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
-                    <Shield className="h-7 w-7 text-[#E1F87E]" />
+                    <Shield className="h-7 w-7 text-gray-800" />
                   </div>
                   <span className="text-xs text-neutral-600">{t('safety')}</span>
                 </div>
               </div>
             </div>
-            <h3 className="flex items-center text-sm font-semibold mb-2 text-neutral-800">
-              <Calendar className="h-4 w-4 mr-2 text-neutral-700" />
-              {t('yourActivity')}
-            </h3>
-            <div onClick={() => activeRide && setShowEditRide(true)} className={`w-full p-4 bg-white border border-neutral-200 rounded-2xl space-y-3 shadow-lg text-left ${activeRide ? 'cursor-pointer' : 'cursor-default'}`}>
-              {activeRide ? (
-                <div className="flex justify-between items-start text-sm">
-                    <div className="flex flex-col space-y-2">
-                        <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> {activeRide.fromLocation} </div>
-                        <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> {activeRide.toLocation} </div>
-                        <div className="flex items-center text-neutral-600"> 
-                            <Users className="h-4 w-4 mr-2" /> 
-                            <button onClick={(e) => {e.stopPropagation(); handleSeatChange(1)}} disabled={activeRide.freeSeats === activeRide.totalSeats} className="mr-2 p-1 rounded-full hover:bg-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed"><MinusCircle size={16}/></button>
-                            <span>{activeRide.totalSeats - activeRide.freeSeats}/{activeRide.totalSeats} {t('passengers')}</span>
-                            <button onClick={(e) => {e.stopPropagation(); handleSeatChange(-1)}} disabled={activeRide.freeSeats === 0} className="ml-2 p-1 rounded-full hover:bg-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed"><PlusCircle size={16}/></button>
+            <div>
+                <h3 className="flex items-center text-sm font-semibold mb-2 text-neutral-800">
+                  <Calendar className="h-4 w-4 mr-2 text-neutral-700" />
+                  {t('yourActivity')}
+                </h3>
+                <div className={`w-full p-4 bg-white border border-neutral-200 rounded-2xl space-y-3 shadow-lg text-left`}>
+                  {activeRide ? (
+                    <>
+                        <div onClick={() => handleEditRideClick(activeRide)} className="cursor-pointer">
+                            <div className="flex justify-between items-start text-sm">
+                                <div className="flex flex-col space-y-2">
+                                    <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> {activeRide.fromLocation} </div>
+                                    <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> {activeRide.toLocation} </div>
+                                    <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> {activeRide.departureDate} {activeRide.departureTime && <><Clock className="h-4 w-4 mx-2" /> {activeRide.departureTime}</>} </div>
+                                </div>
+                                
+                                <div className="flex flex-col items-end space-y-2">
+                                    <span className="text-xl font-bold text-gray-800">${activeRide.price}</span>
+                                    <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full">{t('active')}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center text-neutral-600"> <Calendar className="h-4 w-4 mr-2" /> {activeRide.departureDate} {activeRide.departureTime && <><Clock className="h-4 w-4 mx-2" /> {activeRide.departureTime}</>}</div>
-                    </div>
-                    <div className="flex flex-col items-end space-y-2">
-                        <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full"> {t('active')} </span>
-                        <button onClick={(e) => {e.stopPropagation(); handleCancelRide()}} className="p-1 rounded-full hover:bg-neutral-100 transition-colors"> <XCircle className="h-5 w-5 text-red-500" /> </button>
-                        <button onClick={(e) => {e.stopPropagation(); handleSeatChange(-1)}} disabled={activeRide.freeSeats === 0} className="flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold hover:bg-green-200 disabled:bg-neutral-100 disabled:text-neutral-400 disabled:cursor-not-allowed">
-                            <UserPlus size={14} className="mr-1.5"/>
-                            {t('iTookAClient')}
-                        </button>
-                    </div>
+                        <div className="border-t border-neutral-200 pt-3 mt-3">
+                            <button onClick={() => setShowConfirmationModal(true)} className="w-full py-2 px-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center">
+                                <Navigation className="h-5 w-5 mr-2"/>
+                                {t('letsGo')}
+                            </button>
+                        </div>
+                    </>
+                  ) : (
+                    <p className="text-neutral-500 text-center py-4">{t('noActiveRide')}</p>
+                  )}
                 </div>
-              ) : (
-                <p className="text-neutral-500 text-center py-4">{t('noActiveRide')}</p>
-              )}
             </div>
           </div>
         );
       case "my-lines": return (
-        <div className="p-4 text-gray-800 font-sans space-y-4">
+        <div className="p-4 text-gray-800 font-sans space-y-4 pb-20">
             {myRides.filter(r => r.status === 'upcoming').length > 0 ? (
                 myRides.filter(r => r.status === 'upcoming').map(ride => (
-                    <div key={ride.id} className="p-4 bg-white border border-neutral-200 rounded-2xl shadow-lg">
-                        <div className="flex justify-between items-center text-sm">
-                             <div className="flex flex-col space-y-1">
-                                <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> {ride.fromLocation} </div>
-                                <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> {ride.toLocation} </div>
-                                <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> {ride.departureDate} {ride.departureTime && <><Clock className="h-4 w-4 mx-2" /> {ride.departureTime}</>} </div>
-                            </div>
-                            
-                            <SeatIndicator availableSeats={ride.freeSeats} />
+                    <div 
+                      key={ride.id} 
+                      onClick={() => handleEditRideClick(ride)}
+                      className="p-4 bg-white border border-neutral-200 rounded-2xl shadow-lg mb-4 cursor-pointer hover:shadow-xl transition-shadow duration-200"
+                    >
+                      <div className="flex justify-between items-center text-sm">
+                         <div className="flex flex-col space-y-1">
+                            <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> {ride.fromLocation} </div>
+                            <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> {ride.toLocation} </div>
+                            <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> {ride.departureDate} {ride.departureTime && <><Clock className="h-4 w-4 mx-2" /> {ride.departureTime}</>} </div>
+                          </div>
+                         
+                          <SeatIndicator totalSeats={ride.totalSeats} availableSeats={ride.freeSeats} />
 
-                            <div className="flex flex-col items-end space-y-2">
-                                <span className="text-xl font-bold text-gray-800">${ride.price}</span>
-                                <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full">{t('active')}</span>
-                            </div>
-                        </div>
+                          <div className="flex flex-col items-end space-y-2">
+                            <span className="text-xl font-bold text-gray-800">${ride.price}</span>
+                            <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full">{t('active')}</span>
+                          </div>
+                      </div>
                     </div>
                 ))
             ) : (
-                <div className="text-center py-10">
-                    <h2 className="text-xl font-bold">{t('noLines')}</h2>
-                    <p className="text-neutral-600 mt-2">{t('postRidePrompt')}</p>
+                <div className="text-center p-8 bg-white rounded-2xl shadow">
+                  <p className="text-gray-600 mb-2">{t('noLines')}</p>
+                  <p className="text-sm text-gray-500">{t('postRidePrompt')}</p>
                 </div>
             )}
         </div>
@@ -1177,23 +1230,23 @@ const AppContent = () => {
     <div className="h-screen bg-[#F8F8F8] text-gray-800 flex flex-col font-sans">
       <CustomScrollbarStyles />
       <header className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between z-20 shadow-lg relative">
-        {(showPostRide || showMessages || activeTab !== "dashboard" || showEditRide) && (
+        {(activeTab !== "dashboard" || showPostRide || showMessages) && (
           <button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
-            <ChevronLeft className="h-8 w-8" />
+            <ChevronLeft className="h-6 w-6" />
           </button>
         )}
-        {!(showPostRide || showMessages || activeTab !== "dashboard" || showEditRide) && (
+        {!(activeTab !== "dashboard" || showPostRide || showMessages) && (
           <div className="w-8 h-8"></div> // Placeholder for alignment
         )}
         <h1 className="absolute left-1/2 -translate-x-1/2 text-xl font-bold text-gray-800">{headerTitle}</h1>
          <button onClick={() => setShowMessages(true)} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
-          <MessageCircle className="h-8 w-8" />
+          <MessageCircle className="h-6 w-6" />
         </button>
       </header>
-      <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative rounded-t-3xl overflow-hidden">
+      <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative">
         {renderContent()}
       </main>
-      {!showMessages && !showPostRide && !showEditRide && (
+      {!(showMessages || showPostRide || isEditModalOpen) && (
         <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-lg z-10">
           <div className="flex justify-around py-2">
             {bottomNavItems.map((item) => {
@@ -1209,6 +1262,41 @@ const AppContent = () => {
           </div>
         </footer>
       )}
+      {showPostRide && (
+        <PostRideForm
+          onClose={() => {
+            setShowPostRide(false);
+            setHeaderTitle(t('ride'));
+          }}
+          onPostSuccess={() => {
+            setActiveTab('my-lines');
+          }}
+          onAddRide={handleAddRide}
+          isEditing={false}
+        />
+      )}
+      {isEditModalOpen && editingRide && (
+        <PostRideForm
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingRide(null);
+          }}
+          onPostSuccess={() => {
+            setIsEditModalOpen(false);
+            setEditingRide(null);
+          }}
+          onAddRide={handleSaveEditedRide}
+          initialValues={editingRide}
+          isEditing={true}
+        />
+      )}
+       <ConfirmationModal
+            isOpen={showConfirmationModal}
+            onClose={() => setShowConfirmationModal(false)}
+            onConfirm={handleStartRide}
+            title={t('letsGo')}
+            message={t('areYouSure')}
+        />
     </div>
   );
 };
