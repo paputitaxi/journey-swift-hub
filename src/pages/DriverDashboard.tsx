@@ -76,6 +76,7 @@ const translations = {
     editRide: "Edit Ride", updateRide: "Update Ride",
     chats: "Chats", groups: "Groups", channels: "Channels", market: "Market", noMessages: "No messages here yet.",
     typeMessage: "Type a message...", cancel: "Cancel", letsGo: "Let's Go!", areYouSure: "Are you sure?", okay: "Okay",
+    searchingForClients: "Searching for clients...", call: "Call", message: "Message", removePassenger: "Remove Passenger",
   },
   uz: {
     ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil",
@@ -103,6 +104,7 @@ const translations = {
     editRide: "Sayohatni tahrirlash", updateRide: "Yangilash",
     chats: "Suhbatlar", groups: "Guruhlar", channels: "Kanallar", market: "Bozor", noMessages: "Bu yerda hali xabarlar yo'q.",
     typeMessage: "Xabar yozing...", cancel: "Bekor qilish", letsGo: "Ketdik!", areYouSure: "Ishonchingiz komilmi?", okay: "Ha",
+    searchingForClients: "Mijozlar qidirilmoqda...", call: "Qo'ng'iroq", message: "Xabar", removePassenger: "Yo'lovchini o'chirish",
   },
   ru: {
     ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль",
@@ -130,6 +132,7 @@ const translations = {
     editRide: "Редактировать поездку", updateRide: "Обновить",
     chats: "Чаты", groups: "Группы", channels: "Каналы", market: "Маркет", noMessages: "Здесь пока нет сообщений.",
     typeMessage: "Введите сообщение...", cancel: "Отмена", letsGo: "Поехали!", areYouSure: "Вы уверены?", okay: "Да",
+    searchingForClients: "Поиск клиентов...", call: "Позвонить", message: "Написать", removePassenger: "Удалить пассажира",
   },
 };
 
@@ -148,6 +151,41 @@ const CustomScrollbarStyles = () => (
     .animate-spin-slow { animation: spin 2s linear infinite; }
     /* Hide the default Leaflet routing instructions panel */
     .leaflet-routing-container { display: none !important; }
+
+    /* Radar Animation */
+    .radar-emitter {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+    }
+    .radar-emitter .radar-wave {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: rgba(34, 197, 94, 0.5);
+        animation: radar-wave-animation 2s infinite;
+        opacity: 0;
+    }
+    .radar-emitter .radar-wave:nth-child(2) {
+        animation-delay: 1s;
+    }
+    @keyframes radar-wave-animation {
+        0% {
+            transform: scale(0.5);
+            opacity: 0;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+    }
   `}</style>
 );
 
@@ -158,30 +196,6 @@ const Avatar = ({ initials, bgColor, size = 'w-10 h-10', src = null }) => (
         {src ? <img src={src} alt="profile" className="rounded-full w-full h-full object-cover" /> : initials}
     </div>
 );
-
-// --- Confirmation Modal ---
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
-    if (!isOpen) return null;
-    const { t } = useLanguage();
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
-            <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
-                <h2 className="text-xl font-bold text-gray-800 mb-2">{title}</h2>
-                <p className="text-neutral-600 mb-6">{message}</p>
-                <div className="flex justify-center gap-4">
-                    <button onClick={onClose} className="flex-1 py-2 px-4 bg-neutral-200 text-neutral-800 font-semibold rounded-xl hover:bg-neutral-300 transition-colors">
-                        {t('cancel')}
-                    </button>
-                    <button onClick={onConfirm} className="flex-1 py-2 px-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors">
-                        {t('okay')}
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 
 // Message Dashboard component with Telegram-like UX
 const MessageDashboard = ({ onClose }) => {
@@ -1007,8 +1021,13 @@ const AppContent = () => {
   const [showEditRide, setShowEditRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [isSearchingForClients, setIsSearchingForClients] = useState(false);
   const [myRides, setMyRides] = useState([]);
   const [activeRide, setActiveRide] = useState(null);
+  const [selectedPassenger, setSelectedPassenger] = useState(null);
+  const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
+  const passengerRefs = useRef({});
+
   const [userData, setUserData] = useState({
         profilePicture: "https://placehold.co/100x100/E1F87E/121212?text=JD",
         fullName: "John Doe",
@@ -1044,11 +1063,22 @@ const AppContent = () => {
     setUserData(prev => ({...prev, car: updatedCarData}));
   };
 
-  // Function to add a new ride to the state
   const handleAddRide = (newRide) => {
-    const rideWithId = { ...newRide, id: Date.now(), status: "upcoming" };
+    const rideWithId = { 
+        ...newRide, 
+        id: Date.now(), 
+        status: "upcoming",
+        passengers: [
+            {id: 1, name: "Alice", avatar: "https://placehold.co/40x40/ffc0cb/000000?text=A"},
+            {id: 2, name: "Bob", avatar: "https://placehold.co/40x40/a2d2ff/000000?text=B"},
+        ]
+    };
     setMyRides(prevRides => [...prevRides, rideWithId]);
-    setActiveRide(rideWithId);
+    setIsSearchingForClients(true);
+    setTimeout(() => {
+        setActiveRide(rideWithId);
+        setIsSearchingForClients(false);
+    }, 3000);
   };
  
   const handleUpdateRide = (updatedRideData) => {
@@ -1056,18 +1086,17 @@ const AppContent = () => {
       setMyRides(prev => prev.map(ride => ride.id === updatedRideData.id ? updatedRideData : ride));
   };
 
-  const handleSeatChange = (increment) => {
+  const handleRemovePassenger = (passengerId) => {
       setActiveRide(prev => {
           if (!prev) return null;
-          const newSeats = prev.freeSeats + increment;
-          if (newSeats < 0 || newSeats > prev.totalSeats) return prev;
-          return {...prev, freeSeats: newSeats};
+          const updatedPassengers = prev.passengers.filter(p => p.id !== passengerId);
+          return {...prev, passengers: updatedPassengers, freeSeats: prev.freeSeats + 1};
       });
+      setSelectedPassenger(null);
   };
 
   const handleStartRide = () => {
       console.log("Ride started!");
-      // Here you would add logic to change the ride status, etc.
       setShowConfirmationModal(false);
   };
 
@@ -1121,6 +1150,102 @@ const AppContent = () => {
     setIsEditModalOpen(false);
     setEditingRide(null);
   };
+  
+  const handlePassengerClick = (passenger, e) => {
+      e.stopPropagation();
+      const rect = e.currentTarget.getBoundingClientRect();
+      setPopoverPosition({
+          top: rect.bottom + window.scrollY + 5,
+          left: rect.left + window.scrollX,
+      });
+      setSelectedPassenger(passenger);
+  };
+
+  const renderActiveRideContent = () => {
+      if (isSearchingForClients) {
+          return (
+              <div className="flex flex-col items-center justify-center p-8 space-y-4">
+                  <div className="radar-emitter">
+                      <div className="radar-wave"></div>
+                      <div className="radar-wave"></div>
+                  </div>
+                  <p className="text-green-600 font-semibold animate-pulse">{t('searchingForClients')}</p>
+              </div>
+          );
+      }
+
+      if (activeRide) {
+          return (
+              <>
+                  <div className="p-4">
+                      <div className="flex justify-between items-start">
+                          <div>
+                              <div className="flex items-center text-lg font-bold text-gray-800">
+                                  <MapPin className="h-5 w-5 mr-2 text-green-600" />
+                                  {activeRide.fromLocation}
+                              </div>
+                              <div className="flex items-center text-lg font-bold text-gray-800 mt-1">
+                                  <MapPin className="h-5 w-5 mr-2 text-red-600" />
+                                  {activeRide.toLocation}
+                              </div>
+                          </div>
+                          <span className="text-3xl font-bold text-gray-800">${activeRide.price}</span>
+                      </div>
+                      <div className="border-t border-neutral-200 my-4"></div>
+                      <div className="flex justify-between items-center text-sm text-neutral-600">
+                          <div className="flex items-center">
+                              <Calendar className="h-5 w-5 mr-2" />
+                              <span>{activeRide.departureDate}</span>
+                          </div>
+                          {activeRide.departureTime && (
+                              <div className="flex items-center">
+                                  <Clock className="h-5 w-5 mr-2" />
+                                  <span>{activeRide.departureTime}</span>
+                              </div>
+                          )}
+                      </div>
+                      <div className="flex justify-between items-center text-sm text-neutral-600 mt-2">
+                          <div className="flex items-center">
+                              <Mail className="h-5 w-5 mr-2" />
+                              <span>{activeRide.mailService === 'yes' ? t('yesCarryMail') : t('noCarryMail')}</span>
+                          </div>
+                          <div className="flex items-center">
+                              {activeRide.departureType === 'fixed' ? <Clock className="h-5 w-5 mr-2" /> : <Users className="h-5 w-5 mr-2" />}
+                              <span>{activeRide.departureType === 'fixed' ? t('fixedDeparture') : t('whenFills')}</span>
+                          </div>
+                      </div>
+                      <div className="border-t border-neutral-200 my-4"></div>
+                      <div>
+                          <p className="text-sm font-medium text-neutral-800 mb-2">{t('passengers')}</p>
+                          <div className="flex space-x-2">
+                              {activeRide.passengers.map((p) => (
+                                <img key={p.id} src={p.avatar} alt={p.name} className="w-10 h-10 rounded-full cursor-pointer" onClick={(e) => handlePassengerClick(p, e)} />
+                              ))}
+                              {Array.from({ length: activeRide.freeSeats }).map((_, index) => (
+                                  <div key={index} className="w-10 h-10 rounded-full flex items-center justify-center bg-green-100 border-2 border-dashed border-green-400">
+                                      <Plus className="h-5 w-5 text-green-500" />
+                                  </div>
+                              ))}
+                          </div>
+                      </div>
+                  </div>
+                  <div className="border-t border-neutral-200 p-4 flex gap-2">
+                      <button onClick={() => handleEditRideClick(activeRide)} className="w-full py-2 px-4 bg-neutral-200 text-neutral-800 font-semibold rounded-xl hover:bg-neutral-300 transition-colors flex items-center justify-center">
+                          <Edit2 className="h-5 w-5 mr-2" />
+                          {t('editRide')}
+                      </button>
+                      <button onClick={() => setShowConfirmationModal(true)} className="w-full py-2 px-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center">
+                          <Navigation className="h-5 w-5 mr-2" />
+                          {t('letsGo')}
+                      </button>
+                  </div>
+              </>
+          );
+      }
+
+      return <p className="text-neutral-500 text-center py-8">{t('noActiveRide')}</p>;
+  };
+
 
   const renderContent = () => {
     if (showMessages) { return <MessageDashboard onClose={() => { setShowMessages(false); setHeaderTitle(t('ride')); }} />; }
@@ -1128,62 +1253,28 @@ const AppContent = () => {
     switch (activeTab) {
       case "dashboard": return (
           <div className="p-4 space-y-4 text-gray-800 font-sans">
-            <div className="text-center py-4">
-              <h2 className="text-sm text-neutral-600">{t('totalEarnings')}</h2>
-              <p className="text-5xl font-extrabold mt-1 mb-4 text-gray-800">$0.00</p>
-              <div className="flex justify-around items-center">
-                <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle(t('newRide')); }} >
-                  <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
-                    <Plus className="h-7 w-7 text-gray-800" />
-                  </div>
-                  <span className="text-xs text-neutral-600">{t('newRide')}</span>
+            <div className="grid grid-cols-2 gap-4">
+                {/* Total Earnings Card */}
+                <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200 text-center flex flex-col justify-center">
+                    <h2 className="text-sm text-neutral-600">{t('totalEarnings')}</h2>
+                    <p className="text-3xl font-extrabold text-gray-800 mt-2">$0.00</p>
                 </div>
-                <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105">
-                  <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
-                    <TrendingUp className="h-7 w-7 text-gray-800" />
-                  </div>
-                  <span className="text-xs text-neutral-600">{t('stats')}</span>
+
+                {/* New Ride Button Card */}
+                <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle(t('newRide')); }}>
+                    <div className="w-14 h-14 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
+                        <Plus className="h-7 w-7 text-gray-800" />
+                    </div>
+                    <span className="text-xs text-neutral-600 mt-2">{t('newRide')}</span>
                 </div>
-                <div className="flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105">
-                  <div className="w-14 h-14 mb-1 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
-                    <Shield className="h-7 w-7 text-gray-800" />
-                  </div>
-                  <span className="text-xs text-neutral-600">{t('safety')}</span>
-                </div>
-              </div>
             </div>
             <div>
                 <h3 className="flex items-center text-sm font-semibold mb-2 text-neutral-800">
                   <Calendar className="h-4 w-4 mr-2 text-neutral-700" />
                   {t('yourActivity')}
                 </h3>
-                <div className={`w-full p-4 bg-white border border-neutral-200 rounded-2xl space-y-3 shadow-lg text-left`}>
-                  {activeRide ? (
-                    <>
-                        <div onClick={() => handleEditRideClick(activeRide)} className="cursor-pointer">
-                            <div className="flex justify-between items-start text-sm">
-                                <div className="flex flex-col space-y-2">
-                                    <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> {activeRide.fromLocation} </div>
-                                    <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> {activeRide.toLocation} </div>
-                                    <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> {activeRide.departureDate} {activeRide.departureTime && <><Clock className="h-4 w-4 mx-2" /> {activeRide.departureTime}</>} </div>
-                                </div>
-                                
-                                <div className="flex flex-col items-end space-y-2">
-                                    <span className="text-xl font-bold text-gray-800">${activeRide.price}</span>
-                                    <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full">{t('active')}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="border-t border-neutral-200 pt-3 mt-3">
-                            <button onClick={() => setShowConfirmationModal(true)} className="w-full py-2 px-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center">
-                                <Navigation className="h-5 w-5 mr-2"/>
-                                {t('letsGo')}
-                            </button>
-                        </div>
-                    </>
-                  ) : (
-                    <p className="text-neutral-500 text-center py-4">{t('noActiveRide')}</p>
-                  )}
+                <div className={`w-full bg-white border border-neutral-200 rounded-2xl shadow-lg text-left overflow-hidden`}>
+                  {renderActiveRideContent()}
                 </div>
             </div>
           </div>
@@ -1229,6 +1320,18 @@ const AppContent = () => {
   return (
     <div className="h-screen bg-[#F8F8F8] text-gray-800 flex flex-col font-sans">
       <CustomScrollbarStyles />
+      {selectedPassenger && (
+          <div 
+              className="fixed bg-white rounded-xl shadow-2xl z-50 p-2 space-y-1"
+              style={{ top: popoverPosition.top, left: popoverPosition.left }}
+              onClick={() => setSelectedPassenger(null)}
+          >
+              <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-neutral-100 rounded-lg"><Phone className="h-4 w-4 mr-2"/>{t('call')}</button>
+              <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-neutral-100 rounded-lg"><Send className="h-4 w-4 mr-2"/>{t('message')}</button>
+              <div className="border-t border-neutral-200 my-1"></div>
+              <button onClick={() => handleRemovePassenger(selectedPassenger.id)} className="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="h-4 w-4 mr-2"/>{t('removePassenger')}</button>
+          </div>
+      )}
       <header className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between z-20 shadow-lg relative">
         {(activeTab !== "dashboard" || showPostRide || showMessages) && (
           <button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
@@ -1243,7 +1346,7 @@ const AppContent = () => {
           <MessageCircle className="h-6 w-6" />
         </button>
       </header>
-      <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative">
+      <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative" onClick={() => selectedPassenger && setSelectedPassenger(null)}>
         {renderContent()}
       </main>
       {!(showMessages || showPostRide || isEditModalOpen) && (
@@ -1269,7 +1372,7 @@ const AppContent = () => {
             setHeaderTitle(t('ride'));
           }}
           onPostSuccess={() => {
-            setActiveTab('my-lines');
+            // setActiveTab('my-lines');
           }}
           onAddRide={handleAddRide}
           isEditing={false}
@@ -1290,13 +1393,22 @@ const AppContent = () => {
           isEditing={true}
         />
       )}
-       <ConfirmationModal
-            isOpen={showConfirmationModal}
-            onClose={() => setShowConfirmationModal(false)}
-            onConfirm={handleStartRide}
-            title={t('letsGo')}
-            message={t('areYouSure')}
-        />
+       {showConfirmationModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+                <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">{t('letsGo')}</h2>
+                    <p className="text-neutral-600 mb-6">{t('areYouSure')}</p>
+                    <div className="flex justify-center gap-4">
+                        <button onClick={() => setShowConfirmationModal(false)} className="flex-1 py-2 px-4 bg-neutral-200 text-neutral-800 font-semibold rounded-xl hover:bg-neutral-300 transition-colors">
+                            {t('cancel')}
+                        </button>
+                        <button onClick={handleStartRide} className="flex-1 py-2 px-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors">
+                            {t('okay')}
+                        </button>
+                    </div>
+                </div>
+            </div>
+       )}
     </div>
   );
 };
