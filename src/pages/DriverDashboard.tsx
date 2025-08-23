@@ -47,6 +47,7 @@ import {
   PlusCircle,
   UserPlus, // Added icon for the new button
   UserRound, // Added for female passenger icon
+  LifeBuoy, // For Support
 } from "lucide-react";
 
 // --- i18n Translations ---
@@ -374,10 +375,12 @@ const MessageDashboard = ({ onClose }) => {
           </>
         ) : (
           <>
-            <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
-            <div className="flex-1"></div> {/* Placeholder to push search icon to the right */}
-            <button onClick={() => setIsSearching(true)} className="text-neutral-800 hover:text-gray-900">
-              <Search className="h-6 w-6" />
+            <a href="https://t.me/nevalela" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors">
+                <LifeBuoy className="h-6 w-6" />
+            </a>
+            <h2 className="text-lg font-semibold text-gray-800 flex-1 text-center">Chats</h2>
+            <button onClick={() => setIsSearching(true)} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors">
+                <Search className="h-6 w-6" />
             </button>
           </>
         )}
