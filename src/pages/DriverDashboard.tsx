@@ -1363,7 +1363,7 @@ const AppContent = () => {
               <button onClick={() => handleRemovePassenger(selectedPassenger.id)} className="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="h-4 w-4 mr-2"/>{t('removePassenger')}</button>
           </div>
       )}
-      <header className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between z-20 shadow-lg relative">
+      <header className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between z-20 shadow-lg relative rounded-b-2xl">
         {(activeTab !== "dashboard" || showPostRide || showMessages) && (
           <button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
             <ChevronLeft className="h-6 w-6" />
