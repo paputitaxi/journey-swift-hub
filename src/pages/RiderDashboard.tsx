@@ -1,4 +1,4 @@
- import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info, Car, MessageCircle, Send } from 'lucide-react';
 
 // Expanded Data for Uzbekistan Regions and Cities - ALL 14 REGIONS INCLUDED
@@ -23,7 +23,7 @@ const uzbekistanLocationsData = [
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { weekday: 'short' as const, month: 'short' as const, day: 'numeric' as const };
+  const options = { weekday: 'short', month: 'short', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
 };
 
@@ -31,7 +31,7 @@ const formatDate = (dateString) => {
 const formatTime = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { hour: '2-digit' as const, minute: '2-digit' as const, hourCycle: 'h23' as const }; // 24-hour format
+  const options = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
   return date.toLocaleTimeString('en-US', options);
 };
 
@@ -40,7 +40,7 @@ const getDropOffDate = (pickupDateString) => {
   if (!pickupDateString) return '';
   const pickupDate = new Date(pickupDateString);
   pickupDate.setDate(pickupDate.getDate() + 1); // Add one day
-  const options = { weekday: 'short' as const, month: 'short' as const, day: 'numeric' as const };
+  const options = { weekday: 'short', month: 'short', day: 'numeric' };
   return pickupDate.toLocaleDateString('en-US', options);
 };
 
@@ -56,11 +56,11 @@ const dummySearchResults = [
     imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Chevrolet+Cobalt',
     plateNumber: { locationCode: '01', series: 'A', serialNumber: '123BC' },
     origin: 'Tashkent',
-    originDate: '2025-08-08T11:45:00',
+    originDate: '2025-08-26T09:00:00',
     destination: 'Tashkent Region',
-    destinationDate: '2025-08-08T15:27:00',
+    destinationDate: '2025-08-26T13:00:00',
     estimatedMiles: '192 mi',
-    tripTime: '5h 1m',
+    tripTime: '4h 0m',
     sitsAvailable: '2 sits',
     basePrice: 284.44,
     avgFuelPerMile: '$0.85/mi',
@@ -77,9 +77,9 @@ const dummySearchResults = [
     imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Lada+Granta',
     plateNumber: { locationCode: '30', series: 'D', serialNumber: '456EF' },
     origin: 'Fergana',
-    originDate: '2025-08-09T22:30:00',
+    originDate: '2025-08-27T14:00:00',
     destination: 'Samarkand Region',
-    destinationDate: '2025-08-10T03:31:00',
+    destinationDate: '2025-08-27T21:30:00',
     estimatedMiles: '350 mi',
     tripTime: '7h 30m',
     sitsAvailable: '1 sit',
@@ -100,9 +100,9 @@ const dummySearchResults = [
     imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Kia+K5',
     plateNumber: { locationCode: '50', series: 'G', serialNumber: '789HI' },
     origin: 'Andijan',
-    originDate: '2025-08-11T16:30:00',
+    originDate: '2025-08-28T10:00:00',
     destination: 'Namangan Region',
-    destinationDate: '2025-08-12T05:30:00',
+    destinationDate: '2025-08-29T23:00:00',
     estimatedMiles: 'Block',
     tripTime: '1d 13h',
     sitsAvailable: '3 sits',
@@ -123,12 +123,12 @@ const dummySearchResults = [
     imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Hyundai+Elantra',
     plateNumber: { locationCode: '80', series: 'J', serialNumber: '321KL' },
     origin: 'Bukhara',
-    originDate: '2025-08-13T08:00:00',
+    originDate: '2025-08-29T08:30:00',
     destination: 'Khorezm Region',
-    destinationDate: '2025-08-13T12:00:00',
+    destinationDate: '2025-08-29T16:30:00',
     estimatedMiles: '400 mi',
     tripTime: '8h 0m',
-    sitsAvailable: '2 sits',
+    sitsAvailable: '4 sits',
     basePrice: 388.89,
     avgFuelPerMile: '$0.80/mi',
     serviceType: 'rider',
@@ -208,7 +208,7 @@ const CheapestIcon = () => (
 );
 
 const CalendarView = ({ onDayClick, selectedDate }) => {
-    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentDate, setCurrentDate] = useState(new Date('2025-08-25'));
   
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -263,198 +263,26 @@ const CustomScrollbarStyles = () => (
   `}</style>
 );
 
-// Helper component for a simple avatar
-const Avatar = ({ initials, bgColor, size = 'w-10 h-10' }) => (
-  <div className={`rounded-full flex items-center justify-center text-white text-sm font-semibold ${bgColor} ${size}`} >
-    {initials}
-  </div>
-);
-
-// Message Dashboard component with Telegram-like UX
-const MessageDashboard = ({ onClose }) => {
-  const [activeMessageTab, setActiveMessageTab] = useState("chats");
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [draft, setDraft] = useState("");
-  const [conversations, setConversations] = useState({
-    1: [
-      { id: "m1", sender: "Jane Doe", text: "Hey, are you available for a ride?", time: "10:30 AM" },
-      { id: "m2", sender: "me", text: "Hi Jane, yes I am!", time: "10:31 AM" },
-    ],
-    2: [
-      { id: "m3", sender: "Mike Smith", text: "Thanks for the ride last week!", time: "Yesterday" },
-    ],
-  });
-
-  const messageNavItems = [
-    { id: "chats", label: "Chats", icon: MessageCircle },
-    { id: "groups", label: "Groups", icon: Users },
-    { id: "channels", label: "Channels", icon: Users },
-    { id: "market", label: "Market", icon: Users },
-  ];
-
-  const chatItems = {
-    chats: [
-      { id: 1, name: "Jane Doe", lastMessage: "Hey, are you available for a ride?", time: "10:30 AM", avatar: <Avatar initials="JD" bgColor="bg-purple-500" /> },
-      { id: 2, name: "Mike Smith", lastMessage: "Thanks for the ride last week!", time: "Yesterday", avatar: <Avatar initials="MS" bgColor="bg-blue-500" /> },
-    ],
-    groups: [ { id: 101, name: "Drivers Community", lastMessage: "New update on city regulations.", time: "1 hr ago", avatar: <Avatar initials="DC" bgColor="bg-yellow-500" /> } ],
-    channels: [ { id: 201, name: "Ride Alerts Official", lastMessage: "High demand in downtown area!", time: "15 min ago", avatar: <Avatar initials="RA" bgColor="bg-red-500" /> } ],
-    market: [ { id: 301, name: "Special Offers", lastMessage: "Discount on car maintenance this week.", time: "2 days ago", avatar: <Avatar initials="SO" bgColor="bg-indigo-500" /> } ],
-  };
-
-  const currentChats = chatItems[activeMessageTab] || [];
-  const filteredChats = currentChats.filter((chat) =>
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const sendMessage = (e) => {
-    e.preventDefault();
-    if (!selectedChat || !draft.trim()) return;
-    setConversations((prev) => {
-      const msgs = prev[selectedChat.id] || [];
-      return {
-        ...prev,
-        [selectedChat.id]: [
-          ...msgs,
-          { id: `${Date.now()}`, sender: "me", text: draft.trim(), time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
-        ],
-      };
-    });
-    setDraft("");
-    // Simulate quick auto-reply
-    setTimeout(() => {
-      setConversations((prev) => {
-        const msgs = prev[selectedChat.id] || [];
-        return {
-          ...prev,
-          [selectedChat.id]: [
-            ...msgs,
-            { id: `${Date.now()}-r`, sender: selectedChat.name, text: "Got it!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
-          ],
-        };
-      });
-    }, 800);
-  };
-
-  const renderList = () => (
-    <div className="flex-grow overflow-y-auto custom-scrollbar">
-      {filteredChats.length > 0 ? (
-        <div className="space-y-1">
-          {filteredChats.map((chat) => (
-            <button
-              key={chat.id}
-              onClick={() => setSelectedChat(chat)}
-              className="w-full flex items-center p-3 hover:bg-neutral-100 cursor-pointer transition-colors text-left"
-            >
-              {chat.avatar}
-              <div className="ml-3 flex-grow">
-                <p className="font-medium text-gray-800">{chat.name}</p>
-                <p className="text-sm text-neutral-600 truncate">{chat.lastMessage}</p>
-              </div>
-              <span className="text-xs text-neutral-500">{chat.time}</span>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <p className="text-neutral-500 text-center mt-10">No messages found.</p>
-      )}
-    </div>
-  );
-
-  const renderChat = () => {
-    const msgs = conversations[selectedChat?.id] || [];
-    return (
-      <div className="flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
-          {msgs.map((m) => (
-            <div key={m.id} className={`flex ${m.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.sender === 'me' ? 'bg-[#E1F87E] text-[#121212]' : 'bg-neutral-100 text-gray-800'}`}>
-                <p className="whitespace-pre-wrap">{m.text}</p>
-                <div className="text-[10px] opacity-70 mt-1 text-right">{m.time}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <form onSubmit={sendMessage} className="p-3 border-t border-neutral-200 bg-white flex items-center gap-2">
-          <input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Type a message"
-            className="flex-1 p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]"
-          />
-          <button type="submit" className="p-2 rounded-lg bg-[#E1F87E] text-[#121212] hover:bg-opacity-80">
-            <Send className="h-5 w-5" />
-          </button>
-        </form>
-      </div>
-    );
-  };
+// Component to visually represent seat availability
+const SeatAvailability = ({ count }) => {
+  const seatCount = parseInt(count) || 0;
+  if (seatCount === 0) return null;
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-3xl overflow-hidden">
-      <div className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between gap-2">
-        {selectedChat ? (
-          <>
-            <button onClick={() => setSelectedChat(null)} className="text-neutral-800 hover:text-gray-900">
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <h2 className="text-lg font-semibold text-gray-800 flex-1 truncate">{selectedChat.name}</h2>
-            <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
-          </>
-        ) : isSearching ? (
-          <>
-            <div className="relative flex-1">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full bg-neutral-100 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] text-gray-800"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-              />
-            </div>
-            <button onClick={() => { setIsSearching(false); setSearchQuery(''); }} className="text-sm font-semibold text-gray-700 hover:text-gray-900">
-              Cancel
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
-            <div className="flex-1"></div> {/* Placeholder to push search icon to the right */}
-            <button onClick={() => setIsSearching(true)} className="text-neutral-800 hover:text-gray-900">
-              <Search className="h-6 w-6" />
-            </button>
-          </>
-        )}
+    <div className="flex items-center">
+      <div className="flex items-center space-x-2">
+        {[...Array(seatCount)].map((_, i) => (
+          <User key={i} size={28} className="text-green-600 bg-green-100 p-1.5 rounded-full" />
+        ))}
       </div>
-
-      {!selectedChat && (
-        <div className="flex justify-around bg-white p-2 border-b border-neutral-200">
-          {messageNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeMessageTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => { setActiveMessageTab(item.id); setSearchQuery(""); setIsSearching(false); }}
-                className={`flex-1 flex flex-col items-center py-2 transition-colors relative ${isActive ? "text-gray-800" : "text-neutral-500"}`}
-              >
-                <Icon className="h-5 w-5 mb-1" />
-                <span className="text-xs">{item.label}</span>
-                {isActive && (<div className="absolute bottom-0 h-0.5 w-full bg-[#E1F87E] rounded-full"></div>)}
-              </button>
-            );
-          })}
-        </div>
-      )}
-      {selectedChat ? renderChat() : renderList()}
+      <div className="ml-2 text-left">
+        <span className="text-lg font-bold text-gray-800">{seatCount}</span>
+        <p className="text-xs text-gray-600 -mt-1 leading-tight">available seats</p>
+      </div>
     </div>
   );
 };
+
 
 // Location Selection Modal Component
 const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
@@ -519,15 +347,15 @@ const App = () => {
   const [pickupDate, setPickupDate] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [activeFilter, setActiveFilter] = useState(null); // 'saved', 'recommended', 'mail'
-  const [activeSort, setActiveSort] = useState(null); // 'cheapest', 'fastest'
+  const [activeSort, setActiveSort] = useState(null); // 'by_seat', 'by_time'
+  const [seatsNeeded, setSeatsNeeded] = useState(null);
   const [savedRides, setSavedRides] = useState([]);
-  const [firstUse, setFirstUse] = useState({ cheapest: true, fastest: true, saved: true, recommended: true, mail: true });
+  const [firstUse, setFirstUse] = useState({ by_seat: true, by_time: true, saved: true, recommended: true, mail: true });
   const [tipToShow, setTipToShow] = useState(null);
   const [dismissedTips, setDismissedTips] = useState([]);
   const [selectedRide, setSelectedRide] = useState(null);
   const [isUnreliableRider, setIsUnreliableRider] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [showMessages, setShowMessages] = useState(false);
   const [showFromModal, setShowFromModal] = useState(false);
   const [showToModal, setShowToModal] = useState(false);
 
@@ -552,6 +380,10 @@ const App = () => {
         setTipToShow(null);
     }
   };
+
+  const handleSeatsNeededClick = (numSeats) => {
+    setSeatsNeeded(prev => prev === numSeats ? null : numSeats);
+  };
   
   const handleCloseTip = () => {
     if (tipToShow) {
@@ -575,9 +407,6 @@ const App = () => {
   }
 
   const renderContent = () => {
-    if (showMessages) {
-        return <MessageDashboard onClose={() => setShowMessages(false)} />;
-    }
     switch (activeTab) {
       case 'history':
         return (
@@ -600,22 +429,27 @@ const App = () => {
           } else if (activeFilter === 'mail') {
             results = results.filter(ride => ride.serviceType === 'mail' || ride.serviceType === 'both');
           }
-
-          const cheapestRideId = results.length > 0 ? results.reduce((prev, curr) => (calculatePayout(prev.basePrice) < calculatePayout(curr.basePrice) ? prev : curr)).id : null;
           
-          if (activeSort === 'cheapest') {
-            results.sort((a, b) => {
-                const priceA = activeFilter === 'mail' ? parseInt(a.mailPayout?.replace('$', '') || '99999') : calculatePayout(a.basePrice);
-                const priceB = activeFilter === 'mail' ? parseInt(b.mailPayout?.replace('$', '') || '99999') : calculatePayout(b.basePrice);
-                return priceA - priceB;
+          if (seatsNeeded) {
+            results = results.filter(ride => {
+                const availableSeats = parseInt(ride.sitsAvailable) || 0;
+                return availableSeats >= seatsNeeded;
             });
-          } else if (activeSort === 'fastest') {
-            results.sort((a, b) => parseTripTimeToMinutes(a.tripTime) - parseTripTimeToMinutes(b.tripTime));
+          }
+
+          if (activeSort === 'by_time') {
+            results.sort((a, b) => new Date(a.originDate) - new Date(b.originDate));
+          } else if (activeSort === 'by_seat') {
+            results.sort((a, b) => {
+                const seatsA = parseInt(a.sitsAvailable) || 0;
+                const seatsB = parseInt(b.sitsAvailable) || 0;
+                return seatsB - seatsA; // Sort by most seats available
+            });
           }
           
           const tipContent = {
-              cheapest: { icon: <DollarSign size={20} className="text-white"/>, text: "Now sorting rides from the lowest to the highest price." },
-              fastest: { icon: <Wind size={20} className="text-white"/>, text: "Now sorting rides by the shortest trip duration." },
+              by_time: { icon: <History size={20} className="text-white"/>, text: "The ride will start at the scheduled time, regardless of seat availability." },
+              by_seat: { icon: <Users size={20} className="text-white"/>, text: "The driver departs once all seats are filled." },
               saved: { icon: <Bookmark size={20} className="text-white"/>, text: "Showing only the rides you have saved." },
               recommended: { icon: <Lightbulb size={20} className="text-white"/>, text: "Showing recommended rides based on driver ratings and your history." },
               mail: { icon: <AmazonMailLogo className="text-white"/>, text: "Showing rides that can also deliver mail. Mail should not be more than 5 kg." },
@@ -625,8 +459,8 @@ const App = () => {
           if(activeFilter === 'recommended') stickyTitle = "Recommended for you";
           else if(activeFilter === 'saved') stickyTitle = "Saved Rides";
           else if(activeFilter === 'mail') stickyTitle = "Mail Delivery";
-          else if(activeSort === 'cheapest') stickyTitle = "Sorted by: Cheapest";
-          else if(activeSort === 'fastest') stickyTitle = "Sorted by: Fastest";
+          else if(activeSort === 'by_seat') stickyTitle = "Sorted by: Seat";
+          else if(activeSort === 'by_time') stickyTitle = "Sorted by: Time";
 
 
           return (
@@ -634,32 +468,42 @@ const App = () => {
               <div className="flex-shrink-0 bg-white shadow-sm z-10">
                 <div className="p-4 border-b border-neutral-200">
                   <h2 className="text-lg font-semibold text-gray-800 text-left mb-3">Results</h2>
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                      <div className="flex items-center space-x-2 flex-wrap gap-2">
-                          <button onClick={() => handleSortClick('cheapest')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'cheapest' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                              <DollarSign size={16} />
-                              <span>Cheapest</span>
-                          </button>
-                          <button onClick={() => handleSortClick('fastest')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'fastest' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                              <Wind size={16} />
-                              <span>Fastest</span>
-                          </button>
-                           <button onClick={() => handleFilterClick('mail')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'mail' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                              {activeFilter === 'mail' ? <X size={16} /> : <AmazonMailLogo className="w-5 h-5"/>}
-                              <span>Mail Only</span>
-                          </button>
-                      </div>
+                  <div className="flex flex-col gap-4">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                          <div className="flex items-center space-x-2 flex-wrap gap-2">
+                              <button onClick={() => handleSortClick('by_seat')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'by_seat' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                  <Users size={16} />
+                                  <span>By seat</span>
+                              </button>
+                              <button onClick={() => handleSortClick('by_time')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'by_time' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                  <History size={16} />
+                                  <span>By time</span>
+                              </button>
+                               <button onClick={() => handleFilterClick('mail')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'mail' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                  {activeFilter === 'mail' ? <X size={16} /> : <AmazonMailLogo className="w-5 h-5"/>}
+                                  <span>With mail option</span>
+                              </button>
+                          </div>
 
+                          <div className="flex items-center space-x-2">
+                              <div className="w-px h-6 bg-gray-300 mx-1 hidden sm:block"></div>
+                              <button onClick={() => handleFilterClick('saved')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'saved' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                  {activeFilter === 'saved' ? <X size={16} /> : <Bookmark size={16} />}
+                                  <span>Saved</span>
+                              </button>
+                               <button onClick={() => handleFilterClick('recommended')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'recommended' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                  {activeFilter === 'recommended' ? <X size={16} /> : <Lightbulb size={16} />}
+                                  <span>Recommended</span>
+                              </button>
+                          </div>
+                      </div>
                       <div className="flex items-center space-x-2">
-                          <div className="w-px h-6 bg-gray-300 mx-1 hidden sm:block"></div>
-                          <button onClick={() => handleFilterClick('saved')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'saved' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                              {activeFilter === 'saved' ? <X size={16} /> : <Bookmark size={16} />}
-                              <span>Saved</span>
-                          </button>
-                           <button onClick={() => handleFilterClick('recommended')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'recommended' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                              {activeFilter === 'recommended' ? <X size={16} /> : <Lightbulb size={16} />}
-                              <span>Recommended</span>
-                          </button>
+                          <span className="text-sm font-semibold text-gray-700">Seats Needed:</span>
+                          {[1, 2, 3, 4].map(num => (
+                              <button key={num} onClick={() => handleSeatsNeededClick(num)} className={`w-10 h-10 rounded-full text-sm font-semibold transition-colors ${seatsNeeded === num ? 'bg-green-500 text-white' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                  {num}
+                              </button>
+                          ))}
                       </div>
                   </div>
                 </div>
@@ -680,20 +524,20 @@ const App = () => {
                         </button>
                         <div className="flex flex-col sm:flex-row justify-between items-start mb-3">
                           <div className="flex flex-col">
-                            <div className="flex items-center text-gray-600 text-sm mb-2">
-                              <p className="font-semibold text-gray-800 text-base mr-2">{item.driverName}</p>
-                              {[...Array(5)].map((_, i) => <Star key={i} size={14} fill={i < Math.floor(item.reliabilityStars) ? "#facc15" : "none"} stroke="#facc15" className="mr-0.5"/>)}
-                              <span className="text-gray-600 text-xs ml-1">({item.reliabilityStars})</span>
+                            <div className="flex items-center mb-2">
+                                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                    <User size={24} className="text-gray-600" />
+                                </div>
+                                <p className="font-semibold text-gray-800 text-lg">{item.driverName}</p>
                             </div>
-                             <div className="flex items-center space-x-2 text-sm text-gray-800 mb-2">
+                            <div className="flex items-center space-x-2 text-sm text-gray-800 mb-2">
                                 <Car size={16} className="text-gray-600" />
                                 <span>{item.carYear} {item.carModel}</span>
                             </div>
-                             <PlateNumber plate={item.plateNumber} />
+                            <PlateNumber plate={item.plateNumber} />
                           </div>
                           <div className="text-right mt-2 sm:mt-0 sm:mr-10">
                             <div className="text-2xl font-bold text-green-700 flex items-center justify-end">
-                                {item.id === cheapestRideId && <CheapestIcon />}
                                 {activeFilter === 'mail' ? item.mailPayout : `$${calculatePayout(item.basePrice).toFixed(2)}`}
                             </div>
                             <div className="text-sm text-gray-600">
@@ -721,11 +565,11 @@ const App = () => {
                         </div>
 
                         <div className="flex items-center justify-between text-gray-700 text-sm mt-3">
-                          <div className="flex items-center space-x-2">
-                            <span>{item.estimatedMiles}</span><span className="mx-1">•</span><span>{item.tripTime}</span>
-                            {activeFilter !== 'mail' && <><span className="mx-1">•</span><Users size={16} className="text-gray-500" /><span>{item.sitsAvailable}</span></>}
-                          </div>
-                          <button onClick={(e) => e.stopPropagation()} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-600 transition duration-200 shadow">Book</button>
+                            <div className="flex items-center space-x-2">
+                                <span>{item.estimatedMiles}</span><span className="mx-1">•</span><span>{item.tripTime}</span>
+                            </div>
+                            <SeatAvailability count={item.sitsAvailable} />
+                            <button onClick={(e) => e.stopPropagation()} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-600 transition duration-200 shadow">Book</button>
                         </div>
                       </div>
                     ))}
@@ -781,11 +625,9 @@ const App = () => {
     <div className="min-h-screen flex flex-col bg-[#F8F8F8] font-sans antialiased">
       <CustomScrollbarStyles />
       <header className="bg-white text-gray-800 p-3 flex items-center justify-between shadow-md border-b border-neutral-200 z-20 relative">
-        {showSearchResults || selectedRide || showMessages ? (<button className="p-2 rounded-full hover:bg-neutral-100 transition-colors" onClick={() => { if(selectedRide) {setSelectedRide(null)} else if (showMessages) {setShowMessages(false)} else {setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setShowSearchResults(false); setActiveFilter(null); setActiveSort(null); } }}><ChevronLeft size={24} /></button>) : (<div className="w-10"></div>)}
+        {showSearchResults || selectedRide ? (<button className="p-2 rounded-full hover:bg-neutral-100 transition-colors" onClick={() => { if(selectedRide) {setSelectedRide(null)} else {setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setShowSearchResults(false); setActiveFilter(null); setActiveSort(null); setSeatsNeeded(null); } }}><ChevronLeft size={24} /></button>) : (<div className="w-10"></div>)}
         <h1 className="text-xl font-bold absolute left-1/2 -translate-x-1/2">Rider's Dashboard</h1>
-        <button onClick={() => setShowMessages(true)} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors">
-            <MessageCircle className="h-8 w-8" />
-        </button>
+        <div className="w-10"></div>
       </header>
 
       <main className="flex-grow overflow-hidden flex flex-col">
@@ -794,15 +636,13 @@ const App = () => {
 
       {pickupLocation && destinationLocation && pickupDate && !showSearchResults && (<div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40"><button className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300 shadow-xl transform hover:scale-105" onClick={() => setShowSearchResults(true)}>See my results</button></div>)}
 
-      {!showMessages && (
-          <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50">
-            <div className="flex justify-around items-center h-16">
-              <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'search' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setActiveFilter(null); setActiveSort(null); setSelectedRide(null); }}><Search size={24} strokeWidth={activeTab === 'search' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'search' ? 'text-gray-800' : 'text-neutral-500'}`}>Search</span></button>
-              <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'history' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => setActiveTab('history')}><History size={24} strokeWidth={activeTab === 'history' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'history' ? 'text-gray-800' : 'text-neutral-500'}`}>History</span></button>
-              <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'profile' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => setActiveTab('profile')}><User size={24} strokeWidth={activeTab === 'profile' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'profile' ? 'text-gray-800' : 'text-neutral-500'}`}>Profile</span></button>
-            </div>
-          </nav>
-      )}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50">
+        <div className="flex justify-around items-center h-16">
+          <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'search' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setActiveFilter(null); setActiveSort(null); setSelectedRide(null); setSeatsNeeded(null); }}><Search size={24} strokeWidth={activeTab === 'search' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'search' ? 'text-gray-800' : 'text-neutral-500'}`}>Search</span></button>
+          <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'history' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => setActiveTab('history')}><History size={24} strokeWidth={activeTab === 'history' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'history' ? 'text-gray-800' : 'text-neutral-500'}`}>History</span></button>
+          <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'profile' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => setActiveTab('profile')}><User size={24} strokeWidth={activeTab === 'profile' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'profile' ? 'text-gray-800' : 'text-neutral-500'}`}>Profile</span></button>
+        </div>
+      </nav>
     </div>
   );
 };
@@ -850,7 +690,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack }) => {
             <div className="bg-white text-gray-800 p-4 flex-shrink-0 border-b border-neutral-200">
                  <div className="flex items-center">
                     <button onClick={onBack} className="mr-3 text-gray-600 hover:text-gray-800"><ChevronLeft size={24} /></button>
-                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4"/>
+                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4" onError={(e) => e.target.src = 'https://placehold.co/200x150/E2E8F0/4A5568?text=Image+Error'}/>
                     <div className="flex items-stretch w-full">
                         <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
                             <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-neutral-300 rounded-full"></div>
@@ -905,7 +745,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack }) => {
                         </AccordionItem>
                          <AccordionItem icon={<User className="text-gray-600" />} title="Driver & Car" value="">
                             <div className="flex space-x-4">
-                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full"/>
+                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full" onError={(e) => e.target.src = 'https://placehold.co/100x100/E2E8F0/4A5568?text=N/A'}/>
                                 <div>
                                     <p className="font-semibold">{ride.driverName}</p>
                                     <div className="flex items-center text-sm text-gray-600">
