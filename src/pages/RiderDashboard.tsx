@@ -262,35 +262,41 @@ const App = () => {
         .eq('status', 'active')
         .order('created_at', { ascending: false });
 
-      // More flexible location matching - check for partial matches in both directions
+      // Simple route matching - if both locations specified, match them
       if (pickupLocation && destinationLocation) {
-        // Priority search: exact route match first, then partial matches
-        console.log('RiderDashboard - Searching for route:', pickupLocation, '→', destinationLocation);
-        query = query.or(`and(departure_location.ilike.%${pickupLocation}%,destination_location.ilike.%${destinationLocation}%),and(departure_location.ilike.%${destinationLocation}%,destination_location.ilike.%${pickupLocation}%)`);
+        console.log('RiderDashboard - Filtering by route:', pickupLocation, '→', destinationLocation);
+        query = query
+          .ilike('departure_location', `%${pickupLocation}%`)
+          .ilike('destination_location', `%${destinationLocation}%`);
       } else if (pickupLocation) {
-        query = query.or(`departure_location.ilike.%${pickupLocation}%,destination_location.ilike.%${pickupLocation}%`);
+        console.log('RiderDashboard - Filtering by pickup location:', pickupLocation);
+        query = query.ilike('departure_location', `%${pickupLocation}%`);
       } else if (destinationLocation) {
-        query = query.or(`departure_location.ilike.%${destinationLocation}%,destination_location.ilike.%${destinationLocation}%`);
+        console.log('RiderDashboard - Filtering by destination:', destinationLocation);
+        query = query.ilike('destination_location', `%${destinationLocation}%`);
       }
 
-      // Date filter is optional for broader results
+      // Date filter is optional
       if (pickupDate) {
+        console.log('RiderDashboard - Filtering by date:', pickupDate);
         query = query.eq('departure_date', pickupDate);
       }
 
-      console.log('RiderDashboard - About to execute query with route matching');
+      console.log('RiderDashboard - About to execute query');
       const { data, error } = await query;
 
       console.log('RiderDashboard - Query response:', { data, error, count: data?.length });
 
       if (error) {
-        console.error('Error fetching rides:', error);
+        console.error('RiderDashboard - Error fetching rides:', error);
         toast({ title: 'Error', description: 'Failed to fetch rides. Please try again.', variant: 'destructive' });
         return;
       }
 
-      const transformedRides = data?.map(ride => {
-        console.log('RiderDashboard - Transforming ride:', ride);
+      console.log('RiderDashboard - Raw database data:', data);
+
+      const transformedRides = data?.map((ride, index) => {
+        console.log(`RiderDashboard - Transforming ride ${index}:`, ride);
         return {
           id: ride.id,
           driverName: ride.username || 'Driver',
@@ -316,12 +322,14 @@ const App = () => {
         };
       }) || [];
 
-      console.log('RiderDashboard - Transformed rides:', transformedRides);
+      console.log('RiderDashboard - Final transformed rides:', transformedRides);
       setRides(transformedRides);
 
       if (transformedRides.length === 0) {
+        console.log('RiderDashboard - No rides found, showing no results message');
         toast({ title: 'No rides found', description: 'No active rides match your search criteria.' });
       } else {
+        console.log(`RiderDashboard - Success! Found ${transformedRides.length} rides`);
         toast({ title: 'Rides loaded', description: `Found ${transformedRides.length} available ride(s).` });
       }
     } catch (error) {

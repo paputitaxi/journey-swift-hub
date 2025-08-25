@@ -66,9 +66,12 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
 
     setIsLoading(true);
     try {
-      const uname = typeof window !== 'undefined' ? (localStorage.getItem('username') || "") : "";
-      const finalUsername = uname || savedUsername;
+      // Get username from localStorage
+      const finalUsername = localStorage.getItem('username');
+      console.log('PostRideModal - Username from localStorage:', finalUsername);
+      
       if (!finalUsername) {
+        console.log('PostRideModal - No username found, redirecting to welcome');
         toast({
           title: "Set username first",
           description: "Please choose a username on the welcome screen.",
@@ -97,7 +100,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
       console.log('PostRideModal - Insert response:', { data, error });
 
       if (error) {
-        console.error('Error posting ride:', error);
+        console.error('PostRideModal - Error posting ride:', error);
         toast({
           title: "Error",
           description: "Failed to post ride. Please try again.",
