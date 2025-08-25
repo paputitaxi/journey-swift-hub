@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info, Car, MessageCircle, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 // Expanded Data for Uzbekistan Regions and Cities - ALL 14 REGIONS INCLUDED
 const uzbekistanLocationsData = [
@@ -43,111 +44,6 @@ const getDropOffDate = (pickupDateString) => {
   pickupDate.setDate(pickupDate.getDate() + 1); // Add one day
   const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
   return pickupDate.toLocaleDateString('en-US', options);
-};
-
-// Dummy data for search results - now includes more details
-const dummySearchResults = [
-  {
-    id: 1,
-    driverName: 'Alisher V.',
-    driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=AV',
-    reliabilityStars: 4.5,
-    carModel: 'Chevrolet Cobalt',
-    carYear: 2022,
-    imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Chevrolet+Cobalt',
-    plateNumber: { locationCode: '01', series: 'A', serialNumber: '123BC' },
-    origin: 'Tashkent',
-    originDate: '2025-08-26T09:00:00',
-    destination: 'Tashkent Region',
-    destinationDate: '2025-08-26T13:00:00',
-    estimatedMiles: '192 mi',
-    tripTime: '4h 0m',
-    sitsAvailable: '2 sits',
-    basePrice: 284.44,
-    avgFuelPerMile: '$0.85/mi',
-    serviceType: 'rider',
-    specialServices: ['Wi-Fi', 'Air Conditioning'],
-  },
-  {
-    id: 2,
-    driverName: 'Botir K.',
-    driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=BK',
-    reliabilityStars: 3.8,
-    carModel: 'Lada Granta',
-    carYear: 2020,
-    imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Lada+Granta',
-    plateNumber: { locationCode: '30', series: 'D', serialNumber: '456EF' },
-    origin: 'Fergana',
-    originDate: '2025-08-27T14:00:00',
-    destination: 'Samarkand Region',
-    destinationDate: '2025-08-27T21:30:00',
-    estimatedMiles: '350 mi',
-    tripTime: '7h 30m',
-    sitsAvailable: '1 sit',
-    basePrice: 332.22,
-    avgFuelPerMile: '$0.75/mi',
-    mailPayout: '$25',
-    ratePerMail: 'per mail',
-    serviceType: 'mail',
-    specialServices: ['Mail delivery'],
-  },
-  {
-    id: 3,
-    driverName: 'Dilshod R.',
-    driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=DR',
-    reliabilityStars: 5.0,
-    carModel: 'Kia K5',
-    carYear: 2023,
-    imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Kia+K5',
-    plateNumber: { locationCode: '50', series: 'G', serialNumber: '789HI' },
-    origin: 'Andijan',
-    originDate: '2025-08-28T10:00:00',
-    destination: 'Namangan Region',
-    destinationDate: '2025-08-29T23:00:00',
-    estimatedMiles: 'Block',
-    tripTime: '1d 13h',
-    sitsAvailable: '3 sits',
-    basePrice: 1514.44,
-    avgFuelPerMile: '$1.10/mi',
-    mailPayout: '$30',
-    ratePerMail: 'per mail',
-    serviceType: 'both',
-    specialServices: ['Wi-Fi', 'Air Conditioning', 'Luggage space'],
-  },
-  {
-    id: 4,
-    driverName: 'Elbek S.',
-    driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=ES',
-    reliabilityStars: 4.2,
-    carModel: 'Hyundai Elantra',
-    carYear: 2021,
-    imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Hyundai+Elantra',
-    plateNumber: { locationCode: '80', series: 'J', serialNumber: '321KL' },
-    origin: 'Bukhara',
-    originDate: '2025-08-29T08:30:00',
-    destination: 'Khorezm Region',
-    destinationDate: '2025-08-29T16:30:00',
-    estimatedMiles: '400 mi',
-    tripTime: '8h 0m',
-    sitsAvailable: '4 sits',
-    basePrice: 388.89,
-    avgFuelPerMile: '$0.80/mi',
-    serviceType: 'rider',
-    specialServices: ['Air Conditioning'],
-  },
-];
-
-// Helper function to parse trip time string into minutes for sorting
-const parseTripTimeToMinutes = (timeString) => {
-    let totalMinutes = 0;
-    const daysMatch = timeString.match(/(\d+)\s*d/);
-    const hoursMatch = timeString.match(/(\d+)\s*h/);
-    const minutesMatch = timeString.match(/(\d+)\s*m/);
-
-    if (daysMatch) totalMinutes += parseInt(daysMatch[1]) * 24 * 60;
-    if (hoursMatch) totalMinutes += parseInt(hoursMatch[1]) * 60;
-    if (minutesMatch) totalMinutes += parseInt(minutesMatch[1]);
-    return totalMinutes;
 };
 
 // Component to render the styled car plate number
@@ -201,12 +97,6 @@ const TipBar = ({ icon, text, onClose }) => {
         </div>
     );
 };
-
-const CheapestIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-);
 
 const CalendarView = ({ onDayClick, selectedDate }) => {
     const [currentDate, setCurrentDate] = useState(new Date('2025-08-25'));
@@ -284,7 +174,6 @@ const SeatAvailability = ({ count }) => {
   );
 };
 
-
 // Location Selection Modal Component
 const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -339,9 +228,9 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
   );
 };
 
-
 // Main App component
 const App = () => {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('search');
   const [pickupLocation, setPickupLocation] = useState('');
   const [destinationLocation, setDestinationLocation] = useState('');
@@ -374,6 +263,11 @@ const App = () => {
 
       if (error) {
         console.error('Error fetching rides:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch rides. Please try again.",
+          variant: "destructive"
+        });
         return;
       }
 
@@ -403,8 +297,25 @@ const App = () => {
       })) || [];
 
       setRides(transformedRides);
+
+      if (transformedRides.length === 0) {
+        toast({
+          title: "No rides found",
+          description: "No active rides match your search criteria.",
+        });
+      } else {
+        toast({
+          title: "Rides loaded",
+          description: `Found ${transformedRides.length} available ride(s).`,
+        });
+      }
     } catch (error) {
       console.error('Error fetching rides:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch rides. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoadingRides(false);
     }
@@ -473,9 +384,6 @@ const App = () => {
           </div>
         );
       case 'search':
-        if (selectedRide) {
-            return <TripDetails ride={selectedRide} onBack={() => setSelectedRide(null)} isUnreliable={isUnreliableRider} onToggleReliability={() => setIsUnreliableRider(p => !p)} />;
-        }
         if (showSearchResults) {
           let results = [...rides];
 
@@ -532,119 +440,129 @@ const App = () => {
           else if(activeSort === 'by_seat') stickyTitle = "Sorted by: Seat";
           else if(activeSort === 'by_time') stickyTitle = "Sorted by: Time";
 
-
           return (
             <div className="flex flex-col h-full">
-              <div className="flex-shrink-0 bg-white shadow-sm z-10">
-                <div className="p-4 border-b border-neutral-200">
-                  <h2 className="text-lg font-semibold text-gray-800 text-left mb-3">Results</h2>
-                  <div className="flex flex-col gap-4">
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                          <div className="flex items-center space-x-2 flex-wrap gap-2">
-                              <button onClick={() => handleSortClick('by_seat')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'by_seat' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                                  <Users size={16} />
-                                  <span>By seat</span>
-                              </button>
-                              <button onClick={() => handleSortClick('by_time')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'by_time' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                                  <History size={16} />
-                                  <span>By time</span>
-                              </button>
-                               <button onClick={() => handleFilterClick('mail')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'mail' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                                  {activeFilter === 'mail' ? <X size={16} /> : <AmazonMailLogo className="w-5 h-5"/>}
-                                  <span>With mail option</span>
-                              </button>
-                          </div>
-
-                          <div className="flex items-center space-x-2">
-                              <div className="w-px h-6 bg-gray-300 mx-1 hidden sm:block"></div>
-                              <button onClick={() => handleFilterClick('saved')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'saved' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                                  {activeFilter === 'saved' ? <X size={16} /> : <Bookmark size={16} />}
-                                  <span>Saved</span>
-                              </button>
-                               <button onClick={() => handleFilterClick('recommended')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'recommended' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                                  {activeFilter === 'recommended' ? <X size={16} /> : <Lightbulb size={16} />}
-                                  <span>Recommended</span>
-                              </button>
-                          </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                          <span className="text-sm font-semibold text-gray-700">Seats Needed:</span>
-                          {[1, 2, 3, 4].map(num => (
-                              <button key={num} onClick={() => handleSeatsNeededClick(num)} className={`w-10 h-10 rounded-full text-sm font-semibold transition-colors ${seatsNeeded === num ? 'bg-green-500 text-white' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                                  {num}
-                              </button>
-                          ))}
-                      </div>
+              {isLoadingRides ? (
+                <div className="flex-grow flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="animate-spin h-12 w-12 border-2 border-border border-t-primary rounded-full mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading rides...</p>
                   </div>
                 </div>
-                
-                {tipToShow && <TipBar icon={tipContent[tipToShow].icon} text={tipContent[tipToShow].text} onClose={handleCloseTip} />}
+              ) : (
+                <>
+                  <div className="flex-shrink-0 bg-white shadow-sm z-10">
+                    <div className="p-4 border-b border-neutral-200">
+                      <h2 className="text-lg font-semibold text-gray-800 text-left mb-3">Results</h2>
+                      <div className="flex flex-col gap-4">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                              <div className="flex items-center space-x-2 flex-wrap gap-2">
+                                  <button onClick={() => handleSortClick('by_seat')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'by_seat' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                      <Users size={16} />
+                                      <span>By seat</span>
+                                  </button>
+                                  <button onClick={() => handleSortClick('by_time')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'by_time' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                      <History size={16} />
+                                      <span>By time</span>
+                                  </button>
+                                   <button onClick={() => handleFilterClick('mail')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'mail' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                      {activeFilter === 'mail' ? <X size={16} /> : <AmazonMailLogo className="w-5 h-5"/>}
+                                      <span>With mail option</span>
+                                  </button>
+                              </div>
 
-                <div className="bg-white py-2 px-4 border-b border-neutral-200">
-                    <h3 className="font-semibold text-gray-800">{stickyTitle}</h3>
-                </div>
-              </div>
-
-              <div className="flex-grow overflow-y-auto bg-[#F8F8F8]">
-                <div className="p-4 space-y-4">
-                    {results.map(item => (
-                      <div key={item.id} onClick={() => setSelectedRide(item)} className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 text-left relative cursor-pointer hover:shadow-xl transition-shadow">
-                        <button onClick={(e) => { e.stopPropagation(); handleSaveRide(item.id); }} className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition-colors">
-                            <Bookmark size={20} className="text-gray-500 hover:text-green-600" fill={savedRides.includes(item.id) ? '#10B981' : 'none'} />
-                        </button>
-                        <div className="flex flex-col sm:flex-row justify-between items-start mb-3">
-                          <div className="flex flex-col">
-                            <div className="flex items-center mb-2">
-                                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
-                                    <User size={24} className="text-gray-600" />
-                                </div>
-                                <p className="font-semibold text-gray-800 text-lg">{item.driverName}</p>
-                            </div>
-                            <div className="flex items-center space-x-2 text-sm text-gray-800 mb-2">
-                                <Car size={16} className="text-gray-600" />
-                                <span>{item.carYear} {item.carModel}</span>
-                            </div>
-                            <PlateNumber plate={item.plateNumber} />
+                              <div className="flex items-center space-x-2">
+                                  <div className="w-px h-6 bg-gray-300 mx-1 hidden sm:block"></div>
+                                  <button onClick={() => handleFilterClick('saved')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'saved' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                      {activeFilter === 'saved' ? <X size={16} /> : <Bookmark size={16} />}
+                                      <span>Saved</span>
+                                  </button>
+                                   <button onClick={() => handleFilterClick('recommended')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'recommended' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                      {activeFilter === 'recommended' ? <X size={16} /> : <Lightbulb size={16} />}
+                                      <span>Recommended</span>
+                                  </button>
+                              </div>
                           </div>
-                          <div className="text-right mt-2 sm:mt-0 sm:mr-10">
-                            <div className="text-2xl font-bold text-green-700 flex items-center justify-end">
-                                {activeFilter === 'mail' ? item.mailPayout : `$${calculatePayout(item.basePrice).toFixed(2)}`}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                                {activeFilter === 'mail' ? item.ratePerMail : item.avgFuelPerMile}
-                            </div>
+                          <div className="flex items-center space-x-2">
+                              <span className="text-sm font-semibold text-gray-700">Seats Needed:</span>
+                              {[1, 2, 3, 4].map(num => (
+                                  <button key={num} onClick={() => handleSeatsNeededClick(num)} className={`w-10 h-10 rounded-full text-sm font-semibold transition-colors ${seatsNeeded === num ? 'bg-green-500 text-white' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                      {num}
+                                  </button>
+                              ))}
                           </div>
-                        </div>
-
-                        <div className="flex items-stretch mt-4">
-                            <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
-                                <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-gray-300 rounded-full"></div>
-                                <MapPin size={20} className="text-green-600 bg-white z-10" />
-                                <Target size={20} className="text-red-600 bg-white z-10" />
-                            </div>
-                            <div className="flex flex-col justify-between w-full">
-                                <div className="mb-4">
-                                    <p className="font-semibold text-gray-800 text-base">{item.origin}</p>
-                                    <p className="text-gray-600 text-sm">{formatDate(item.originDate)} {formatTime(item.originDate)}</p>
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-gray-800 text-base">{item.destination}</p>
-                                    <p className="text-gray-600 text-sm">{formatDate(item.destinationDate)} {formatTime(item.destinationDate)}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-gray-700 text-sm mt-3">
-                            <div className="flex items-center space-x-2">
-                                <span>{item.estimatedMiles}</span><span className="mx-1">•</span><span>{item.tripTime}</span>
-                            </div>
-                            <SeatAvailability count={item.sitsAvailable} />
-                            <button onClick={(e) => e.stopPropagation()} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-600 transition duration-200 shadow">Book</button>
-                        </div>
                       </div>
-                    ))}
-                </div>
-              </div>
+                    </div>
+                    
+                    {tipToShow && <TipBar icon={tipContent[tipToShow].icon} text={tipContent[tipToShow].text} onClose={handleCloseTip} />}
+
+                    <div className="bg-white py-2 px-4 border-b border-neutral-200">
+                        <h3 className="font-semibold text-gray-800">{stickyTitle}</h3>
+                    </div>
+                  </div>
+
+                  <div className="flex-grow overflow-y-auto bg-[#F8F8F8]">
+                    <div className="p-4 space-y-4">
+                        {results.map(item => (
+                          <div key={item.id} className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 text-left relative cursor-pointer hover:shadow-xl transition-shadow">
+                            <button onClick={(e) => { e.stopPropagation(); handleSaveRide(item.id); }} className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition-colors">
+                                <Bookmark size={20} className="text-gray-500 hover:text-green-600" fill={savedRides.includes(item.id) ? '#10B981' : 'none'} />
+                            </button>
+                            <div className="flex flex-col sm:flex-row justify-between items-start mb-3">
+                              <div className="flex flex-col">
+                                <div className="flex items-center mb-2">
+                                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                        <User size={24} className="text-gray-600" />
+                                    </div>
+                                    <p className="font-semibold text-gray-800 text-lg">{item.driverName}</p>
+                                </div>
+                                <div className="flex items-center space-x-2 text-sm text-gray-800 mb-2">
+                                    <Car size={16} className="text-gray-600" />
+                                    <span>{item.carYear} {item.carModel}</span>
+                                </div>
+                                <PlateNumber plate={item.plateNumber} />
+                              </div>
+                              <div className="text-right mt-2 sm:mt-0 sm:mr-10">
+                                <div className="text-2xl font-bold text-green-700 flex items-center justify-end">
+                                    {activeFilter === 'mail' ? item.mailPayout : `$${calculatePayout(item.basePrice).toFixed(2)}`}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                    {activeFilter === 'mail' ? item.ratePerMail : item.avgFuelPerMile}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-stretch mt-4">
+                                <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
+                                    <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-gray-300 rounded-full"></div>
+                                    <MapPin size={20} className="text-green-600 bg-white z-10" />
+                                    <Target size={20} className="text-red-600 bg-white z-10" />
+                                </div>
+                                <div className="flex flex-col justify-between w-full">
+                                    <div className="mb-4">
+                                        <p className="font-semibold text-gray-800 text-base">{item.origin}</p>
+                                        <p className="text-gray-600 text-sm">{formatDate(item.originDate)} {formatTime(item.originDate)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-gray-800 text-base">{item.destination}</p>
+                                        <p className="text-gray-600 text-sm">{formatDate(item.destinationDate)} {formatTime(item.destinationDate)}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between text-gray-700 text-sm mt-3">
+                                <div className="flex items-center space-x-2">
+                                    <span>{item.estimatedMiles}</span><span className="mx-1">•</span><span>{item.tripTime}</span>
+                                </div>
+                                <SeatAvailability count={item.sitsAvailable} />
+                                <button onClick={(e) => e.stopPropagation()} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-600 transition duration-200 shadow">Book</button>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           );
         } else {
@@ -695,7 +613,7 @@ const App = () => {
     <div className="min-h-screen flex flex-col bg-[#F8F8F8] font-sans antialiased">
       <CustomScrollbarStyles />
       <header className="bg-white text-gray-800 p-3 flex items-center justify-between shadow-md border-b border-neutral-200 z-20 relative">
-        {showSearchResults || selectedRide ? (<button className="p-2 rounded-full hover:bg-neutral-100 transition-colors" onClick={() => { if(selectedRide) {setSelectedRide(null)} else {setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setShowSearchResults(false); setActiveFilter(null); setActiveSort(null); setSeatsNeeded(null); } }}><ChevronLeft size={24} /></button>) : (<div className="w-10"></div>)}
+        {showSearchResults ? (<button className="p-2 rounded-full hover:bg-neutral-100 transition-colors" onClick={() => { setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setShowSearchResults(false); setActiveFilter(null); setActiveSort(null); setSeatsNeeded(null); }}><ChevronLeft size={24} /></button>) : (<div className="w-10"></div>)}
         <h1 className="text-xl font-bold absolute left-1/2 -translate-x-1/2">Rider's Dashboard</h1>
         <div className="w-10"></div>
       </header>
@@ -704,144 +622,27 @@ const App = () => {
         {renderContent()}
       </main>
 
-      {pickupLocation && destinationLocation && pickupDate && !showSearchResults && (<div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40"><button className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300 shadow-xl transform hover:scale-105" onClick={handleSearch}>See my results</button></div>)}
+      {pickupLocation && destinationLocation && pickupDate && !showSearchResults && (
+        <div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40">
+          <button 
+            className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300 shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:transform-none" 
+            onClick={handleSearch} 
+            disabled={isLoadingRides}
+          >
+            {isLoadingRides ? "Searching..." : "See my results"}
+          </button>
+        </div>
+      )}
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50">
         <div className="flex justify-around items-center h-16">
-          <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'search' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setActiveFilter(null); setActiveSort(null); setSelectedRide(null); setSeatsNeeded(null); }}><Search size={24} strokeWidth={activeTab === 'search' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'search' ? 'text-gray-800' : 'text-neutral-500'}`}>Search</span></button>
+          <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'search' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setActiveFilter(null); setActiveSort(null); setSeatsNeeded(null); }}><Search size={24} strokeWidth={activeTab === 'search' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'search' ? 'text-gray-800' : 'text-neutral-500'}`}>Search</span></button>
           <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'history' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => setActiveTab('history')}><History size={24} strokeWidth={activeTab === 'history' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'history' ? 'text-gray-800' : 'text-neutral-500'}`}>History</span></button>
           <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'profile' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => setActiveTab('profile')}><User size={24} strokeWidth={activeTab === 'profile' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'profile' ? 'text-gray-800' : 'text-neutral-500'}`}>Profile</span></button>
         </div>
       </nav>
     </div>
   );
-};
-
-const AccordionItem = ({ icon, title, value, children }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    return (
-        <div className="border-b last:border-b-0 border-neutral-200">
-            <button onClick={() => setIsOpen(!isOpen)} className="p-4 flex justify-between items-center w-full hover:bg-neutral-50">
-                <div className="flex items-center space-x-3">
-                    {icon}
-                    <span className="font-medium text-gray-800">{title}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <span className="text-gray-600 text-sm truncate max-w-[120px]">{value}</span>
-                    <ChevronDown size={20} className={`text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                </div>
-            </button>
-            <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96' : 'max-h-0'}`}>
-                <div className="p-4 bg-neutral-50 text-gray-700">
-                    {children}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const SpecialService = ({ service }) => {
-    const iconMap = {
-        'Wi-Fi': <Wifi size={16} className="mr-2"/>,
-        'Air Conditioning': <Snowflake size={16} className="mr-2"/>,
-        'Mail delivery': <Mail size={16} className="mr-2"/>,
-        'Luggage space': <Briefcase size={16} className="mr-2"/>
-    }
-    return <div className="flex items-center">{iconMap[service] || <Star size={16} className="mr-2"/>} {service}</div>
-}
-
-
-const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack }) => {
-    const discount = ride.basePrice * 0.10;
-    const finalPrice = isUnreliable ? ride.basePrice : ride.basePrice - discount;
-
-    return (
-        <div className="flex flex-col h-full bg-[#F8F8F8]">
-            <div className="bg-white text-gray-800 p-4 flex-shrink-0 border-b border-neutral-200">
-                 <div className="flex items-center">
-                    <button onClick={onBack} className="mr-3 text-gray-600 hover:text-gray-800"><ChevronLeft size={24} /></button>
-                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4" onError={(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/200x150/E2E8F0/4A5568?text=Image+Error'}/>
-                    <div className="flex items-stretch w-full">
-                        <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
-                            <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-neutral-300 rounded-full"></div>
-                            <MapPin size={20} className="text-green-600 bg-white z-10" />
-                            <Target size={20} className="text-red-600 bg-white z-10" />
-                        </div>
-                        <div className="flex flex-col justify-between w-full">
-                            <div className="mb-2">
-                                <p className="font-semibold text-gray-800 text-lg">{ride.origin}</p>
-                                <p className="text-neutral-600 text-sm">{formatDate(ride.originDate)} {formatTime(ride.originDate)}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold text-gray-800 text-lg">{ride.destination}</p>
-                                <p className="text-neutral-600 text-sm">{formatDate(ride.destinationDate)} {formatTime(ride.destinationDate)}</p>
-                            </div>
-                        </div>
-                    </div>
-                 </div>
-            </div>
-            <div className="flex-grow overflow-y-auto">
-                <div className="p-4 space-y-4">
-                    <div className="flex items-center justify-between text-sm p-2 bg-red-100 rounded-lg">
-                        <span className="text-red-800">Simulate Unreliable Rider:</span>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input type="checkbox" checked={isUnreliable} onChange={onToggleReliability} className="sr-only peer" />
-                          <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-red-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
-                        </label>
-                    </div>
-
-                    <h2 className="text-lg font-semibold text-gray-800">About the trip</h2>
-                    <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-                        <AccordionItem icon={<DollarSign className="text-gray-600" />} title="Payout (est.)" value={`$${finalPrice.toFixed(2)}`}>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between"><span>Base Fare:</span><span>${ride.basePrice.toFixed(2)}</span></div>
-                                <div className="flex justify-between items-center">
-                                    <span className={isUnreliable ? 'line-through text-gray-400' : ''}>Reliability Discount (10%):</span>
-                                    <span className={isUnreliable ? 'line-through text-gray-400' : 'text-green-600'}>-${discount.toFixed(2)}</span>
-                                </div>
-                                {isUnreliable && (
-                                    <div className="text-xs text-red-600 bg-red-50 p-2 rounded-md flex items-start space-x-2">
-                                        <Info size={14} className="mt-0.5 flex-shrink-0"/>
-                                        <span>Your discount was removed due to a previous no-show. Be reliable on your next trip to reinstate it.</span>
-                                    </div>
-                                )}
-                                <hr className="my-2 border-neutral-200"/>
-                                <div className="flex justify-between font-bold"><span>Final Price:</span><span>${finalPrice.toFixed(2)}</span></div>
-                                <div className="flex justify-between text-xs text-gray-500 pt-2"><span>Avg. Fuel Cost/Mile:</span><span>{ride.avgFuelPerMile}</span></div>
-                            </div>
-                        </AccordionItem>
-                         <AccordionItem icon={<Users className="text-gray-600" />} title="Special services" value="">
-                            {ride.specialServices.map(service => <SpecialService key={service} service={service} />)}
-                        </AccordionItem>
-                         <AccordionItem icon={<User className="text-gray-600" />} title="Driver & Car" value="">
-                            <div className="flex space-x-4">
-                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full" onError={(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/100x100/E2E8F0/4A5568?text=N/A'}/>
-                                <div>
-                                    <p className="font-semibold">{ride.driverName}</p>
-                                    <div className="flex items-center text-sm text-gray-600">
-                                        {[...Array(5)].map((_, i) => <Star key={i} size={14} fill={i < Math.floor(ride.reliabilityStars) ? "#facc15" : "none"} stroke="#facc15" className="mr-0.5"/>)}
-                                        ({ride.reliabilityStars})
-                                    </div>
-                                    <div className="flex items-center space-x-2 mt-2 text-sm text-gray-800">
-                                        <Car size={16} className="text-gray-600" />
-                                        <span>{ride.carYear} {ride.carModel}</span>
-                                    </div>
-                                    <div className="mt-2"><PlateNumber plate={ride.plateNumber}/></div>
-                                </div>
-                            </div>
-                        </AccordionItem>
-                    </div>
-                </div>
-            </div>
-            <div className="p-4 bg-white border-t border-neutral-200 flex-shrink-0 flex justify-between items-center shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-                <div>
-                    <p className="text-2xl font-bold text-gray-800">${finalPrice.toFixed(2)}</p>
-                    <p className="text-sm text-gray-600">{ride.ratePerMail || ride.avgFuelPerMile}</p>
-                </div>
-                <button className="bg-green-500 text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-green-600 transition-colors shadow-lg">Book</button>
-            </div>
-        </div>
-    );
 };
 
 export default App;
