@@ -262,17 +262,23 @@ const App = () => {
         .eq('status', 'active')
         .order('created_at', { ascending: false });
 
-      if (pickupLocation) {
-        query = query.ilike('departure_location', `%${pickupLocation}%`);
+      // More flexible location matching - check for partial matches in both directions
+      if (pickupLocation && destinationLocation) {
+        // Priority search: exact route match first, then partial matches
+        console.log('RiderDashboard - Searching for route:', pickupLocation, '→', destinationLocation);
+        query = query.or(`and(departure_location.ilike.%${pickupLocation}%,destination_location.ilike.%${destinationLocation}%),and(departure_location.ilike.%${destinationLocation}%,destination_location.ilike.%${pickupLocation}%)`);
+      } else if (pickupLocation) {
+        query = query.or(`departure_location.ilike.%${pickupLocation}%,destination_location.ilike.%${pickupLocation}%`);
+      } else if (destinationLocation) {
+        query = query.or(`departure_location.ilike.%${destinationLocation}%,destination_location.ilike.%${destinationLocation}%`);
       }
-      if (destinationLocation) {
-        query = query.ilike('destination_location', `%${destinationLocation}%`);
-      }
+
+      // Date filter is optional for broader results
       if (pickupDate) {
         query = query.eq('departure_date', pickupDate);
       }
 
-      console.log('RiderDashboard - About to execute query');
+      console.log('RiderDashboard - About to execute query with route matching');
       const { data, error } = await query;
 
       console.log('RiderDashboard - Query response:', { data, error, count: data?.length });
