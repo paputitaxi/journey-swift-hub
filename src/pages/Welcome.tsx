@@ -17,9 +17,14 @@ const Welcome = () => {
 
   useEffect(() => {
     const saved = localStorage.getItem('username');
+    console.log('Welcome useEffect - saved username:', saved);
+    console.log('Welcome useEffect - current step:', step);
     if (saved) {
       setUsername(saved);
       setStep('role');
+      console.log('Welcome useEffect - setting step to role');
+    } else {
+      console.log('Welcome useEffect - no saved username, should show username step');
     }
   }, []);
 
@@ -64,9 +69,15 @@ const Welcome = () => {
     else navigate('/driver-dashboard');
   };
 
+  console.log('Welcome render - current step:', step);
+  console.log('Welcome render - current username:', username);
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="text-center max-w-xl mx-auto space-y-8">
+        {/* Debug info */}
+        <div className="text-xs text-muted-foreground">Debug: step={step}, username="{username}"</div>
+        
         {/* Main Header and Description */}
         <div className="space-y-4">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">Welcome</h1>
