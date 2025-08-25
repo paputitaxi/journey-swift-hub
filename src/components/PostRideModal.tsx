@@ -65,18 +65,8 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
     
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please log in to post a ride.",
-          variant: "destructive"
-        });
-        return;
-      }
-
       const rideData = {
-        user_id: user.id,
+        user_id: '00000000-0000-0000-0000-000000000000', // Default user ID for no-auth mode
         departure_location: departure,
         destination_location: destination,
         departure_date: format(date, 'yyyy-MM-dd'),
