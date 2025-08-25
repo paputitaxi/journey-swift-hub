@@ -78,7 +78,7 @@ export type Database = {
           status: string
           total_seats: number
           updated_at: string
-          user_id: string
+          username: string
         }
         Insert: {
           available_seats?: number
@@ -95,7 +95,7 @@ export type Database = {
           status?: string
           total_seats?: number
           updated_at?: string
-          user_id: string
+          username?: string
         }
         Update: {
           available_seats?: number
@@ -112,7 +112,25 @@ export type Database = {
           status?: string
           total_seats?: number
           updated_at?: string
-          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      usernames: {
+        Row: {
+          created_at: string
+          id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          username?: string
         }
         Relationships: []
       }

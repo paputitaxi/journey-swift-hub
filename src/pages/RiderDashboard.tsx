@@ -251,31 +251,38 @@ const App = () => {
   const [rides, setRides] = useState([]);
   const [isLoadingRides, setIsLoadingRides] = useState(false);
 
-  // Fetch rides from database
+  // Fetch rides from database with optional filters
   const fetchRides = async () => {
     setIsLoadingRides(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('rides')
         .select('*')
         .eq('status', 'active')
         .order('created_at', { ascending: false });
 
+      if (pickupLocation) {
+        query = query.ilike('departure_location', `%${pickupLocation}%`);
+      }
+      if (destinationLocation) {
+        query = query.ilike('destination_location', `%${destinationLocation}%`);
+      }
+      if (pickupDate) {
+        query = query.eq('departure_date', pickupDate);
+      }
+
+      const { data, error } = await query;
+
       if (error) {
         console.error('Error fetching rides:', error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch rides. Please try again.",
-          variant: "destructive"
-        });
+        toast({ title: 'Error', description: 'Failed to fetch rides. Please try again.', variant: 'destructive' });
         return;
       }
 
-      // Transform database rides to match expected format
       const transformedRides = data?.map(ride => ({
         id: ride.id,
-        driverName: 'Driver', // We'll need to join with profiles table later
-        driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=D',
+        driverName: ride.username || 'Driver',
+        driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=' + (ride.username ? ride.username[0]?.toUpperCase() : 'D'),
         reliabilityStars: 4.0,
         carModel: 'Car',
         carYear: 2022,
@@ -287,39 +294,43 @@ const App = () => {
         destinationDate: ride.departure_date + 'T18:00:00',
         estimatedMiles: '200 mi',
         tripTime: '4h 0m',
-        sitsAvailable: ride.available_seats + ' sits',
+        sitsAvailable: (ride.available_seats || 4) + ' sits',
         basePrice: ride.ride_price || 100,
         avgFuelPerMile: '$0.75/mi',
         serviceType: ride.mail_option === 'no' ? 'rider' : ride.mail_option === 'mailOnly' ? 'mail' : 'both',
         specialServices: ride.mail_option !== 'no' ? ['Mail delivery'] : ['Air Conditioning'],
         mailPayout: ride.mail_price ? '$' + ride.mail_price : null,
-        ratePerMail: 'per mail'
+        ratePerMail: 'per mail',
       })) || [];
 
       setRides(transformedRides);
 
       if (transformedRides.length === 0) {
-        toast({
-          title: "No rides found",
-          description: "No active rides match your search criteria.",
-        });
+        toast({ title: 'No rides found', description: 'No active rides match your search criteria.' });
       } else {
-        toast({
-          title: "Rides loaded",
-          description: `Found ${transformedRides.length} available ride(s).`,
-        });
+        toast({ title: 'Rides loaded', description: `Found ${transformedRides.length} available ride(s).` });
       }
     } catch (error) {
       console.error('Error fetching rides:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch rides. Please try again.",
-        variant: "destructive"
-      });
+      toast({ title: 'Error', description: 'Failed to fetch rides. Please try again.', variant: 'destructive' });
     } finally {
       setIsLoadingRides(false);
     }
   };
+
+  // Realtime: refresh results when rides change
+  useEffect(() => {
+    const channel = supabase
+      .channel('rides-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'rides' }, () => {
+        if (showSearchResults) fetchRides();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [showSearchResults, pickupLocation, destinationLocation, pickupDate]);
 
   // Search for rides
   const handleSearch = () => {

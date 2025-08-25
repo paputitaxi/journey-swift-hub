@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import LocationSelector from "./LocationSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
+import { useUsername } from "@/hooks/useUsername";
 interface PostRideModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -20,6 +20,7 @@ interface PostRideModalProps {
 
 const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
   const { toast } = useToast();
+  const { username: savedUsername } = useUsername();
   const [step, setStep] = useState(1);
   const [departure, setDeparture] = useState("");
   const [destination, setDestination] = useState("");
@@ -62,21 +63,22 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
 
   const handlePost = async () => {
     if (!date || !mailOption || !departureType) return;
-    
+
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const uname = typeof window !== 'undefined' ? (localStorage.getItem('username') || "") : "";
+      const finalUsername = uname || savedUsername;
+      if (!finalUsername) {
         toast({
-          title: "Authentication Required",
-          description: "Please log in to post a ride.",
-          variant: "destructive"
+          title: "Set username first",
+          description: "Please choose a username on the welcome screen.",
+          variant: "destructive",
         });
         return;
       }
 
-      const rideData = {
-        user_id: user.id,
+      const rideData: any = {
+        username: finalUsername,
         departure_location: departure,
         destination_location: destination,
         departure_date: format(date, 'yyyy-MM-dd'),
@@ -85,18 +87,17 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
         mail_option: mailOption,
         ride_price: ridePrice ? parseFloat(ridePrice) : null,
         mail_price: mailPrice ? parseFloat(mailPrice) : null,
+        status: 'active',
       };
 
-      const { error } = await supabase
-        .from('rides')
-        .insert([rideData]);
+      const { error } = await supabase.from('rides').insert([rideData]);
 
       if (error) {
         console.error('Error posting ride:', error);
         toast({
           title: "Error",
           description: "Failed to post ride. Please try again.",
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
@@ -122,7 +123,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
       toast({
         title: "Error",
         description: "Failed to post ride. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
