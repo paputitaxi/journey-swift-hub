@@ -253,6 +253,7 @@ const App = () => {
 
   // Fetch rides from database with optional filters
   const fetchRides = async () => {
+    console.log('RiderDashboard - Starting fetchRides with filters:', { pickupLocation, destinationLocation, pickupDate });
     setIsLoadingRides(true);
     try {
       let query = supabase
@@ -271,7 +272,10 @@ const App = () => {
         query = query.eq('departure_date', pickupDate);
       }
 
+      console.log('RiderDashboard - About to execute query');
       const { data, error } = await query;
+
+      console.log('RiderDashboard - Query response:', { data, error, count: data?.length });
 
       if (error) {
         console.error('Error fetching rides:', error);
@@ -279,30 +283,34 @@ const App = () => {
         return;
       }
 
-      const transformedRides = data?.map(ride => ({
-        id: ride.id,
-        driverName: ride.username || 'Driver',
-        driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=' + (ride.username ? ride.username[0]?.toUpperCase() : 'D'),
-        reliabilityStars: 4.0,
-        carModel: 'Car',
-        carYear: 2022,
-        imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Car',
-        plateNumber: { locationCode: '01', series: 'A', serialNumber: '123BC' },
-        origin: ride.departure_location,
-        originDate: ride.departure_date + (ride.departure_time ? 'T' + ride.departure_time : 'T09:00:00'),
-        destination: ride.destination_location,
-        destinationDate: ride.departure_date + 'T18:00:00',
-        estimatedMiles: '200 mi',
-        tripTime: '4h 0m',
-        sitsAvailable: (ride.available_seats || 4) + ' sits',
-        basePrice: ride.ride_price || 100,
-        avgFuelPerMile: '$0.75/mi',
-        serviceType: ride.mail_option === 'no' ? 'rider' : ride.mail_option === 'mailOnly' ? 'mail' : 'both',
-        specialServices: ride.mail_option !== 'no' ? ['Mail delivery'] : ['Air Conditioning'],
-        mailPayout: ride.mail_price ? '$' + ride.mail_price : null,
-        ratePerMail: 'per mail',
-      })) || [];
+      const transformedRides = data?.map(ride => {
+        console.log('RiderDashboard - Transforming ride:', ride);
+        return {
+          id: ride.id,
+          driverName: ride.username || 'Driver',
+          driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=' + (ride.username ? ride.username[0]?.toUpperCase() : 'D'),
+          reliabilityStars: 4.0,
+          carModel: 'Car',
+          carYear: 2022,
+          imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Car',
+          plateNumber: { locationCode: '01', series: 'A', serialNumber: '123BC' },
+          origin: ride.departure_location,
+          originDate: ride.departure_date + (ride.departure_time ? 'T' + ride.departure_time : 'T09:00:00'),
+          destination: ride.destination_location,
+          destinationDate: ride.departure_date + 'T18:00:00',
+          estimatedMiles: '200 mi',
+          tripTime: '4h 0m',
+          sitsAvailable: (ride.available_seats || 4) + ' sits',
+          basePrice: ride.ride_price || 100,
+          avgFuelPerMile: '$0.75/mi',
+          serviceType: ride.mail_option === 'no' ? 'rider' : ride.mail_option === 'mailOnly' ? 'mail' : 'both',
+          specialServices: ride.mail_option !== 'no' ? ['Mail delivery'] : ['Air Conditioning'],
+          mailPayout: ride.mail_price ? '$' + ride.mail_price : null,
+          ratePerMail: 'per mail',
+        };
+      }) || [];
 
+      console.log('RiderDashboard - Transformed rides:', transformedRides);
       setRides(transformedRides);
 
       if (transformedRides.length === 0) {

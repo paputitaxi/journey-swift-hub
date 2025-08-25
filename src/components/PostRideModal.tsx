@@ -90,7 +90,11 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
         status: 'active',
       };
 
-      const { error } = await supabase.from('rides').insert([rideData]);
+      console.log('PostRideModal - About to insert ride data:', rideData);
+
+      const { data, error } = await supabase.from('rides').insert([rideData]).select();
+
+      console.log('PostRideModal - Insert response:', { data, error });
 
       if (error) {
         console.error('Error posting ride:', error);
@@ -102,6 +106,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
         return;
       }
 
+      console.log('PostRideModal - Ride posted successfully:', data);
       toast({
         title: "Ride Posted!",
         description: "Your ride has been posted successfully.",
