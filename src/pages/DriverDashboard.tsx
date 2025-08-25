@@ -54,7 +54,7 @@ import {
 const translations = {
   en: {
     ride: "Ride", newRide: "New Ride", myLines: "My Lines", profile: "Profile",
-    totalEarnings: "Total Earnings", stats: "Stats", safety: "Safety", yourActivity: "Your Activity",
+    totalEarnings: "Total Earnings", stats: "Statistics", safety: "Safety", yourActivity: "Your Activity",
     noLines: "No Lines Posted Yet", postRidePrompt: "Post a new ride to see it here.", active: "Active",
     postNewRide: "Post a New Ride", fromWhere: "From where", toWhere: "To where", departureDate: "Departure date",
     mailService: "Mail Service", yesCarryMail: "Yes, I do carry Mail", mailDescYes: "I can transport both passengers and mail packages",
@@ -79,6 +79,7 @@ const translations = {
     chats: "Chats", groups: "Groups", channels: "Channels", market: "Market", noMessages: "No messages here yet.",
     typeMessage: "Type a message...", cancel: "Cancel", letsGo: "Let's Go!", areYouSure: "Are you sure?", okay: "Okay",
     searchingForClients: "Searching for clients...", call: "Call", message: "Message", removePassenger: "Remove Passenger",
+    dailyEarnings: "Daily Earnings", recentTrips: "Recent Trips",
   },
   uz: {
     ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil",
@@ -107,6 +108,7 @@ const translations = {
     chats: "Suhbatlar", groups: "Guruhlar", channels: "Kanallar", market: "Bozor", noMessages: "Bu yerda hali xabarlar yo'q.",
     typeMessage: "Xabar yozing...", cancel: "Bekor qilish", letsGo: "Ketdik!", areYouSure: "Ishonchingiz komilmi?", okay: "Ha",
     searchingForClients: "Mijozlar qidirilmoqda...", call: "Qo'ng'iroq", message: "Xabar", removePassenger: "Yo'lovchini o'chirish",
+    dailyEarnings: "Kunlik daromad", recentTrips: "Oxirgi sayohatlar",
   },
   ru: {
     ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль",
@@ -135,6 +137,7 @@ const translations = {
     chats: "Чаты", groups: "Группы", channels: "Каналы", market: "Маркет", noMessages: "Здесь пока нет сообщений.",
     typeMessage: "Введите сообщение...", cancel: "Отмена", letsGo: "Поехали!", areYouSure: "Вы уверены?", okay: "Да",
     searchingForClients: "Поиск клиентов...", call: "Позвонить", message: "Написать", removePassenger: "Удалить пассажира",
+    dailyEarnings: "Дневной заработок", recentTrips: "Последние поездки",
   },
 };
 
@@ -147,8 +150,8 @@ const CustomScrollbarStyles = () => (
   <style>{`
     /* For Webkit-based browsers (Chrome, Safari, Edge) */
     .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #F8F8F8; border-radius: 10px; } /* Updated scrollbar track */
-    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #94a3b8; border-radius: 10px; border: 2px solid #F8F8F8; } /* Updated scrollbar thumb border */
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #94a3b8; border-radius: 10px; border: 2px solid #F8F8F800; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #64748b; }
     .animate-spin-slow { animation: spin 2s linear infinite; }
     /* Hide the default Leaflet routing instructions panel */
@@ -299,7 +302,7 @@ const MessageDashboard = ({ onClose }) => {
             <button
               key={chat.id}
               onClick={() => setSelectedChat(chat)}
-              className="w-full flex items-center p-3 hover:bg-neutral-100 cursor-pointer transition-colors text-left"
+              className="w-full flex items-center p-3 hover:bg-neutral-100/50 cursor-pointer transition-colors text-left"
             >
               {chat.avatar}
               <div className="ml-3 flex-grow">
@@ -323,19 +326,19 @@ const MessageDashboard = ({ onClose }) => {
         <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
           {msgs.map((m) => (
             <div key={m.id} className={`flex ${m.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.sender === 'me' ? 'bg-[#E1F87E] text-[#121212]' : 'bg-neutral-100 text-gray-800'}`}>
+              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.sender === 'me' ? 'bg-[#E1F87E] text-[#121212]' : 'bg-white/80 backdrop-blur-sm text-gray-800'}`}>
                 <p className="whitespace-pre-wrap">{m.text}</p>
                 <div className="text-[10px] opacity-70 mt-1 text-right">{m.time}</div>
               </div>
             </div>
           ))}
         </div>
-        <form onSubmit={sendMessage} className="p-3 border-t border-neutral-200 bg-white flex items-center gap-2">
+        <form onSubmit={sendMessage} className="p-3 border-t border-neutral-200/50 bg-white/80 backdrop-blur-sm flex items-center gap-2">
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={t('typeMessage')}
-            className="flex-1 p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]"
+            className="flex-1 p-2 rounded-lg bg-neutral-100/50 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]"
           />
           <button type="submit" className="p-2 rounded-lg bg-[#E1F87E] text-[#121212] hover:bg-opacity-80">
             <Send className="h-5 w-5" />
@@ -346,8 +349,8 @@ const MessageDashboard = ({ onClose }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-3xl overflow-hidden">
-      <div className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between gap-2">
+    <div className="flex flex-col h-full bg-white/90 backdrop-blur-sm rounded-3xl overflow-hidden">
+      <div className="bg-white/80 backdrop-blur-sm p-3 border-b border-neutral-200/50 flex items-center justify-between gap-2">
         {selectedChat ? (
           <>
             <button onClick={() => setSelectedChat(null)} className="text-neutral-800 hover:text-gray-900">
@@ -363,7 +366,7 @@ const MessageDashboard = ({ onClose }) => {
               <input
                 type="text"
                 placeholder={`${t('search')}...`}
-                className="w-full bg-neutral-100 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] text-gray-800"
+                className="w-full bg-neutral-100/50 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] text-gray-800"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 autoFocus
@@ -375,11 +378,11 @@ const MessageDashboard = ({ onClose }) => {
           </>
         ) : (
           <>
-            <a href="https://t.me/nevalela" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors">
+            <a href="https://t.me/nevalela" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100/50 hover:text-gray-900 transition-colors">
                 <LifeBuoy className="h-6 w-6" />
             </a>
             <h2 className="text-lg font-semibold text-gray-800 flex-1 text-center">Chats</h2>
-            <button onClick={() => setIsSearching(true)} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors">
+            <button onClick={() => setIsSearching(true)} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100/50 hover:text-gray-900 transition-colors">
                 <Search className="h-6 w-6" />
             </button>
           </>
@@ -387,7 +390,7 @@ const MessageDashboard = ({ onClose }) => {
       </div>
 
       {!selectedChat && (
-        <div className="flex justify-around bg-white p-2 border-b border-neutral-200">
+        <div className="flex justify-around bg-white/80 backdrop-blur-sm p-2 border-b border-neutral-200/50">
           {messageNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeMessageTab === item.id;
@@ -859,7 +862,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
     );
 
     const SettingsItem = ({ icon: Icon, label, action = () => {}, value }) => (
-        <button onClick={action} className="w-full flex items-center justify-between py-3 text-left hover:bg-neutral-50 rounded-lg px-2 transition-colors">
+        <button onClick={action} className="w-full flex items-center justify-between py-3 text-left hover:bg-neutral-50/50 rounded-lg px-2 transition-colors">
             <div className="flex items-center">
                 <Icon className="h-5 w-5 text-neutral-500 mr-3" />
                 <span className="text-sm font-medium text-gray-800">{label}</span>
@@ -875,7 +878,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
         <div>
             <h3 className="font-semibold mb-2">{t('pastRides')}</h3>
             {myRides.filter(r => r.status === 'completed').length > 0 ? myRides.filter(r => r.status === 'completed').map(ride => (
-                <div key={ride.id} className="mb-2 p-2 border-b">
+                <div key={ride.id} className="mb-2 p-2 border-b border-neutral-200/50">
                     <p>{ride.fromLocation} to {ride.toLocation}</p>
                     <p className="text-xs text-neutral-500">{ride.departureDate}</p>
                 </div>
@@ -887,7 +890,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
          <div>
             <h3 className="font-semibold mb-2">{t('upcomingRides')}</h3>
             {myRides.filter(r => r.status === 'upcoming').length > 0 ? myRides.filter(r => r.status === 'upcoming').map(ride => (
-                <div key={ride.id} className="mb-2 p-2 border-b">
+                <div key={ride.id} className="mb-2 p-2 border-b border-neutral-200/50">
                     <p>{ride.fromLocation} to {ride.toLocation}</p>
                     <p className="text-xs text-neutral-500">{ride.departureDate}</p>
                 </div>
@@ -910,7 +913,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
                             onSelectLanguage(lang.key);
                             setShowSettingsModal(false);
                         }}
-                        className={`w-full p-3 rounded-lg text-left transition-colors flex justify-between items-center ${currentLanguage === lang.key ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-neutral-100'}`}
+                        className={`w-full p-3 rounded-lg text-left transition-colors flex justify-between items-center ${currentLanguage === lang.key ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-neutral-100/50'}`}
                     >
                         {lang.name}
                         {currentLanguage === lang.key && <CheckCircle className="h-5 w-5" />}
@@ -932,7 +935,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
             <div className="flex flex-col items-center space-y-3">
                 <div className="relative">
                     <Avatar src={user.profilePicture} size="w-24 h-24" initials="JD" bgColor="bg-gray-700" />
-                    <button onClick={() => setShowEditProfile(true)} className="absolute bottom-0 right-0 bg-white p-1.5 rounded-full shadow-md hover:bg-neutral-100 transition-colors">
+                    <button onClick={() => setShowEditProfile(true)} className="absolute bottom-0 right-0 bg-white/80 backdrop-blur-sm p-1.5 rounded-full shadow-md hover:bg-neutral-100/50 transition-colors">
                         <Edit2 className="h-4 w-4 text-gray-800" />
                     </button>
                 </div>
@@ -948,14 +951,14 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
             </div>
 
             {/* --- Basic Info Card --- */}
-            <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200">
+            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20">
                 <InfoItem icon={User} label={t('username')} value={`@${user.username}`} />
                 <InfoItem icon={Users} label={t('gender')} value={user.gender} />
                 <InfoItem icon={Calendar} label={t('memberSince')} value={user.memberSince} />
             </div>
 
             {/* --- Contact & Verification Card --- */}
-            <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200">
+            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20">
                 <h3 className="text-sm font-semibold mb-2 text-neutral-800">{t('contactVerification')}</h3>
                 <InfoItem icon={Phone} label={t('phone')} value={user.phone} />
                 <InfoItem icon={Mail} label={t('email')} value={user.email} />
@@ -971,10 +974,10 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
             </div>
             
             {/* --- Driver Details Card --- */}
-            <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200">
+            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20">
                 <div className="flex justify-between items-center mb-2">
                     <h3 className="text-sm font-semibold text-neutral-800">{t('driverDetails')}</h3>
-                    <button onClick={() => setShowEditCar(true)} className="p-1.5 rounded-full hover:bg-neutral-100 transition-colors">
+                    <button onClick={() => setShowEditCar(true)} className="p-1.5 rounded-full hover:bg-neutral-100/50 transition-colors">
                         <Edit2 className="h-4 w-4 text-gray-800" />
                     </button>
                 </div>
@@ -992,7 +995,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
             </div>
 
             {/* --- Activity & History --- */}
-            <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
+            <div className="bg-white/80 backdrop-blur-sm p-2 rounded-2xl shadow-lg border border-white/20">
                  <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('activity')}</h3>
                  <SettingsItem icon={History} label={t('rideHistory')} value="" action={() => handleOpenSettings(t('rideHistory'), <RideHistoryContent />)} />
                  <SettingsItem icon={Calendar} label={t('upcomingRides')} value="" action={() => handleOpenSettings(t('upcomingRides'), <UpcomingRidesContent />)} />
@@ -1000,7 +1003,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
 
 
             {/* --- Settings & Preferences --- */}
-            <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
+            <div className="bg-white/80 backdrop-blur-sm p-2 rounded-2xl shadow-lg border border-white/20">
                 <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('settings')}</h3>
                 <SettingsItem 
                     icon={Languages} 
@@ -1014,7 +1017,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
             </div>
 
             {/* --- Security --- */}
-            <div className="bg-white p-2 rounded-2xl shadow-lg border border-neutral-200">
+            <div className="bg-white/80 backdrop-blur-sm p-2 rounded-2xl shadow-lg border border-white/20">
                 <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('security')}</h3>
                 <SettingsItem icon={Lock} label={t('changePassword')} value="" action={() => handleOpenSettings(t('changePassword'), <div className="p-4">Change password form</div>)} />
                 <SettingsItem icon={LogOut} label={t('logout')} value="" action={() => handleOpenSettings(t('logout'), <div className="p-4">Logout confirmation</div>)} />
@@ -1047,6 +1050,7 @@ const AppContent = () => {
   const [showEditRide, setShowEditRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showStatsModal, setShowStatsModal] = useState(false);
   const [isSearchingForClients, setIsSearchingForClients] = useState(false);
   const [myRides, setMyRides] = useState([]);
   const [activeRide, setActiveRide] = useState(null);
@@ -1136,6 +1140,9 @@ const AppContent = () => {
     } else if (showEditRide) {
         setShowEditRide(false);
         setHeaderTitle(t('ride'));
+    } else if (showStatsModal) {
+        setShowStatsModal(false);
+        setHeaderTitle(t('ride'));
     }
     else {
       setHeaderTitle(t('ride'));
@@ -1150,7 +1157,10 @@ const AppContent = () => {
       case "profile": setHeaderTitle(t('profile')); break;
       default: setHeaderTitle("Driver");
     }
-  }, [activeTab, language, t]);
+     if (showStatsModal) {
+        setHeaderTitle(t('stats'));
+    }
+  }, [activeTab, language, t, showStatsModal]);
 
   const bottomNavItems = [
     { id: "dashboard", label: t('ride'), icon: MapPin },
@@ -1217,7 +1227,7 @@ const AppContent = () => {
                           </div>
                           <span className="text-3xl font-bold text-gray-800">${activeRide.price}</span>
                       </div>
-                      <div className="border-t border-neutral-200 my-4"></div>
+                      <div className="border-t border-neutral-200/50 my-4"></div>
                       <div className="flex justify-between items-center text-sm text-neutral-600">
                           <div className="flex items-center">
                               <Calendar className="h-5 w-5 mr-2" />
@@ -1240,7 +1250,7 @@ const AppContent = () => {
                               <span>{activeRide.departureType === 'fixed' ? t('fixedDeparture') : t('whenFills')}</span>
                           </div>
                       </div>
-                      <div className="border-t border-neutral-200 my-4"></div>
+                      <div className="border-t border-neutral-200/50 my-4"></div>
                       <div>
                           <p className="text-sm font-medium text-neutral-800 mb-2">{t('passengers')}</p>
                           <div className="flex space-x-2">
@@ -1250,7 +1260,7 @@ const AppContent = () => {
                                 </div>
                               ))}
                               {Array.from({ length: activeRide.freeSeats }).map((_, index) => (
-                                  <div key={index} className="w-10 h-10 rounded-full flex items-center justify-center bg-green-100 relative">
+                                  <div key={index} className="w-10 h-10 rounded-full flex items-center justify-center bg-green-100/50 relative">
                                       <div className="radar-emitter-small">
                                           <div className="radar-wave"></div>
                                           <div className="radar-wave"></div>
@@ -1260,7 +1270,7 @@ const AppContent = () => {
                           </div>
                       </div>
                   </div>
-                  <div className="border-t border-neutral-200 p-4 flex gap-2">
+                  <div className="border-t border-neutral-200/50 p-4 flex gap-2">
                       <button onClick={() => handleEditRideClick(activeRide)} className="w-full py-2 px-4 bg-neutral-200 text-neutral-800 font-semibold rounded-xl hover:bg-neutral-300 transition-colors flex items-center justify-center">
                           <Edit2 className="h-5 w-5 mr-2" />
                           {t('editRide')}
@@ -1277,34 +1287,35 @@ const AppContent = () => {
       return <p className="text-neutral-500 text-center py-8">{t('noActiveRide')}</p>;
   };
 
-
   const renderContent = () => {
     if (showMessages) { return <MessageDashboard onClose={() => { setShowMessages(false); setHeaderTitle(t('ride')); }} />; }
     
+    if (showStatsModal) { return <StatsModal onClose={() => setShowStatsModal(false)} />; }
+
     switch (activeTab) {
       case "dashboard": return (
           <div className="p-4 space-y-4 text-gray-800 font-sans">
             <div className="grid grid-cols-2 gap-4">
                 {/* Total Earnings Card */}
-                <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200 text-center flex flex-col justify-center">
+                <div onClick={() => setShowStatsModal(true)} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 text-center flex flex-col justify-center cursor-pointer">
                     <h2 className="text-sm text-neutral-600">{t('totalEarnings')}</h2>
                     <p className="text-3xl font-extrabold text-gray-800 mt-2">$0.00</p>
                 </div>
 
                 {/* New Ride Button Card */}
-                <div className="bg-white p-4 rounded-2xl shadow-lg border border-neutral-200 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle(t('newRide')); }}>
-                    <div className="w-14 h-14 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-neutral-200 shadow-md">
+                <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle(t('newRide')); }}>
+                    <div className="w-14 h-14 bg-neutral-100/50 rounded-full flex items-center justify-center border-2 border-neutral-200/50 shadow-md">
                         <Plus className="h-7 w-7 text-gray-800" />
                     </div>
                     <span className="text-xs text-neutral-600 mt-2">{t('newRide')}</span>
                 </div>
             </div>
             <div>
-                <h3 className="flex items-center text-sm font-semibold mb-2 text-neutral-800">
-                  <Calendar className="h-4 w-4 mr-2 text-neutral-700" />
+                <h3 className="flex items-center text-sm font-semibold mb-2 text-white/90 drop-shadow-lg">
+                  <Calendar className="h-4 w-4 mr-2" />
                   {t('yourActivity')}
                 </h3>
-                <div className={`w-full bg-white border border-neutral-200 rounded-2xl shadow-lg text-left overflow-hidden`}>
+                <div className={`w-full bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg text-left overflow-hidden`}>
                   {renderActiveRideContent()}
                 </div>
             </div>
@@ -1317,7 +1328,7 @@ const AppContent = () => {
                     <div 
                       key={ride.id} 
                       onClick={() => handleEditRideClick(ride)}
-                      className="p-4 bg-white border border-neutral-200 rounded-2xl shadow-lg mb-4 cursor-pointer hover:shadow-xl transition-shadow duration-200"
+                      className="p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg mb-4 cursor-pointer hover:shadow-xl transition-shadow duration-200"
                     >
                       <div className="flex justify-between items-center text-sm">
                          <div className="flex flex-col space-y-1">
@@ -1336,7 +1347,7 @@ const AppContent = () => {
                     </div>
                 ))
             ) : (
-                <div className="text-center p-8 bg-white rounded-2xl shadow">
+                <div className="text-center p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow">
                   <p className="text-gray-600 mb-2">{t('noLines')}</p>
                   <p className="text-sm text-gray-500">{t('postRidePrompt')}</p>
                 </div>
@@ -1349,7 +1360,15 @@ const AppContent = () => {
   };
 
   return (
-    <div className="h-screen bg-[#F8F8F8] text-gray-800 flex flex-col font-sans rounded-2xl overflow-hidden shadow-2xl">
+    <div 
+      className="h-screen text-gray-800 flex flex-col font-sans"
+      style={{
+          backgroundImage: `url('image_134672.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+      }}
+    >
       <CustomScrollbarStyles />
       {selectedPassenger && (
           <div 
@@ -1363,25 +1382,25 @@ const AppContent = () => {
               <button onClick={() => handleRemovePassenger(selectedPassenger.id)} className="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="h-4 w-4 mr-2"/>{t('removePassenger')}</button>
           </div>
       )}
-      <header className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between z-20 shadow-lg relative">
-        {(activeTab !== "dashboard" || showPostRide || showMessages) && (
-          <button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
+      <header className="bg-white/80 backdrop-blur-sm p-3 border-b border-white/20 flex items-center justify-between z-20 shadow-lg relative rounded-b-2xl">
+        {(activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal) && (
+          <button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-black/10 transition-colors" >
             <ChevronLeft className="h-6 w-6" />
           </button>
         )}
-        {!(activeTab !== "dashboard" || showPostRide || showMessages) && (
+        {!(activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal) && (
           <div className="w-8 h-8"></div> // Placeholder for alignment
         )}
         <h1 className="absolute left-1/2 -translate-x-1/2 text-xl font-bold text-gray-800">{headerTitle}</h1>
-         <button onClick={() => setShowMessages(true)} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors" >
+         <button onClick={() => setShowMessages(true)} className="p-2 rounded-full text-neutral-800 hover:bg-black/10 transition-colors" >
           <MessageCircle className="h-6 w-6" />
         </button>
       </header>
       <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative" onClick={() => selectedPassenger && setSelectedPassenger(null)}>
         {renderContent()}
       </main>
-      {!(showMessages || showPostRide || isEditModalOpen) && (
-        <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-lg z-10">
+      {!(showMessages || showPostRide || isEditModalOpen || showStatsModal) && (
+        <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-white/20 shadow-lg z-10">
           <div className="flex justify-around py-2">
             {bottomNavItems.map((item) => {
               const Icon = item.icon;
@@ -1443,6 +1462,58 @@ const AppContent = () => {
     </div>
   );
 };
+
+const StatsModal = ({ onClose }) => {
+    const { t } = useLanguage();
+    const dailyEarningsData = [
+        { day: 'Mon', earnings: 120 },
+        { day: 'Tue', earnings: 98 },
+        { day: 'Wed', earnings: 150 },
+        { day: 'Thu', earnings: 80 },
+        { day: 'Fri', earnings: 200 },
+        { day: 'Sat', earnings: 250 },
+        { day: 'Sun', earnings: 180 },
+    ];
+
+    const recentTrips = [
+        {id: 1, from: 'Tashkent', to: 'Samarkand', earnings: 50},
+        {id: 2, from: 'Bukhara', to: 'Khiva', earnings: 70},
+        {id: 3, from: 'Fergana', to: 'Andijan', earnings: 45},
+    ];
+
+    return (
+        <div className="p-4 space-y-6">
+            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20">
+                <h3 className="text-lg font-semibold mb-4">{t('dailyEarnings')}</h3>
+                <div style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer>
+                        <BarChart data={dailyEarningsData}>
+                            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+                            <XAxis dataKey="day" />
+                            <YAxis />
+                            <Tooltip />
+                            <Bar dataKey="earnings" fill="#22c55e" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20">
+                <h3 className="text-lg font-semibold mb-4">{t('recentTrips')}</h3>
+                <div className="space-y-3">
+                    {recentTrips.map(trip => (
+                        <div key={trip.id} className="flex justify-between items-center p-3 bg-neutral-100/50 rounded-xl">
+                            <div>
+                                <p className="font-medium">{trip.from} - {trip.to}</p>
+                            </div>
+                            <p className="font-bold text-green-600">+${trip.earnings}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 const App = () => (
     <LanguageProvider>
