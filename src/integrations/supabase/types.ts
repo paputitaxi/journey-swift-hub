@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -59,6 +59,60 @@ export type Database = {
           id?: string
           nickname?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      rides: {
+        Row: {
+          available_seats: number
+          created_at: string
+          departure_date: string
+          departure_location: string
+          departure_time: string | null
+          departure_type: string
+          destination_location: string
+          id: string
+          mail_option: string
+          mail_price: number | null
+          ride_price: number | null
+          status: string
+          total_seats: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_seats?: number
+          created_at?: string
+          departure_date: string
+          departure_location: string
+          departure_time?: string | null
+          departure_type: string
+          destination_location: string
+          id?: string
+          mail_option: string
+          mail_price?: number | null
+          ride_price?: number | null
+          status?: string
+          total_seats?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_seats?: number
+          created_at?: string
+          departure_date?: string
+          departure_location?: string
+          departure_time?: string | null
+          departure_type?: string
+          destination_location?: string
+          id?: string
+          mail_option?: string
+          mail_price?: number | null
+          ride_price?: number | null
+          status?: string
+          total_seats?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

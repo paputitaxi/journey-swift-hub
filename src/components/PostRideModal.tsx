@@ -10,6 +10,8 @@ import { MapPin, Calendar as CalendarIcon, Mail, Clock, Users, DollarSign, Car }
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import LocationSelector from "./LocationSelector";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface PostRideModalProps {
   open: boolean;
@@ -17,6 +19,7 @@ interface PostRideModalProps {
 }
 
 const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [departure, setDeparture] = useState("");
   const [destination, setDestination] = useState("");
@@ -29,6 +32,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
   const [departureTime, setDepartureTime] = useState("");
   const [showDepartureSelector, setShowDepartureSelector] = useState(false);
   const [showDestinationSelector, setShowDestinationSelector] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const mailOptions = [
     {
@@ -56,19 +60,73 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
     setShowMailOptions(false);
   };
 
-  const handlePost = () => {
-    // Handle posting the ride
-    onOpenChange(false);
-    // Reset form
-    setStep(1);
-    setDeparture("");
-    setDestination("");
-    setDate(undefined);
-    setMailOption(null);
-    setRidePrice("");
-    setMailPrice("");
-    setDepartureType(null);
-    setDepartureTime("");
+  const handlePost = async () => {
+    if (!date || !mailOption || !departureType) return;
+    
+    setIsLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to post a ride.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const rideData = {
+        user_id: user.id,
+        departure_location: departure,
+        destination_location: destination,
+        departure_date: format(date, 'yyyy-MM-dd'),
+        departure_time: departureType === 'time' ? departureTime : null,
+        departure_type: departureType,
+        mail_option: mailOption,
+        ride_price: ridePrice ? parseFloat(ridePrice) : null,
+        mail_price: mailPrice ? parseFloat(mailPrice) : null,
+      };
+
+      const { error } = await supabase
+        .from('rides')
+        .insert([rideData]);
+
+      if (error) {
+        console.error('Error posting ride:', error);
+        toast({
+          title: "Error",
+          description: "Failed to post ride. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Ride Posted!",
+        description: "Your ride has been posted successfully.",
+      });
+
+      onOpenChange(false);
+      // Reset form
+      setStep(1);
+      setDeparture("");
+      setDestination("");
+      setDate(undefined);
+      setMailOption(null);
+      setRidePrice("");
+      setMailPrice("");
+      setDepartureType(null);
+      setDepartureTime("");
+    } catch (error) {
+      console.error('Error posting ride:', error);
+      toast({
+        title: "Error",
+        description: "Failed to post ride. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const renderStep = () => {
@@ -338,13 +396,13 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
               </Button>
               <Button 
                 onClick={handlePost}
-                disabled={!departureType || (departureType === "time" && !departureTime)}
+                disabled={!departureType || (departureType === "time" && !departureTime) || isLoading}
                 variant="hero"
                 size="xl"
                 className="flex-1"
               >
                 <Car className="mr-2 h-5 w-5" />
-                Post Ride
+                {isLoading ? "Posting..." : "Post Ride"}
               </Button>
             </div>
           </div>

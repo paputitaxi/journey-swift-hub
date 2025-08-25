@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info, Car, MessageCircle, Send } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 // Expanded Data for Uzbekistan Regions and Cities - ALL 14 REGIONS INCLUDED
 const uzbekistanLocationsData = [
@@ -358,6 +359,62 @@ const App = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [showFromModal, setShowFromModal] = useState(false);
   const [showToModal, setShowToModal] = useState(false);
+  const [rides, setRides] = useState([]);
+  const [isLoadingRides, setIsLoadingRides] = useState(false);
+
+  // Fetch rides from database
+  const fetchRides = async () => {
+    setIsLoadingRides(true);
+    try {
+      const { data, error } = await supabase
+        .from('rides')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching rides:', error);
+        return;
+      }
+
+      // Transform database rides to match expected format
+      const transformedRides = data?.map(ride => ({
+        id: ride.id,
+        driverName: 'Driver', // We'll need to join with profiles table later
+        driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=D',
+        reliabilityStars: 4.0,
+        carModel: 'Car',
+        carYear: 2022,
+        imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Car',
+        plateNumber: { locationCode: '01', series: 'A', serialNumber: '123BC' },
+        origin: ride.departure_location,
+        originDate: ride.departure_date + (ride.departure_time ? 'T' + ride.departure_time : 'T09:00:00'),
+        destination: ride.destination_location,
+        destinationDate: ride.departure_date + 'T18:00:00',
+        estimatedMiles: '200 mi',
+        tripTime: '4h 0m',
+        sitsAvailable: ride.available_seats + ' sits',
+        basePrice: ride.ride_price || 100,
+        avgFuelPerMile: '$0.75/mi',
+        serviceType: ride.mail_option === 'no' ? 'rider' : ride.mail_option === 'mailOnly' ? 'mail' : 'both',
+        specialServices: ride.mail_option !== 'no' ? ['Mail delivery'] : ['Air Conditioning'],
+        mailPayout: ride.mail_price ? '$' + ride.mail_price : null,
+        ratePerMail: 'per mail'
+      })) || [];
+
+      setRides(transformedRides);
+    } catch (error) {
+      console.error('Error fetching rides:', error);
+    } finally {
+      setIsLoadingRides(false);
+    }
+  };
+
+  // Search for rides
+  const handleSearch = () => {
+    fetchRides();
+    setShowSearchResults(true);
+  };
 
   const handleFilterClick = (filterType) => {
     const newFilter = activeFilter === filterType ? null : filterType;
@@ -420,7 +477,20 @@ const App = () => {
             return <TripDetails ride={selectedRide} onBack={() => setSelectedRide(null)} isUnreliable={isUnreliableRider} onToggleReliability={() => setIsUnreliableRider(p => !p)} />;
         }
         if (showSearchResults) {
-          let results = [...dummySearchResults];
+          let results = [...rides];
+
+          // Apply location filtering
+          if (pickupLocation) {
+            results = results.filter(ride => 
+              ride.origin.toLowerCase().includes(pickupLocation.toLowerCase())
+            );
+          }
+          
+          if (destinationLocation) {
+            results = results.filter(ride => 
+              ride.destination.toLowerCase().includes(destinationLocation.toLowerCase())
+            );
+          }
 
           if (activeFilter === 'saved') {
             results = results.filter(ride => savedRides.includes(ride.id));
@@ -634,7 +704,7 @@ const App = () => {
         {renderContent()}
       </main>
 
-      {pickupLocation && destinationLocation && pickupDate && !showSearchResults && (<div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40"><button className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300 shadow-xl transform hover:scale-105" onClick={() => setShowSearchResults(true)}>See my results</button></div>)}
+      {pickupLocation && destinationLocation && pickupDate && !showSearchResults && (<div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40"><button className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300 shadow-xl transform hover:scale-105" onClick={handleSearch}>See my results</button></div>)}
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50">
         <div className="flex justify-around items-center h-16">
