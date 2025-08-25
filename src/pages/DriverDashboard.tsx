@@ -1439,6 +1439,7 @@ const AppContent = () => {
             // setActiveTab('my-lines');
           }}
           onAddRide={handleAddRide}
+          initialValues={null}
           isEditing={false}
         />
       )}
