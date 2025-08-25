@@ -74,7 +74,7 @@ const translations = {
     logout: "Logout", editProfile: "Edit Profile", fullName: "Full Name", saveChanges: "Save Changes",
     editVehicle: "Edit Vehicle Details", uzbek: "Uzbek", english: "English", russian: "Russian",
     pastRides: "Past Rides", noCompletedRides: "No completed rides.", noUpcomingRides: "No upcoming rides.",
-    submitting: "Submitting...", noActiveRide: "No active ride.", passengers: "passengers", iTookAClient: "I took a client",
+    submitting: "Submitting...", noActiveRide: "Your active ride will appear here", passengers: "passengers", iTookAClient: "I took a client",
     editRide: "Edit Ride", updateRide: "Update Ride",
     chats: "Chats", groups: "Groups", channels: "Channels", market: "Market", noMessages: "No messages here yet.",
     typeMessage: "Type a message...", cancel: "Cancel", letsGo: "Let's Go!", areYouSure: "Are you sure?", okay: "Okay",
@@ -103,7 +103,7 @@ const translations = {
     logout: "Chiqish", editProfile: "Profilni tahrirlash", fullName: "To'liq ism", saveChanges: "O'zgarishlarni saqlash",
     editVehicle: "Avtomobil ma'lumotlarini tahrirlash", uzbek: "O'zbekcha", english: "Inglizcha", russian: "Ruscha",
     pastRides: "O'tgan Sayohatlar", noCompletedRides: "Tugallangan sayohatlar yo'q.", noUpcomingRides: "Kutilayotgan sayohatlar yo'q.",
-    submitting: "Yuborilmoqda...", noActiveRide: "Faol sayohat yo'q.", passengers: "yo'lovchilar", iTookAClient: "Mijoz oldim",
+    submitting: "Yuborilmoqda...", noActiveRide: "Sizning faol sayohatingiz shu yerda paydo bo'ladi", passengers: "yo'lovchilar", iTookAClient: "Mijoz oldim",
     editRide: "Sayohatni tahrirlash", updateRide: "Yangilash",
     chats: "Suhbatlar", groups: "Guruhlar", channels: "Kanallar", market: "Bozor", noMessages: "Bu yerda hali xabarlar yo'q.",
     typeMessage: "Xabar yozing...", cancel: "Bekor qilish", letsGo: "Ketdik!", areYouSure: "Ishonchingiz komilmi?", okay: "Ha",
@@ -132,7 +132,7 @@ const translations = {
     logout: "Выйти", editProfile: "Редактировать профиль", fullName: "Полное имя", saveChanges: "Сохранить изменения",
     editVehicle: "Редактировать данные автомобиля", uzbek: "Узбекский", english: "Английский", russian: "Русский",
     pastRides: "Прошлые поездки", noCompletedRides: "Завершенных поездок нет.", noUpcomingRides: "Предстоящих поездок нет.",
-    submitting: "Отправка...", noActiveRide: "Активных поездок нет.", passengers: "пассажиров", iTookAClient: "Я взял клиента",
+    submitting: "Отправка...", noActiveRide: "Ваша активная поездка появится здесь", passengers: "пассажиров", iTookAClient: "Я взял клиента",
     editRide: "Редактировать поездку", updateRide: "Обновить",
     chats: "Чаты", groups: "Группы", channels: "Каналы", market: "Маркет", noMessages: "Здесь пока нет сообщений.",
     typeMessage: "Введите сообщение...", cancel: "Отмена", letsGo: "Поехали!", areYouSure: "Вы уверены?", okay: "Да",
@@ -493,7 +493,7 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
   const [toLocation, setToLocation] = useState(initialValues?.toLocation || "");
   const [departureDate, setDepartureDate] = useState(initialValues?.departureDate || "");
   const [mailService, setMailService] = useState(initialValues?.mailService || ""); // "yes", "no"
-  const [freeSeats, setFreeSeats] = useState(initialValues?.freeSeats || null); // New state for free seats
+  const [freeSeats, setFreeSeats] = useState(initialValues?.freeSeats || null);
   const [departureType, setDepartureType] = useState(initialValues?.departureType || ""); // "fixed", "when_fills"
   const [departureTime, setDepartureTime] = useState(initialValues?.departureTime || ""); // Only for fixed departure
   const [price, setPrice] = useState(initialValues?.price || "");
@@ -509,7 +509,7 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
     toLocation &&
     departureDate &&
     mailService &&
-    freeSeats !== null && // Free seats must be selected
+    freeSeats !== null &&
     departureType &&
     price &&
     (departureType !== "fixed" || departureTime); // If fixed, time is also required
@@ -518,7 +518,7 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
     e.preventDefault();
     if (isFormValid) {
       setSubmissionState('submitting');
-      const newRideData = { ...initialValues, fromLocation, toLocation, departureDate, mailService, freeSeats, departureType, departureTime, price, totalSeats: freeSeats };
+      const newRideData = { ...initialValues, fromLocation, toLocation, departureDate, mailService, freeSeats, totalSeats: 4, departureType, departureTime, price };
 
       setTimeout(() => {
         onAddRide(newRideData); // Pass the data up to the parent component
@@ -1094,14 +1094,18 @@ const AppContent = () => {
   };
 
   const handleAddRide = (newRide) => {
+    const bookedSeatsCount = 4 - newRide.freeSeats;
+    const mockPassengers = Array.from({ length: bookedSeatsCount }, (_, i) => ({
+        id: i + 1,
+        name: `Passenger ${i + 1}`,
+        gender: i % 2 === 0 ? "female" : "male",
+    }));
+
     const rideWithId = { 
         ...newRide, 
         id: Date.now(), 
         status: "upcoming",
-        passengers: [
-            {id: 1, name: "Alice", gender: "female"},
-            {id: 2, name: "Bob", gender: "male"},
-        ]
+        passengers: mockPassengers,
     };
     setMyRides(prevRides => [...prevRides, rideWithId]);
     setIsSearchingForClients(true);
@@ -1177,11 +1181,23 @@ const AppContent = () => {
   };
 
   const handleSaveEditedRide = (updatedRide) => {
+    const bookedSeatsCount = 4 - updatedRide.freeSeats;
+    const mockPassengers = Array.from({ length: bookedSeatsCount }, (_, i) => ({
+        id: i + 1,
+        name: `Passenger ${i + 1}`,
+        gender: i % 2 === 0 ? "female" : "male",
+    }));
+    
+    const finalUpdatedRide = {
+        ...updatedRide,
+        passengers: mockPassengers,
+    };
+
     setMyRides(prev => 
-      prev.map(ride => ride.id === updatedRide.id ? { ...ride, ...updatedRide } : ride)
+      prev.map(ride => ride.id === finalUpdatedRide.id ? finalUpdatedRide : ride)
     );
-    if (activeRide && activeRide.id === updatedRide.id) {
-        setActiveRide(prev => ({...prev, ...updatedRide}));
+    if (activeRide && activeRide.id === finalUpdatedRide.id) {
+        setActiveRide(finalUpdatedRide);
     }
     setIsEditModalOpen(false);
     setEditingRide(null);
@@ -1287,6 +1303,7 @@ const AppContent = () => {
       return <p className="text-neutral-500 text-center py-8">{t('noActiveRide')}</p>;
   };
 
+
   const renderContent = () => {
     if (showMessages) { return <MessageDashboard onClose={() => { setShowMessages(false); setHeaderTitle(t('ride')); }} />; }
     
@@ -1311,7 +1328,7 @@ const AppContent = () => {
                 </div>
             </div>
             <div>
-                <h3 className="flex items-center text-sm font-semibold mb-2 text-white/90 drop-shadow-lg">
+                <h3 className="flex items-center text-sm font-semibold mb-2 text-black drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]">
                   <Calendar className="h-4 w-4 mr-2" />
                   {t('yourActivity')}
                 </h3>
@@ -1392,9 +1409,6 @@ const AppContent = () => {
           <div className="w-8 h-8"></div> // Placeholder for alignment
         )}
         <h1 className="absolute left-1/2 -translate-x-1/2 text-xl font-bold text-gray-800">{headerTitle}</h1>
-         <button onClick={() => setShowMessages(true)} className="p-2 rounded-full text-neutral-800 hover:bg-black/10 transition-colors" >
-          <MessageCircle className="h-6 w-6" />
-        </button>
       </header>
       <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative" onClick={() => selectedPassenger && setSelectedPassenger(null)}>
         {renderContent()}
@@ -1425,7 +1439,6 @@ const AppContent = () => {
             // setActiveTab('my-lines');
           }}
           onAddRide={handleAddRide}
-          initialValues={null}
           isEditing={false}
         />
       )}
