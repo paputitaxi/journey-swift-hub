@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { useLanguage } from "@/hooks/useLanguage";
 import NotFound from "./pages/NotFound";
 import Welcome from "./pages/Welcome";
 import DriverDashboard from "./pages/DriverDashboard";
@@ -12,6 +14,27 @@ import RiderDashboard from "./pages/RiderDashboard";
 import ChatWidget from "./components/ChatWidget";
 
 const queryClient = new QueryClient();
+
+const AppContent = () => {
+  const { language, setLanguage } = useLanguage();
+
+  if (!language) {
+    return <LanguageSelector onLanguageSelect={setLanguage} />;
+  }
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Welcome />} />
+        <Route path="/driver-dashboard" element={<DriverDashboard />} />
+        <Route path="/rider-dashboard" element={<RiderDashboard />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <ChatWidget />
+    </BrowserRouter>
+  );
+};
 
 const App = () => {
   // Register service worker for PWA (production only)
@@ -34,16 +57,7 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Welcome />} />
-                <Route path="/driver-dashboard" element={<DriverDashboard />} />
-                <Route path="/rider-dashboard" element={<RiderDashboard />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <ChatWidget />
-            </BrowserRouter>
+            <AppContent />
           </TooltipProvider>
         </ThemeProvider>
       </LanguageProvider>
