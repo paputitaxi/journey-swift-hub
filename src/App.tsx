@@ -18,7 +18,10 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   const { language, setLanguage } = useLanguage();
 
+  console.log('Current language:', language);
+
   if (!language) {
+    console.log('No language set, showing language selector');
     return <LanguageSelector onLanguageSelect={setLanguage} />;
   }
 

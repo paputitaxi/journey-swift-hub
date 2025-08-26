@@ -126,6 +126,7 @@ export const useLanguage = () => {
 export const useLanguageProvider = () => {
   const [language, setLanguageState] = useState<Language | null>(() => {
     const saved = localStorage.getItem('app-language');
+    console.log('Saved language from localStorage:', saved);
     if (saved && ['uz', 'en', 'ru'].includes(saved)) {
       return saved as Language;
     }
@@ -133,6 +134,7 @@ export const useLanguageProvider = () => {
   });
 
   const setLanguage = (lang: Language) => {
+    console.log('Setting language to:', lang);
     setLanguageState(lang);
     localStorage.setItem('app-language', lang);
   };
