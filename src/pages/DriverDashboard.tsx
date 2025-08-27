@@ -1,6 +1,7 @@
 // Driver Dashboard - With Custom Scrollbar Styling
 import React, { useState, useEffect, useRef, createContext, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   Plus,
@@ -1045,6 +1046,7 @@ const LanguageProvider = ({ children }) => {
 
 const AppContent = () => {
   const { t, language } = useLanguage();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [headerTitle, setHeaderTitle] = useState(t('ride'));
   const [showPostRide, setShowPostRide] = useState(false);
@@ -1117,34 +1119,82 @@ const AppContent = () => {
   };
 
   const handleAddRide = async (newRide) => {
-    const bookedSeatsCount = 4 - newRide.freeSeats;
-    const mockPassengers = Array.from({ length: bookedSeatsCount }, (_, i) => ({
-        id: i + 1,
-        name: `Passenger ${i + 1}`,
-        gender: i % 2 === 0 ? "female" : "male",
-    }));
+    try {
+      // Insert ride into Supabase database
+      const { data: insertedRide, error } = await supabase
+        .from('rides')
+        .insert({
+          username: localStorage.getItem('username') || 'driver',
+          departure_location: newRide.fromLocation,
+          destination_location: newRide.toLocation,
+          departure_date: newRide.departureDate,
+          departure_time: newRide.departureTime || null,
+          departure_type: newRide.departureType,
+          mail_option: newRide.mailService,
+          ride_price: parseFloat(newRide.price) || 0,
+          mail_price: newRide.mailService === 'yes' ? 5 : 0, // Default mail price
+          available_seats: parseInt(newRide.freeSeats) || 4,
+          total_seats: 4,
+          status: 'active'
+        })
+        .select()
+        .single();
 
-    const rideWithId = { 
-        ...newRide, 
-        id: Date.now(), 
-        status: "upcoming",
-        passengers: mockPassengers,
-    };
-    console.log('PostRideModal - Ride posted successfully, refreshing data...');
-    setMyRides(prevRides => [...prevRides, rideWithId]);
-    
-    // Refresh rides data
-    const { data: updatedRides } = await supabase
-      .from('rides')
-      .select('*')
-      .eq('username', localStorage.getItem('username'))
-      .order('created_at', { ascending: false });
-    if (updatedRides) setMyRides(updatedRides);
-    setIsSearchingForClients(true);
-    setTimeout(() => {
-        setActiveRide(rideWithId);
-        setIsSearchingForClients(false);
-    }, 3000);
+      if (error) {
+        console.error('Error inserting ride:', error);
+        toast({
+          title: 'Error posting ride',
+          description: 'Please try again',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      console.log('Ride posted successfully to database:', insertedRide);
+      
+      // Create local ride object for immediate UI update
+      const bookedSeatsCount = 4 - newRide.freeSeats;
+      const mockPassengers = Array.from({ length: bookedSeatsCount }, (_, i) => ({
+          id: i + 1,
+          name: `Passenger ${i + 1}`,
+          gender: i % 2 === 0 ? "female" : "male",
+      }));
+
+      const rideWithId = { 
+          ...newRide, 
+          id: insertedRide.id, 
+          status: "upcoming",
+          passengers: mockPassengers,
+      };
+      
+      // Refresh rides data from database
+      const { data: updatedRides } = await supabase
+        .from('rides')
+        .select('*')
+        .eq('username', localStorage.getItem('username'))
+        .order('created_at', { ascending: false });
+      
+      if (updatedRides) setMyRides(updatedRides);
+      
+      setIsSearchingForClients(true);
+      setTimeout(() => {
+          setActiveRide(rideWithId);
+          setIsSearchingForClients(false);
+      }, 3000);
+
+      toast({
+        title: 'Ride posted successfully!',
+        description: 'Riders can now see your ride'
+      });
+
+    } catch (error) {
+      console.error('Error in handleAddRide:', error);
+      toast({
+        title: 'Error posting ride',
+        description: 'Please try again',
+        variant: 'destructive'
+      });
+    }
   };
  
   const handleUpdateRide = (updatedRideData) => {
