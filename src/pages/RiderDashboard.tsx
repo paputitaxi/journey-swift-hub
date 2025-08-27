@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info, Car, MessageCircle, Send, Plus, Minus } from 'lucide-react';
 
 // Expanded Data for Uzbekistan Regions and Cities - ALL 14 REGIONS INCLUDED
@@ -428,7 +430,90 @@ const App = () => {
   const [rideHistory, setRideHistory] = useState([]);
   const [isBooking, setIsBooking] = useState(false);
   const [rideToBook, setRideToBook] = useState(null);
-  const [availableRides, setAvailableRides] = useState(initialDummySearchResults);
+  const [availableRides, setAvailableRides] = useState([]);
+  const { toast } = useToast();
+
+  // Fetch available rides from database
+  useEffect(() => {
+    const fetchRides = async () => {
+      const { data, error } = await supabase
+        .from('rides')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching rides:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load rides. Please try again.',
+          variant: 'destructive'
+        });
+      } else {
+        // Transform database data to match expected UI structure
+        const transformedRides = data.map(ride => ({
+          id: ride.id,
+          driverName: ride.username,
+          driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=' + ride.username.charAt(0).toUpperCase(),
+          reliabilityStars: 4.5, // Default rating
+          carModel: 'Chevrolet Cobalt', // Default car
+          carYear: 2022,
+          imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Car',
+          plateNumber: { locationCode: '01', series: 'A', serialNumber: '123BC' },
+          startLocation: ride.departure_location,
+          endLocation: ride.destination_location,
+          startTime: ride.departure_time,
+          departureDate: ride.departure_date,
+          availableSeats: ride.available_seats,
+          totalSeats: ride.total_seats,
+          pricePerSeat: ride.ride_price,
+          mailOption: ride.mail_option === 'yes',
+          mailPrice: ride.mail_price,
+          departureType: ride.departure_type,
+          tags: []
+        }));
+        setAvailableRides(transformedRides);
+      }
+    };
+
+    fetchRides();
+    
+    // Set up real-time subscription for new rides
+    const subscription = supabase
+      .channel('rides-changes')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'rides' },
+        (payload) => {
+          const newRide = payload.new;
+          const transformedRide = {
+            id: newRide.id,
+            driverName: newRide.username,
+            driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=' + newRide.username.charAt(0).toUpperCase(),
+            reliabilityStars: 4.5,
+            carModel: 'Chevrolet Cobalt',
+            carYear: 2022,
+            imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Car',
+            plateNumber: { locationCode: '01', series: 'A', serialNumber: '123BC' },
+            startLocation: newRide.departure_location,
+            endLocation: newRide.destination_location,
+            startTime: newRide.departure_time,
+            departureDate: newRide.departure_date,
+            availableSeats: newRide.available_seats,
+            totalSeats: newRide.total_seats,
+            pricePerSeat: newRide.ride_price,
+            mailOption: newRide.mail_option === 'yes',
+            mailPrice: newRide.mail_price,
+            departureType: newRide.departure_type,
+            tags: []
+          };
+          setAvailableRides(prev => [transformedRide, ...prev]);
+        })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, []);
 
   const handleBookClick = (ride) => {
     setRideToBook(ride);

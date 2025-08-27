@@ -1,5 +1,6 @@
 // Driver Dashboard - With Custom Scrollbar Styling
 import React, { useState, useEffect, useRef, createContext, useContext } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   Plus,
@@ -1053,6 +1054,28 @@ const AppContent = () => {
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [isSearchingForClients, setIsSearchingForClients] = useState(false);
   const [myRides, setMyRides] = useState([]);
+
+  // Fetch user's rides from database
+  useEffect(() => {
+    const fetchMyRides = async () => {
+      if (!localStorage.getItem('username')) return;
+      
+      const username = localStorage.getItem('username');
+      const { data, error } = await supabase
+        .from('rides')
+        .select('*')
+        .eq('username', username)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching my rides:', error);
+      } else {
+        setMyRides(data || []);
+      }
+    };
+
+    fetchMyRides();
+  }, []);
   const [activeRide, setActiveRide] = useState(null);
   const [selectedPassenger, setSelectedPassenger] = useState(null);
   const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
@@ -1093,7 +1116,7 @@ const AppContent = () => {
     setUserData(prev => ({...prev, car: updatedCarData}));
   };
 
-  const handleAddRide = (newRide) => {
+  const handleAddRide = async (newRide) => {
     const bookedSeatsCount = 4 - newRide.freeSeats;
     const mockPassengers = Array.from({ length: bookedSeatsCount }, (_, i) => ({
         id: i + 1,
@@ -1107,7 +1130,16 @@ const AppContent = () => {
         status: "upcoming",
         passengers: mockPassengers,
     };
+    console.log('PostRideModal - Ride posted successfully, refreshing data...');
     setMyRides(prevRides => [...prevRides, rideWithId]);
+    
+    // Refresh rides data
+    const { data: updatedRides } = await supabase
+      .from('rides')
+      .select('*')
+      .eq('username', localStorage.getItem('username'))
+      .order('created_at', { ascending: false });
+    if (updatedRides) setMyRides(updatedRides);
     setIsSearchingForClients(true);
     setTimeout(() => {
         setActiveRide(rideWithId);
