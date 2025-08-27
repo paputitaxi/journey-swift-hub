@@ -12,21 +12,44 @@ const Welcome = () => {
   const [username, setUsername] = useState("");
   const [step, setStep] = useState<'username' | 'role'>('username');
   const [checking, setChecking] = useState(false);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check authentication state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        const savedUsername = session.user.user_metadata?.username || localStorage.getItem('username');
+        if (savedUsername) {
+          setUsername(savedUsername);
+          setStep('role');
+        }
+      }
+    });
+
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        const savedUsername = session.user.user_metadata?.username || localStorage.getItem('username');
+        if (savedUsername) {
+          setUsername(savedUsername);
+          setStep('role');
+        }
+      }
+    });
+
+    // Also check localStorage for existing username (backward compatibility)
     const saved = localStorage.getItem('username');
-    console.log('Welcome useEffect - saved username:', saved);
-    console.log('Welcome useEffect - current step:', step);
-    if (saved) {
+    if (saved && !user) {
       setUsername(saved);
       setStep('role');
-      console.log('Welcome useEffect - setting step to role');
-    } else {
-      console.log('Welcome useEffect - no saved username, should show username step');
     }
-  }, []);
+
+    return () => subscription.unsubscribe();
+  }, [user]);
 
   const validateUsername = (u: string) => /^[a-zA-Z0-9_]{3,20}$/.test(u);
 
@@ -99,24 +122,25 @@ const Welcome = () => {
   };
 
   const handleRoleSelect = (role: 'rider' | 'driver') => {
-    if (!localStorage.getItem('username')) {
-      toast({ title: 'Choose a username first', description: 'Please set a username.', variant: 'destructive' });
+    // Check if user is authenticated
+    if (!user && !localStorage.getItem('username')) {
+      toast({ title: 'Please sign in first', description: 'Choose a username to continue.', variant: 'destructive' });
+      setStep('username');
       return;
     }
+    
     setSelectedType(role);
-    if (role === 'rider') navigate('/rider-dashboard');
-    else navigate('/driver-dashboard');
+    
+    if (role === 'rider') {
+      navigate('/rider-dashboard');
+    } else {
+      navigate('/driver-dashboard');
+    }
   };
-
-  console.log('Welcome render - current step:', step);
-  console.log('Welcome render - current username:', username);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="text-center max-w-xl mx-auto space-y-8">
-        {/* Debug info */}
-        <div className="text-xs text-muted-foreground">Debug: step={step}, username="{username}"</div>
-        
         {/* Main Header and Description */}
         <div className="space-y-4">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">Welcome</h1>
