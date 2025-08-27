@@ -460,17 +460,19 @@ const App = () => {
           carYear: 2022,
           imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Car',
           plateNumber: { locationCode: '01', series: 'A', serialNumber: '123BC' },
-          startLocation: ride.departure_location,
-          endLocation: ride.destination_location,
-          startTime: ride.departure_time,
-          departureDate: ride.departure_date,
-          availableSeats: ride.available_seats,
-          totalSeats: ride.total_seats,
-          pricePerSeat: ride.ride_price,
-          mailOption: ride.mail_option === 'yes',
-          mailPrice: ride.mail_price,
-          departureType: ride.departure_type,
-          tags: []
+          origin: ride.departure_location,
+          destination: ride.destination_location,
+          originDate: `${ride.departure_date}T${ride.departure_time || '09:00:00'}`,
+          destinationDate: `${ride.departure_date}T${ride.departure_time || '09:00:00'}`,
+          estimatedMiles: '200 mi',
+          tripTime: '4h 0m',
+          sitsAvailable: ride.available_seats.toString(),
+          basePrice: ride.ride_price || 0,
+          avgFuelPerMile: '$0.85/mi',
+          serviceType: ride.mail_option === 'yes' ? 'both' : 'rider',
+          mailPayout: ride.mail_option === 'yes' ? `$${ride.mail_price || 25}` : null,
+          ratePerMail: 'per mail',
+          specialServices: ride.mail_option === 'yes' ? ['Mail delivery'] : []
         }));
         setAvailableRides(transformedRides);
       }
@@ -494,17 +496,19 @@ const App = () => {
             carYear: 2022,
             imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Car',
             plateNumber: { locationCode: '01', series: 'A', serialNumber: '123BC' },
-            startLocation: newRide.departure_location,
-            endLocation: newRide.destination_location,
-            startTime: newRide.departure_time,
-            departureDate: newRide.departure_date,
-            availableSeats: newRide.available_seats,
-            totalSeats: newRide.total_seats,
-            pricePerSeat: newRide.ride_price,
-            mailOption: newRide.mail_option === 'yes',
-            mailPrice: newRide.mail_price,
-            departureType: newRide.departure_type,
-            tags: []
+            origin: newRide.departure_location,
+            destination: newRide.destination_location,
+            originDate: `${newRide.departure_date}T${newRide.departure_time || '09:00:00'}`,
+            destinationDate: `${newRide.departure_date}T${newRide.departure_time || '09:00:00'}`,
+            estimatedMiles: '200 mi',
+            tripTime: '4h 0m',
+            sitsAvailable: newRide.available_seats.toString(),
+            basePrice: newRide.ride_price || 0,
+            avgFuelPerMile: '$0.85/mi',
+            serviceType: newRide.mail_option === 'yes' ? 'both' : 'rider',
+            mailPayout: newRide.mail_option === 'yes' ? `$${newRide.mail_price || 25}` : null,
+            ratePerMail: 'per mail',
+            specialServices: newRide.mail_option === 'yes' ? ['Mail delivery'] : []
           };
           setAvailableRides(prev => [transformedRide, ...prev]);
         })
