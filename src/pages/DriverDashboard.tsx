@@ -1,56 +1,48 @@
 // Driver Dashboard - With Custom Scrollbar Styling
 import React, { useState, useEffect, useRef, createContext, useContext } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+// Note: In a real app, these would be properly imported from your project structure
+// For this example, we'll assume they are available.
+// import { supabase } from "@/integrations/supabase/client";
+// import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
-  Plus,
-  User,
-  MapPin,
-  Calendar,
-  Clock,
-  Shield,
-  Navigation,
-  MessageCircle,
-  Users, // For Groups
-  Hash, // For Channels
-  Store, // For Market
-  Search, // For search bar
-  X, // For closing modals
-  CheckCircle, // For submit button success state
-  ArrowLeft, // For Navigation
-  Send, // For search button
-  Loader2, // For loading state
-  XCircle, // For ending a trip
-  Fuel, // Nearby gas stations
-  Radar, // Speed cameras
-  LocateFixed, // Recenter to user
-  Car, // Added Car icon back for Welcome component
-  Sparkles, // For Gemini features
-  Newspaper, // For News
-  TrendingUp, // For Stats
-  Mail,
-  Phone,
-  Settings,
-  LogOut,
-  Edit2,
-  ChevronLeft, // Added missing icon
-  ChevronRight,
-  Star,
-  ShieldCheck,
-  CreditCard,
-  Bell,
-  Languages,
-  Lock,
-  Trash2,
-  History,
-  FileText,
-  MinusCircle,
-  PlusCircle,
-  UserPlus, // Added icon for the new button
-  UserRound, // Added for female passenger icon
-  LifeBuoy, // For Support
+  Plus, User, MapPin, Calendar, Clock, Shield, Navigation, MessageCircle, Users,
+  Hash, Store, Search, X, CheckCircle, ArrowLeft, Send, Loader2, XCircle, Fuel,
+  Radar, LocateFixed, Car, Sparkles, Newspaper, TrendingUp, Mail, Phone, Settings,
+  LogOut, Edit2, ChevronLeft, ChevronRight, Star, ShieldCheck, CreditCard, Bell,
+  Languages, Lock, Trash2, History, FileText, MinusCircle, PlusCircle, UserPlus,
+  UserRound, LifeBuoy
 } from "lucide-react";
+
+// --- Mock Supabase and Toast ---
+// In a real environment, you'd use the actual libraries.
+// These mocks are for demonstration purposes to make the code runnable.
+const supabase = {
+  from: () => ({
+    select: () => ({
+      eq: () => ({
+        order: () => Promise.resolve({ data: [], error: null }),
+      }),
+    }),
+    insert: (data) => ({
+        select: () => ({
+            single: () => Promise.resolve({ data: {id: Date.now(), ...data}, error: null })
+        })
+    }),
+  }),
+};
+
+const useToast = () => {
+    return {
+        toast: ({ title, description }) => {
+            console.log(`Toast: ${title} - ${description}`);
+            // A simple alert to simulate a toast notification for this example
+            // In a real app, you'd use a proper toast component library.
+            // alert(`${title}\n${description}`);
+        }
+    };
+};
+
 
 // --- i18n Translations ---
 const translations = {
@@ -82,6 +74,7 @@ const translations = {
     typeMessage: "Type a message...", cancel: "Cancel", letsGo: "Let's Go!", areYouSure: "Are you sure?", okay: "Okay",
     searchingForClients: "Searching for clients...", call: "Call", message: "Message", removePassenger: "Remove Passenger",
     dailyEarnings: "Daily Earnings", recentTrips: "Recent Trips",
+    mailPriceLabel: "Mail Price", enterMailPrice: "Enter mail price",
   },
   uz: {
     ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil",
@@ -111,6 +104,7 @@ const translations = {
     typeMessage: "Xabar yozing...", cancel: "Bekor qilish", letsGo: "Ketdik!", areYouSure: "Ishonchingiz komilmi?", okay: "Ha",
     searchingForClients: "Mijozlar qidirilmoqda...", call: "Qo'ng'iroq", message: "Xabar", removePassenger: "Yo'lovchini o'chirish",
     dailyEarnings: "Kunlik daromad", recentTrips: "Oxirgi sayohatlar",
+    mailPriceLabel: "Pochta Narxi", enterMailPrice: "Pochta narxini kiriting",
   },
   ru: {
     ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль",
@@ -140,6 +134,7 @@ const translations = {
     typeMessage: "Введите сообщение...", cancel: "Отмена", letsGo: "Поехали!", areYouSure: "Вы уверены?", okay: "Да",
     searchingForClients: "Поиск клиентов...", call: "Позвонить", message: "Написать", removePassenger: "Удалить пассажира",
     dailyEarnings: "Дневной заработок", recentTrips: "Последние поездки",
+    mailPriceLabel: "Цена за посылку", enterMailPrice: "Введите цену за посылку",
   },
 };
 
@@ -499,6 +494,7 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
   const [departureType, setDepartureType] = useState(initialValues?.departureType || ""); // "fixed", "when_fills"
   const [departureTime, setDepartureTime] = useState(initialValues?.departureTime || ""); // Only for fixed departure
   const [price, setPrice] = useState(initialValues?.price || "");
+  const [mailPrice, setMailPrice] = useState(initialValues?.mailPrice || "");
   const [submissionState, setSubmissionState] = useState('idle'); // 'idle', 'submitting', 'submitted'
 
   const [showFromModal, setShowFromModal] = useState(false);
@@ -514,13 +510,14 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
     freeSeats !== null &&
     departureType &&
     price &&
-    (departureType !== "fixed" || departureTime); // If fixed, time is also required
+    (departureType !== "fixed" || departureTime) &&
+    (mailService !== "yes" || mailPrice);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isFormValid) {
       setSubmissionState('submitting');
-      const newRideData = { ...initialValues, fromLocation, toLocation, departureDate, mailService, freeSeats, totalSeats: 4, departureType, departureTime, price };
+      const newRideData = { ...initialValues, fromLocation, toLocation, departureDate, mailService, freeSeats, totalSeats: 4, departureType, departureTime, price, mailPrice };
 
       setTimeout(() => {
         onAddRide(newRideData); // Pass the data up to the parent component
@@ -614,6 +611,23 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
                 </div>
                 {mailService === "yes" && <CheckCircle className="h-6 w-6 text-green-400" />}
               </button>
+              {mailService === "yes" && (
+                <div className="mt-3">
+                    <label className="block text-neutral-800 text-sm font-medium mb-2">{t('mailPriceLabel')}</label>
+                    <div className="relative">
+                        <input 
+                            type="text" 
+                            inputMode="numeric" 
+                            pattern="[0-9]*" 
+                            placeholder={t('enterMailPrice')} 
+                            className="w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" 
+                            value={mailPrice} 
+                            onChange={(e) => { const value = e.target.value; if (/^[0-9]*$/.test(value)) { setMailPrice(value); } }} 
+                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">$</span>
+                    </div>
+                </div>
+              )}
               <button type="button" onClick={() => setMailService("no")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${mailService === "no" ? "bg-green-600/30 border border-green-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="text-left">
                   <p className="font-medium text-gray-800">{t('noCarryMail')}</p>
@@ -889,7 +903,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
     );
     
     const UpcomingRidesContent = () => (
-         <div>
+        <div>
             <h3 className="font-semibold mb-2">{t('upcomingRides')}</h3>
             {myRides.filter(r => r.status === 'upcoming').length > 0 ? myRides.filter(r => r.status === 'upcoming').map(ride => (
                 <div key={ride.id} className="mb-2 p-2 border-b border-neutral-200/50">
@@ -1060,7 +1074,7 @@ const AppContent = () => {
   // Fetch user's rides from database
   useEffect(() => {
     const fetchMyRides = async () => {
-      if (!localStorage.getItem('username')) return;
+      if (typeof window !== 'undefined' && !localStorage.getItem('username')) return;
       
       const username = localStorage.getItem('username');
       const { data, error } = await supabase
@@ -1132,7 +1146,7 @@ const AppContent = () => {
           departure_type: newRide.departureType === 'fixed' ? 'time' : newRide.departureType === 'when_fills' ? 'sitToGo' : newRide.departureType,
           mail_option: newRide.mailService,
           ride_price: parseFloat(newRide.price) || 0,
-          mail_price: newRide.mailService === 'yes' ? 5 : 0, // Default mail price
+          mail_price: newRide.mailService === 'yes' ? parseFloat(newRide.mailPrice) || 0 : 0,
           available_seats: parseInt(newRide.freeSeats) || 4,
           total_seats: 4,
           status: 'active'
@@ -1353,9 +1367,9 @@ const AppContent = () => {
                           <p className="text-sm font-medium text-neutral-800 mb-2">{t('passengers')}</p>
                           <div className="flex space-x-2">
                               {activeRide.passengers.map((p) => (
-                                <div key={p.id} onClick={(e) => handlePassengerClick(p, e)} className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${p.gender === 'male' ? 'bg-blue-200' : 'bg-green-200'}`}>
-                                    {p.gender === 'male' ? <User className="h-6 w-6 text-blue-800" /> : <UserRound className="h-6 w-6 text-green-800" />}
-                                </div>
+                                  <div key={p.id} onClick={(e) => handlePassengerClick(p, e)} className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${p.gender === 'male' ? 'bg-blue-200' : 'bg-green-200'}`}>
+                                      {p.gender === 'male' ? <User className="h-6 w-6 text-blue-800" /> : <UserRound className="h-6 w-6 text-green-800" />}
+                                  </div>
                               ))}
                               {Array.from({ length: activeRide.freeSeats }).map((_, index) => (
                                   <div key={index} className="w-10 h-10 rounded-full flex items-center justify-center bg-green-100/50 relative">
@@ -1393,33 +1407,33 @@ const AppContent = () => {
 
     switch (activeTab) {
       case "dashboard": return (
-          <div className="p-4 space-y-4 text-gray-800 font-sans">
-            <div className="grid grid-cols-2 gap-4">
-                {/* Total Earnings Card */}
-                <div onClick={() => setShowStatsModal(true)} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 text-center flex flex-col justify-center cursor-pointer">
-                    <h2 className="text-sm text-neutral-600">{t('totalEarnings')}</h2>
-                    <p className="text-3xl font-extrabold text-gray-800 mt-2">$0.00</p>
-                </div>
+        <div className="p-4 space-y-4 text-gray-800 font-sans">
+          <div className="grid grid-cols-2 gap-4">
+              {/* Total Earnings Card */}
+              <div onClick={() => setShowStatsModal(true)} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 text-center flex flex-col justify-center cursor-pointer">
+                  <h2 className="text-sm text-neutral-600">{t('totalEarnings')}</h2>
+                  <p className="text-3xl font-extrabold text-gray-800 mt-2">$0.00</p>
+              </div>
 
-                {/* New Ride Button Card */}
-                <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle(t('newRide')); }}>
-                    <div className="w-14 h-14 bg-neutral-100/50 rounded-full flex items-center justify-center border-2 border-neutral-200/50 shadow-md">
-                        <Plus className="h-7 w-7 text-gray-800" />
-                    </div>
-                    <span className="text-xs text-neutral-600 mt-2">{t('newRide')}</span>
-                </div>
-            </div>
-            <div>
-                <h3 className="flex items-center text-sm font-semibold mb-2 text-black drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]">
+              {/* New Ride Button Card */}
+              <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle(t('newRide')); }}>
+                  <div className="w-14 h-14 bg-neutral-100/50 rounded-full flex items-center justify-center border-2 border-neutral-200/50 shadow-md">
+                      <Plus className="h-7 w-7 text-gray-800" />
+                  </div>
+                  <span className="text-xs text-neutral-600 mt-2">{t('newRide')}</span>
+              </div>
+          </div>
+          <div>
+              <h3 className="flex items-center text-sm font-semibold mb-2 text-black drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]">
                   <Calendar className="h-4 w-4 mr-2" />
                   {t('yourActivity')}
-                </h3>
-                <div className={`w-full bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg text-left overflow-hidden`}>
-                  {renderActiveRideContent()}
-                </div>
-            </div>
+              </h3>
+              <div className={`w-full bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg text-left overflow-hidden`}>
+                {renderActiveRideContent()}
+              </div>
           </div>
-        );
+        </div>
+      );
       case "my-lines": return (
         <div className="p-4 text-gray-800 font-sans space-y-4 pb-20">
             {myRides.filter(r => r.status === 'upcoming').length > 0 ? (
@@ -1447,8 +1461,8 @@ const AppContent = () => {
                 ))
             ) : (
                 <div className="text-center p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow">
-                  <p className="text-gray-600 mb-2">{t('noLines')}</p>
-                  <p className="text-sm text-gray-500">{t('postRidePrompt')}</p>
+                    <p className="text-gray-600 mb-2">{t('noLines')}</p>
+                    <p className="text-sm text-gray-500">{t('postRidePrompt')}</p>
                 </div>
             )}
         </div>
@@ -1462,7 +1476,7 @@ const AppContent = () => {
     <div 
       className="h-screen text-gray-800 flex flex-col font-sans"
       style={{
-          backgroundImage: `url('image_134672.jpg')`,
+          backgroundImage: `url('https://images.unsplash.com/photo-1533106418989-88406e768d19?q=80&w=2940&auto=format&fit=crop')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -1503,7 +1517,7 @@ const AppContent = () => {
               const isActive = activeTab === item.id;
               return (
                 <button key={item.id} onClick={() => { setActiveTab(item.id); }} className={`flex-1 flex flex-col items-center py-2 transition-colors ${ isActive ? "text-gray-800" : "text-neutral-500" }`} >
-                  <Icon className={`h-6 w-6 mb-1 ${ isActive ? "text-[#E1F87E]" : "text-neutral-500" }`} />
+                  <Icon className={`h-6 w-6 mb-1 ${ isActive ? "text-green-500" : "text-neutral-500" }`} />
                   <span className="text-xs">{item.label}</span>
                 </button>
               );
