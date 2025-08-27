@@ -75,6 +75,7 @@ const translations = {
     searchingForClients: "Searching for clients...", call: "Call", message: "Message", removePassenger: "Remove Passenger",
     dailyEarnings: "Daily Earnings", recentTrips: "Recent Trips",
     mailPriceLabel: "Mail Price", enterMailPrice: "Enter mail price",
+    carType: "Car Type", selectCar: "Select Your Car",
   },
   uz: {
     ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil",
@@ -105,6 +106,7 @@ const translations = {
     searchingForClients: "Mijozlar qidirilmoqda...", call: "Qo'ng'iroq", message: "Xabar", removePassenger: "Yo'lovchini o'chirish",
     dailyEarnings: "Kunlik daromad", recentTrips: "Oxirgi sayohatlar",
     mailPriceLabel: "Pochta Narxi", enterMailPrice: "Pochta narxini kiriting",
+    carType: "Avtomobil turi", selectCar: "Avtomobilingizni tanlang",
   },
   ru: {
     ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль",
@@ -135,6 +137,7 @@ const translations = {
     searchingForClients: "Поиск клиентов...", call: "Позвонить", message: "Написать", removePassenger: "Удалить пассажира",
     dailyEarnings: "Дневной заработок", recentTrips: "Последние поездки",
     mailPriceLabel: "Цена за посылку", enterMailPrice: "Введите цену за посылку",
+    carType: "Тип автомобиля", selectCar: "Выберите ваш автомобиль",
   },
 };
 
@@ -427,6 +430,49 @@ const uzbekistanLocations = [
   { region: "Tashkent City", cities: ["Tashkent", "Bektemir", "Chilonzor", "Mirobod", "Mirzo Ulugbek", "Sergeli", "Shaykhontohur", "Uchtepa", "Yakkasaroy", "Yashnobod", "Yunusobod"] },
   { region: "Republic of Karakalpakstan", cities: ["Nukus", "Beruniy", "Chimboy", "Ellikqala", "Kegeyli", "Qo'ng'irot", "Qorao'zak", "Shumanay", "Taxtako'pir", "To'rtko'l", "Xo'jayli", "Amudaryo", "Bo'zatov", "Qanliko'l", "Taxiatosh"] },
 ];
+
+const uzbekistanCars = [
+    'Chevrolet Cobalt', 'Chevrolet Lacetti', 'Chevrolet Nexia 3', 'Chevrolet Spark', 
+    'Chevrolet Damas', 'Daewoo Matiz', 'Daewoo Nexia', 'Hyundai Elantra', 'Kia K5',
+    'Lada Vesta', 'BYD Song Plus', 'Chery Tiggo 7 Pro'
+];
+
+// Car Type Selection Modal
+const CarTypeModal = ({ isOpen, onClose, onSelectCar, currentCar }) => {
+    const { t } = useLanguage();
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-auto max-h-[80vh] flex flex-col">
+                <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">{t('selectCar')}</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100">
+                        <X className="h-6 w-6" />
+                    </button>
+                </div>
+                <div className="flex-grow overflow-y-auto p-4 space-y-2 custom-scrollbar">
+                    {uzbekistanCars.map((car, index) => (
+                        <button
+                            key={index}
+                            onClick={() => {
+                                onSelectCar(car);
+                                onClose();
+                            }}
+                            className={`w-full p-3 rounded-lg text-left transition-colors flex justify-between items-center ${
+                                currentCar === car ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-neutral-100/50'
+                            }`}
+                        >
+                            {car}
+                            {currentCar === car && <CheckCircle className="h-5 w-5" />}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 // Location Selection Modal Component
 const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
@@ -1033,6 +1079,8 @@ const AppContent = () => {
   const [showMessages, setShowMessages] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
+  const [showCarTypeModal, setShowCarTypeModal] = useState(false);
+  const [selectedCar, setSelectedCar] = useState("Chevrolet Cobalt");
   const [isSearchingForClients, setIsSearchingForClients] = useState(false);
   const [myRides, setMyRides] = useState([]);
 
@@ -1371,19 +1419,26 @@ const AppContent = () => {
     switch (activeTab) {
       case "dashboard": return (
         <div className="p-4 space-y-4 text-gray-800 font-sans">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
               {/* Total Earnings Card */}
               <div onClick={() => setShowStatsModal(true)} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 text-center flex flex-col justify-center cursor-pointer">
                   <h2 className="text-sm text-neutral-600">{t('totalEarnings')}</h2>
-                  <p className="text-3xl font-extrabold text-gray-800 mt-2">$0.00</p>
+                  <p className="text-2xl font-extrabold text-gray-800 mt-2">$0.00</p>
               </div>
 
               {/* New Ride Button Card */}
               <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={() => { setShowPostRide(true); setHeaderTitle(t('newRide')); }}>
-                  <div className="w-14 h-14 bg-neutral-100/50 rounded-full flex items-center justify-center border-2 border-neutral-200/50 shadow-md">
-                      <Plus className="h-7 w-7 text-gray-800" />
+                  <div className="w-12 h-12 bg-neutral-100/50 rounded-full flex items-center justify-center border-2 border-neutral-200/50 shadow-md">
+                      <Plus className="h-6 w-6 text-gray-800" />
                   </div>
                   <span className="text-xs text-neutral-600 mt-2">{t('newRide')}</span>
+              </div>
+              
+              {/* Car Type Card */}
+              <div onClick={() => setShowCarTypeModal(true)} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 text-center flex flex-col items-center justify-center cursor-pointer">
+                  <Car className="h-6 w-6 text-gray-800" />
+                  <h2 className="text-sm text-neutral-600 mt-2">{t('carType')}</h2>
+                  <p className="text-xs font-semibold text-gray-800 truncate">{selectedCar}</p>
               </div>
           </div>
           <div>
@@ -1484,6 +1539,12 @@ const AppContent = () => {
           isEditing={true}
         />
       )}
+      <CarTypeModal 
+        isOpen={showCarTypeModal} 
+        onClose={() => setShowCarTypeModal(false)}
+        onSelectCar={setSelectedCar}
+        currentCar={selectedCar}
+      />
        {showConfirmationModal && (
             <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
                 <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
