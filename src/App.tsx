@@ -30,10 +30,8 @@ const AppContent = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Welcome />} />
-        <Route element={<ProtectedRoute />}>
-          <Route path="/driver-dashboard" element={<DriverDashboard />} />
-          <Route path="/rider-dashboard" element={<RiderDashboard />} />
-        </Route>
+        <Route path="/driver-dashboard" element={<DriverDashboard />} />
+        <Route path="/rider-dashboard" element={<RiderDashboard />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

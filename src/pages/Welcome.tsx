@@ -122,8 +122,9 @@ const Welcome = () => {
   };
 
   const handleRoleSelect = (role: 'rider' | 'driver') => {
-    // Check if user is authenticated
-    if (!user && !localStorage.getItem('username')) {
+    // Allow navigation if user is authenticated OR username exists in localStorage
+    const hasUsername = localStorage.getItem('username');
+    if (!user && !hasUsername) {
       toast({ title: 'Please sign in first', description: 'Choose a username to continue.', variant: 'destructive' });
       setStep('username');
       return;
