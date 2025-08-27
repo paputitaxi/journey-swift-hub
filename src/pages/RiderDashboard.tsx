@@ -723,7 +723,7 @@ const App = () => {
                               {item.departure_type === 'time' && item.departure_time && (
                                 <span className="text-gray-700">at {item.departure_time}</span>
                               )}
-                              {item.departure_type === 'sit_to_go' && (
+                              {item.departure_type === 'sitToGo' && (
                                 <span className="text-blue-600 font-medium">Sit & Go</span>
                               )}
                             </div>

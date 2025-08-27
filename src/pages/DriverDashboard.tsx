@@ -1129,7 +1129,7 @@ const AppContent = () => {
           destination_location: newRide.toLocation,
           departure_date: newRide.departureDate,
           departure_time: newRide.departureTime || null,
-          departure_type: newRide.departureType,
+          departure_type: newRide.departureType === 'fixed' ? 'time' : newRide.departureType === 'when_fills' ? 'sitToGo' : newRide.departureType,
           mail_option: newRide.mailService,
           ride_price: parseFloat(newRide.price) || 0,
           mail_price: newRide.mailService === 'yes' ? 5 : 0, // Default mail price

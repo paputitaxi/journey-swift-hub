@@ -86,7 +86,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
         destination_location: destination,
         departure_date: format(date, 'yyyy-MM-dd'),
         departure_time: departureType === 'time' ? departureTime : null,
-        departure_type: departureType === 'sitToGo' ? 'sit_to_go' : departureType,
+        departure_type: departureType,
         mail_option: mailOption,
         ride_price: ridePrice ? parseFloat(ridePrice) : null,
         mail_price: mailPrice ? parseFloat(mailPrice) : null,
