@@ -969,24 +969,6 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
             {/* --- Basic Info Card --- */}
             <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20">
                 <InfoItem icon={User} label={t('username')} value={`@${user.username}`} />
-                <InfoItem icon={Users} label={t('gender')} value={user.gender} />
-                <InfoItem icon={Calendar} label={t('memberSince')} value={user.memberSince} />
-            </div>
-
-            {/* --- Contact & Verification Card --- */}
-            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20">
-                <h3 className="text-sm font-semibold mb-2 text-neutral-800">{t('contactVerification')}</h3>
-                <InfoItem icon={Phone} label={t('phone')} value={user.phone} />
-                <InfoItem icon={Mail} label={t('email')} value={user.email} />
-                <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center">
-                        <ShieldCheck className="h-5 w-5 text-neutral-500 mr-3" />
-                        <span className="text-sm text-neutral-600">{t('idVerification')}</span>
-                    </div>
-                    <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${user.idVerified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {user.idVerified ? t('verified') : t('notVerified')}
-                    </span>
-                </div>
             </div>
             
             {/* --- Driver Details Card --- */}
@@ -998,16 +980,6 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
                     </button>
                 </div>
                 <InfoItem icon={Car} label={t('vehicle')} value={`${user.car.brand} ${user.car.model} (${user.car.year})`} />
-                <InfoItem icon={FileText} label={t('licensePlate')} value={user.car.plate} />
-                 <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center">
-                        <ShieldCheck className="h-5 w-5 text-neutral-500 mr-3" />
-                        <span className="text-sm text-neutral-600">{t('drivingLicense')}</span>
-                    </div>
-                    <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${user.licenseVerified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {user.licenseVerified ? t('verified') : t('notVerified')}
-                    </span>
-                </div>
             </div>
 
             {/* --- Activity & History --- */}
@@ -1030,13 +1002,6 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
                 <SettingsItem icon={Bell} label={t('notifications')} value="" action={() => handleOpenSettings(t('notifications'), <div className="p-4">Notification settings</div>)} />
                 <SettingsItem icon={CreditCard} label={t('paymentMethods')} value="" action={() => handleOpenSettings(t('paymentMethods'), <div className="p-4">Payment methods</div>)} />
                 <SettingsItem icon={Shield} label={t('privacy')} value="" action={() => handleOpenSettings(t('privacy'), <div className="p-4">Privacy settings</div>)} />
-            </div>
-
-            {/* --- Security --- */}
-            <div className="bg-white/80 backdrop-blur-sm p-2 rounded-2xl shadow-lg border border-white/20">
-                <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('security')}</h3>
-                <SettingsItem icon={Lock} label={t('changePassword')} value="" action={() => handleOpenSettings(t('changePassword'), <div className="p-4">Change password form</div>)} />
-                <SettingsItem icon={LogOut} label={t('logout')} value="" action={() => handleOpenSettings(t('logout'), <div className="p-4">Logout confirmation</div>)} />
             </div>
         </div>
     );
