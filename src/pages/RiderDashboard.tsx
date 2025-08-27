@@ -23,7 +23,7 @@ const uzbekistanLocationsData = [
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { weekday: 'short', month: 'short', day: 'numeric' };
+  const options = { weekday: 'short' as const, month: 'short' as const, day: 'numeric' as const };
   return date.toLocaleDateString('en-US', options);
 };
 
@@ -31,7 +31,7 @@ const formatDate = (dateString) => {
 const formatTime = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
+  const options = { hour: '2-digit' as const, minute: '2-digit' as const, hourCycle: 'h23' as const }; // 24-hour format
   return date.toLocaleTimeString('en-US', options);
 };
 
@@ -757,7 +757,20 @@ const App = () => {
         {renderContent()}
       </main>
 
-      {pickupLocation && destinationLocation && pickupDate && !showSearchResults && (<div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40"><button className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300 shadow-xl transform hover:scale-105" onClick={() => setShowSearchResults(true)}>See my results</button></div>)}
+      {!showSearchResults && (
+        <div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40">
+          <button 
+            className={`w-full py-3 rounded-lg font-semibold transition duration-300 shadow-xl transform hover:scale-105 ${
+              pickupLocation && destinationLocation && pickupDate 
+                ? 'bg-green-500 text-white hover:bg-green-600' 
+                : 'bg-gray-300 text-gray-600 hover:bg-gray-400'
+            }`} 
+            onClick={() => setShowSearchResults(true)}
+          >
+            Continue
+          </button>
+        </div>
+      )}
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50">
         <div className="flex justify-around items-center h-16">
@@ -828,7 +841,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
             <div className="bg-white text-gray-800 p-4 flex-shrink-0 border-b border-neutral-200">
                  <div className="flex items-center">
                     <button onClick={onBack} className="mr-3 text-gray-600 hover:text-gray-800"><ChevronLeft size={24} /></button>
-                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4" onError={(e) => e.target.src = 'https://placehold.co/200x150/E2E8F0/4A5568?text=Image+Error'}/>
+                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4" onError={(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/200x150/E2E8F0/4A5568?text=Image+Error'}/>
                     <div className="flex items-stretch w-full">
                         <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
                             <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-neutral-300 rounded-full"></div>
@@ -883,7 +896,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
                         </AccordionItem>
                          <AccordionItem icon={<User className="text-gray-600" />} title="Driver & Car" value="">
                             <div className="flex space-x-4">
-                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full" onError={(e) => e.target.src = 'https://placehold.co/100x100/E2E8F0/4A5568?text=N/A'}/>
+                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full" onError={(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/100x100/E2E8F0/4A5568?text=N/A'}/>
                                 <div>
                                     <p className="font-semibold">{ride.driverName}</p>
                                     <div className="flex items-center text-sm text-gray-600">
