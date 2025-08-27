@@ -450,29 +450,19 @@ const App = () => {
           variant: 'destructive'
         });
       } else {
-        // Transform database data to match expected UI structure
+        // Transform database data to show only required information
         const transformedRides = data.map(ride => ({
           id: ride.id,
-          driverName: ride.username,
-          driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=' + ride.username.charAt(0).toUpperCase(),
-          reliabilityStars: 4.5, // Default rating
-          carModel: 'Chevrolet Cobalt', // Default car
-          carYear: 2022,
-          imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Car',
-          plateNumber: { locationCode: '01', series: 'A', serialNumber: '123BC' },
-          origin: ride.departure_location,
-          destination: ride.destination_location,
-          originDate: `${ride.departure_date}T${ride.departure_time || '09:00:00'}`,
-          destinationDate: `${ride.departure_date}T${ride.departure_time || '09:00:00'}`,
-          estimatedMiles: '200 mi',
-          tripTime: '4h 0m',
-          sitsAvailable: ride.available_seats.toString(),
-          basePrice: ride.ride_price || 0,
-          avgFuelPerMile: '$0.85/mi',
-          serviceType: ride.mail_option === 'yes' ? 'both' : 'rider',
-          mailPayout: ride.mail_option === 'yes' ? `$${ride.mail_price || 25}` : null,
-          ratePerMail: 'per mail',
-          specialServices: ride.mail_option === 'yes' ? ['Mail delivery'] : []
+          username: ride.username,
+          departure_location: ride.departure_location,
+          destination_location: ride.destination_location,
+          departure_date: ride.departure_date,
+          departure_time: ride.departure_time,
+          departure_type: ride.departure_type,
+          mail_option: ride.mail_option,
+          available_seats: ride.available_seats,
+          ride_price: ride.ride_price || 0,
+          mail_price: ride.mail_price || 0
         }));
         setAvailableRides(transformedRides);
       }
@@ -489,26 +479,16 @@ const App = () => {
           const newRide = payload.new;
           const transformedRide = {
             id: newRide.id,
-            driverName: newRide.username,
-            driverImageUrl: 'https://placehold.co/100x100/E2E8F0/4A5568?text=' + newRide.username.charAt(0).toUpperCase(),
-            reliabilityStars: 4.5,
-            carModel: 'Chevrolet Cobalt',
-            carYear: 2022,
-            imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Car',
-            plateNumber: { locationCode: '01', series: 'A', serialNumber: '123BC' },
-            origin: newRide.departure_location,
-            destination: newRide.destination_location,
-            originDate: `${newRide.departure_date}T${newRide.departure_time || '09:00:00'}`,
-            destinationDate: `${newRide.departure_date}T${newRide.departure_time || '09:00:00'}`,
-            estimatedMiles: '200 mi',
-            tripTime: '4h 0m',
-            sitsAvailable: newRide.available_seats.toString(),
-            basePrice: newRide.ride_price || 0,
-            avgFuelPerMile: '$0.85/mi',
-            serviceType: newRide.mail_option === 'yes' ? 'both' : 'rider',
-            mailPayout: newRide.mail_option === 'yes' ? `$${newRide.mail_price || 25}` : null,
-            ratePerMail: 'per mail',
-            specialServices: newRide.mail_option === 'yes' ? ['Mail delivery'] : []
+            username: newRide.username,
+            departure_location: newRide.departure_location,
+            destination_location: newRide.destination_location,
+            departure_date: newRide.departure_date,
+            departure_time: newRide.departure_time,
+            departure_type: newRide.departure_type,
+            mail_option: newRide.mail_option,
+            available_seats: newRide.available_seats,
+            ride_price: newRide.ride_price || 0,
+            mail_price: newRide.mail_price || 0
           };
           setAvailableRides(prev => [transformedRide, ...prev]);
         })
@@ -712,58 +692,61 @@ const App = () => {
               <div className="flex-grow overflow-y-auto bg-[#F8F8F8]">
                 <div className="p-4 space-y-4">
                     {results.map(item => (
-                      <div key={item.id} onClick={() => setSelectedRide(item)} className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 text-left relative cursor-pointer hover:shadow-xl transition-shadow">
-                        <button onClick={(e) => { e.stopPropagation(); handleSaveRide(item.id); }} className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition-colors">
-                            <Bookmark size={20} className="text-gray-500 hover:text-green-600" fill={savedRides.includes(item.id) ? '#10B981' : 'none'} />
-                        </button>
-                        <div className="flex flex-col sm:flex-row justify-between items-start mb-3">
-                          <div className="flex flex-col">
-                            <div className="flex items-center mb-2">
-                                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
-                                    <User size={24} className="text-gray-600" />
-                                </div>
-                                <p className="font-semibold text-gray-800 text-lg">{item.driverName}</p>
+                      <div key={item.id} onClick={() => handleBookClick(item)} className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 text-left cursor-pointer hover:shadow-xl transition-shadow">
+                        <div className="space-y-3">
+                          {/* Username */}
+                          <div className="flex items-center">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                              <User size={20} className="text-gray-600" />
                             </div>
-                            <div className="flex items-center space-x-2 text-sm text-gray-800 mb-2">
-                                <Car size={16} className="text-gray-600" />
-                                <span>{item.carYear} {item.carModel}</span>
-                            </div>
-                            <PlateNumber plate={item.plateNumber} />
+                            <p className="font-semibold text-gray-800 text-lg">{item.username}</p>
                           </div>
-                          <div className="text-right mt-2 sm:mt-0 sm:mr-10">
-                            <div className="text-2xl font-bold text-green-700 flex items-center justify-end">
-                                {activeFilter === 'mail' ? item.mailPayout : `$${calculatePayout(item.basePrice).toFixed(2)}`}
+
+                          {/* Route */}
+                          <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2 flex-1">
+                              <MapPin size={16} className="text-green-600" />
+                              <span className="text-gray-800 font-medium">{item.departure_location}</span>
                             </div>
-                            <div className="text-sm text-gray-600">
-                                {activeFilter === 'mail' ? item.ratePerMail : item.avgFuelPerMile}
+                            <div className="text-gray-400">→</div>
+                            <div className="flex items-center space-x-2 flex-1">
+                              <Target size={16} className="text-red-600" />
+                              <span className="text-gray-800 font-medium">{item.destination_location}</span>
                             </div>
                           </div>
-                        </div>
 
-                        <div className="flex items-stretch mt-4">
-                            <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
-                                <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-gray-300 rounded-full"></div>
-                                <MapPin size={20} className="text-green-600 bg-white z-10" />
-                                <Target size={20} className="text-red-600 bg-white z-10" />
-                            </div>
-                            <div className="flex flex-col justify-between w-full">
-                                <div className="mb-4">
-                                    <p className="font-semibold text-gray-800 text-base">{item.origin}</p>
-                                    <p className="text-gray-600 text-sm">{formatDate(item.originDate)} {formatTime(item.originDate)}</p>
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-gray-800 text-base">{item.destination}</p>
-                                    <p className="text-gray-600 text-sm">{formatDate(item.destinationDate)} {formatTime(item.destinationDate)}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-gray-700 text-sm mt-3">
+                          {/* Date and Ride Type */}
+                          <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
-                                <span>{item.estimatedMiles}</span><span className="mx-1">•</span><span>{item.tripTime}</span>
+                              <Calendar size={16} className="text-gray-600" />
+                              <span className="text-gray-700">{formatDate(item.departure_date)}</span>
+                              {item.departure_type === 'time' && item.departure_time && (
+                                <span className="text-gray-700">at {item.departure_time}</span>
+                              )}
+                              {item.departure_type === 'sit_to_go' && (
+                                <span className="text-blue-600 font-medium">Sit & Go</span>
+                              )}
                             </div>
-                            <SeatAvailability count={item.sitsAvailable} />
-                            <button onClick={(e) => {e.stopPropagation(); handleBookClick(item);}} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-600 transition duration-200 shadow">Book</button>
+                          </div>
+
+                          {/* Mail Option, Seats, Price */}
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center space-x-4">
+                              {item.mail_option === 'yes' && (
+                                <div className="flex items-center space-x-1 text-blue-600">
+                                  <Mail size={16} />
+                                  <span>Mail: ${item.mail_price}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center space-x-1 text-gray-600">
+                                <Users size={16} />
+                                <span>{item.available_seats} seats</span>
+                              </div>
+                            </div>
+                            <div className="text-xl font-bold text-green-600">
+                              ${item.ride_price}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
