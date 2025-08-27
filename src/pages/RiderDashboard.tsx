@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info, Car, MessageCircle, Send, Plus, Minus } from 'lucide-react';
 
 // Expanded Data for Uzbekistan Regions and Cities - ALL 14 REGIONS INCLUDED
@@ -25,7 +23,7 @@ const uzbekistanLocationsData = [
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+  const options = { weekday: 'short', month: 'short', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
 };
 
@@ -33,7 +31,7 @@ const formatDate = (dateString) => {
 const formatTime = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
+  const options = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
   return date.toLocaleTimeString('en-US', options);
 };
 
@@ -430,88 +428,30 @@ const App = () => {
   const [rideHistory, setRideHistory] = useState([]);
   const [isBooking, setIsBooking] = useState(false);
   const [rideToBook, setRideToBook] = useState(null);
-  const [availableRides, setAvailableRides] = useState([]);
-  const { toast } = useToast();
-
-  // Fetch available rides from database
-  useEffect(() => {
-    const fetchRides = async () => {
-      const { data, error } = await supabase
-        .from('rides')
-        .select('*')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching rides:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load rides. Please try again.',
-          variant: 'destructive'
-        });
-      } else {
-        // Transform database data to show only required information
-        const transformedRides = data.map(ride => ({
-          id: ride.id,
-          username: ride.username,
-          departure_location: ride.departure_location,
-          destination_location: ride.destination_location,
-          departure_date: ride.departure_date,
-          departure_time: ride.departure_time,
-          departure_type: ride.departure_type,
-          mail_option: ride.mail_option,
-          available_seats: ride.available_seats,
-          ride_price: ride.ride_price || 0,
-          mail_price: ride.mail_price || 0
-        }));
-        setAvailableRides(transformedRides);
-      }
-    };
-
-    fetchRides();
-    
-    // Set up real-time subscription for new rides
-    const subscription = supabase
-      .channel('rides-changes')
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'rides' },
-        (payload) => {
-          const newRide = payload.new;
-          const transformedRide = {
-            id: newRide.id,
-            username: newRide.username,
-            departure_location: newRide.departure_location,
-            destination_location: newRide.destination_location,
-            departure_date: newRide.departure_date,
-            departure_time: newRide.departure_time,
-            departure_type: newRide.departure_type,
-            mail_option: newRide.mail_option,
-            available_seats: newRide.available_seats,
-            ride_price: newRide.ride_price || 0,
-            mail_price: newRide.mail_price || 0
-          };
-          setAvailableRides(prev => [transformedRide, ...prev]);
-        })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(subscription);
-    };
-  }, []);
+  // Use the initial dummy data directly, as Supabase is not available in this environment.
+  const [availableRides, setAvailableRides] = useState(initialDummySearchResults);
 
   const handleBookClick = (ride) => {
     setRideToBook(ride);
     setIsBooking(true);
   };
+  
+  const handleCardClick = (ride) => {
+      setSelectedRide(ride);
+  }
 
   const handleConfirmBooking = (bookedRide, seats) => {
     const newBooking = { ...bookedRide, seatsBooked: seats, bookingDate: new Date().toISOString() };
     setRideHistory(prev => [newBooking, ...prev]);
+    // Simulate booking by removing the ride from the available list
     setAvailableRides(prev => prev.filter(r => r.id !== bookedRide.id));
     
     setIsBooking(false);
     setRideToBook(null);
-    setSelectedRide(null);
+    setSelectedRide(null); // Go back to the search results after booking
+    
+    // A simple confirmation alert. In a real app, use a toast notification.
+    console.log(`Booking confirmed for ${seats} seat(s) on ride #${bookedRide.id}!`);
   };
 
   const handleFilterClick = (filterType) => {
@@ -571,16 +511,16 @@ const App = () => {
               <div className="space-y-4">
                 {rideHistory.map(ride => (
                   <div key={`${ride.id}-${ride.bookingDate}`} className="bg-white p-4 rounded-xl shadow-lg border">
-                     <div className="flex justify-between items-start">
-                        <div>
-                            <p className="font-semibold text-lg">{ride.origin} to {ride.destination}</p>
-                            <p className="text-sm text-gray-600">Booked on: {formatDate(ride.bookingDate)}</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="font-bold text-lg text-green-600">${(ride.basePrice * ride.seatsBooked).toFixed(2)}</p>
-                            <p className="text-sm text-gray-600">{ride.seatsBooked} seat(s)</p>
-                        </div>
-                     </div>
+                       <div className="flex justify-between items-start">
+                           <div>
+                               <p className="font-semibold text-lg">{ride.origin} to {ride.destination}</p>
+                               <p className="text-sm text-gray-600">Booked on: {formatDate(ride.bookingDate)}</p>
+                           </div>
+                           <div className="text-right">
+                               <p className="font-bold text-lg text-green-600">${(ride.basePrice * ride.seatsBooked).toFixed(2)}</p>
+                               <p className="text-sm text-gray-600">{ride.seatsBooked} seat(s)</p>
+                           </div>
+                       </div>
                   </div>
                 ))}
               </div>
@@ -596,6 +536,7 @@ const App = () => {
         if (showSearchResults) {
           let results = [...availableRides];
 
+          // Filtering logic
           if (activeFilter === 'saved') {
             results = results.filter(ride => savedRides.includes(ride.id));
           } else if (activeFilter === 'recommended') {
@@ -611,6 +552,7 @@ const App = () => {
             });
           }
 
+          // Sorting logic
           if (activeSort === 'by_time') {
             results.sort((a, b) => new Date(a.originDate).getTime() - new Date(b.originDate).getTime());
           } else if (activeSort === 'by_seat') {
@@ -692,59 +634,52 @@ const App = () => {
               <div className="flex-grow overflow-y-auto bg-[#F8F8F8]">
                 <div className="p-4 space-y-4">
                     {results.map(item => (
-                      <div key={item.id} onClick={() => handleBookClick(item)} className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 text-left cursor-pointer hover:shadow-xl transition-shadow">
+                      <div key={item.id} onClick={() => handleCardClick(item)} className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 text-left cursor-pointer hover:shadow-xl transition-shadow">
                         <div className="space-y-3">
-                          {/* Username */}
+                          {/* Driver Name */}
                           <div className="flex items-center">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
-                              <User size={20} className="text-gray-600" />
-                            </div>
-                            <p className="font-semibold text-gray-800 text-lg">{item.username}</p>
+                            <img src={item.driverImageUrl} alt={item.driverName} className="w-8 h-8 rounded-full object-cover mr-3" />
+                            <p className="font-semibold text-gray-800 text-lg">{item.driverName}</p>
                           </div>
 
                           {/* Route */}
                           <div className="flex items-center space-x-3">
                             <div className="flex items-center space-x-2 flex-1">
                               <MapPin size={16} className="text-green-600" />
-                              <span className="text-gray-800 font-medium">{item.departure_location}</span>
+                              <span className="text-gray-800 font-medium">{item.origin}</span>
                             </div>
                             <div className="text-gray-400">→</div>
                             <div className="flex items-center space-x-2 flex-1">
                               <Target size={16} className="text-red-600" />
-                              <span className="text-gray-800 font-medium">{item.destination_location}</span>
+                              <span className="text-gray-800 font-medium">{item.destination}</span>
                             </div>
                           </div>
 
-                          {/* Date and Ride Type */}
+                          {/* Date and Time */}
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
                               <Calendar size={16} className="text-gray-600" />
-                              <span className="text-gray-700">{formatDate(item.departure_date)}</span>
-                              {item.departure_type === 'time' && item.departure_time && (
-                                <span className="text-gray-700">at {item.departure_time}</span>
-                              )}
-                              {item.departure_type === 'sitToGo' && (
-                                <span className="text-blue-600 font-medium">Sit & Go</span>
-                              )}
+                              <span className="text-gray-700">{formatDate(item.originDate)}</span>
+                              <span className="text-gray-700">at {formatTime(item.originDate)}</span>
                             </div>
                           </div>
 
-                          {/* Mail Option, Seats, Price */}
-                          <div className="flex items-center justify-between text-sm">
+                          {/* Seats and Price */}
+                          <div className="flex items-center justify-between text-sm pt-2 border-t mt-2">
                             <div className="flex items-center space-x-4">
-                              {item.mail_option === 'yes' && (
-                                <div className="flex items-center space-x-1 text-blue-600">
-                                  <Mail size={16} />
-                                  <span>Mail: ${item.mail_price}</span>
+                                { (item.serviceType === 'mail' || item.serviceType === 'both') && (
+                                    <div className="flex items-center space-x-1 text-blue-600">
+                                        <Mail size={16} />
+                                        <span>Mail: {item.mailPayout}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center space-x-1 text-gray-600">
+                                    <Users size={16} />
+                                    <span>{item.sitsAvailable}</span>
                                 </div>
-                              )}
-                              <div className="flex items-center space-x-1 text-gray-600">
-                                <Users size={16} />
-                                <span>{item.available_seats} seats</span>
-                              </div>
                             </div>
                             <div className="text-xl font-bold text-green-600">
-                              ${item.ride_price}
+                                ${item.basePrice.toFixed(2)}
                             </div>
                           </div>
                         </div>
@@ -780,6 +715,18 @@ const App = () => {
                         <Calendar className="h-5 w-5 text-neutral-500" />
                     </button>
                 </div>
+                
+                <div className="pt-4 border-t border-neutral-200">
+                    <p className="text-left font-semibold text-gray-700 mb-2">How many seats?</p>
+                    <div className="flex items-center justify-center space-x-4">
+                        {[1, 2, 3, 4].map(num => (
+                            <button key={num} onClick={() => handleSeatsNeededClick(num)} className={`w-12 h-12 rounded-full text-md font-semibold transition-colors flex items-center justify-center ${seatsNeeded === num ? 'bg-green-500 text-white' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                {num}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
               </div>
               <p className="mt-6 text-gray-700 font-medium">Ready to hit the road? Let's find your perfect ride!</p>
             </div>
@@ -881,7 +828,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
             <div className="bg-white text-gray-800 p-4 flex-shrink-0 border-b border-neutral-200">
                  <div className="flex items-center">
                     <button onClick={onBack} className="mr-3 text-gray-600 hover:text-gray-800"><ChevronLeft size={24} /></button>
-                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4" onError={(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/200x150/E2E8F0/4A5568?text=Image+Error'}/>
+                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4" onError={(e) => e.target.src = 'https://placehold.co/200x150/E2E8F0/4A5568?text=Image+Error'}/>
                     <div className="flex items-stretch w-full">
                         <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
                             <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-neutral-300 rounded-full"></div>
@@ -936,7 +883,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
                         </AccordionItem>
                          <AccordionItem icon={<User className="text-gray-600" />} title="Driver & Car" value="">
                             <div className="flex space-x-4">
-                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full" onError={(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/100x100/E2E8F0/4A5568?text=N/A'}/>
+                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full" onError={(e) => e.target.src = 'https://placehold.co/100x100/E2E8F0/4A5568?text=N/A'}/>
                                 <div>
                                     <p className="font-semibold">{ride.driverName}</p>
                                     <div className="flex items-center text-sm text-gray-600">
