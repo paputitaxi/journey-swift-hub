@@ -37,17 +37,14 @@ const Welcome = () => {
     }
     setChecking(true);
     try {
-      const { count, error: countError } = await supabase
-        .from('usernames')
-        .select('id', { count: 'exact', head: true })
-        .eq('username', username);
-      if (countError) throw countError;
-      if ((count || 0) > 0) {
-        toast({ title: 'Username taken', description: 'Try another one.', variant: 'destructive' });
-        return;
-      }
       const { error: insertError } = await supabase.from('usernames').insert([{ username }]);
-      if (insertError) throw insertError;
+      if (insertError) {
+        if (insertError.code === '23505') {
+          toast({ title: 'Username taken', description: 'Try another one.', variant: 'destructive' });
+          return;
+        }
+        throw insertError;
+      }
       localStorage.setItem('username', username);
       toast({ title: 'Username saved', description: `Hello, ${username}!` });
       setStep('role');
