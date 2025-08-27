@@ -587,9 +587,6 @@ const App = () => {
                   <div className="flex flex-col gap-4">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                           <div className="flex items-center space-x-2 flex-wrap gap-2">
-                              <button onClick={() => setActiveSort(null)} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === null ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                                  <span>All</span>
-                              </button>
                               <button onClick={() => handleSortClick('by_seat')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'by_seat' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
                                   <Users size={16} />
                                   <span>By seat</span>
