@@ -12,6 +12,8 @@ import Welcome from "./pages/Welcome";
 import DriverDashboard from "./pages/DriverDashboard";
 import RiderDashboard from "./pages/RiderDashboard";
 import ChatWidget from "./components/ChatWidget";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -28,9 +30,12 @@ const AppContent = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Welcome />} />
-        <Route path="/driver-dashboard" element={<DriverDashboard />} />
-        <Route path="/rider-dashboard" element={<RiderDashboard />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Welcome />} />
+          <Route path="/driver-dashboard" element={<DriverDashboard />} />
+          <Route path="/rider-dashboard" element={<RiderDashboard />} />
+        </Route>
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
