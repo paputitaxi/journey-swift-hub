@@ -1218,7 +1218,6 @@ const AppContent = () => {
   useEffect(() => {
     switch (activeTab) {
       case "dashboard": setHeaderTitle(t('ride')); break;
-      case "my-lines": setHeaderTitle(t('myLines')); break;
       case "profile": setHeaderTitle(t('profile')); break;
       default: setHeaderTitle("Driver");
     }
@@ -1229,7 +1228,6 @@ const AppContent = () => {
 
   const bottomNavItems = [
     { id: "dashboard", label: t('ride'), icon: MapPin },
-    { id: "my-lines", label: t('myLines'), icon: Navigation },
     { id: "profile", label: t('profile'), icon: User },
   ];
 
@@ -1397,39 +1395,6 @@ const AppContent = () => {
                 {renderActiveRideContent()}
               </div>
           </div>
-        </div>
-      );
-      case "my-lines": return (
-        <div className="p-4 text-gray-800 font-sans space-y-4 pb-20">
-            {myRides.filter(r => r.status === 'upcoming').length > 0 ? (
-                myRides.filter(r => r.status === 'upcoming').map(ride => (
-                    <div 
-                      key={ride.id} 
-                      onClick={() => handleEditRideClick(ride)}
-                      className="p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg mb-4 cursor-pointer hover:shadow-xl transition-shadow duration-200"
-                    >
-                      <div className="flex justify-between items-center text-sm">
-                         <div className="flex flex-col space-y-1">
-                            <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> {ride.fromLocation} </div>
-                            <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> {ride.toLocation} </div>
-                            <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> {ride.departureDate} {ride.departureTime && <><Clock className="h-4 w-4 mx-2" /> {ride.departureTime}</>} </div>
-                          </div>
-                         
-                          <SeatIndicator totalSeats={ride.totalSeats} availableSeats={ride.freeSeats} />
-
-                          <div className="flex flex-col items-end space-y-2">
-                            <span className="text-xl font-bold text-gray-800">${ride.price}</span>
-                            <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full">{t('active')}</span>
-                          </div>
-                      </div>
-                    </div>
-                ))
-            ) : (
-                <div className="text-center p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow">
-                    <p className="text-gray-600 mb-2">{t('noLines')}</p>
-                    <p className="text-sm text-gray-500">{t('postRidePrompt')}</p>
-                </div>
-            )}
         </div>
       );
       case "profile": return ( <ProfilePage user={{...userData, language}} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} myRides={myRides} /> );
