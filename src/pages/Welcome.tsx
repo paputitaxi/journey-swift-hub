@@ -37,20 +37,62 @@ const Welcome = () => {
     }
     setChecking(true);
     try {
-      const { error: insertError } = await supabase.from('usernames').insert([{ username }]);
-      if (insertError) {
-        if (insertError.code === '23505') {
-          toast({ title: 'Username taken', description: 'Try another one.', variant: 'destructive' });
+      // Check if username already exists
+      const { data: existingUser, error: checkError } = await supabase
+        .from('usernames')
+        .select('username')
+        .eq('username', username)
+        .maybeSingle();
+      
+      if (checkError) throw checkError;
+
+      const internalEmail = `${username}@internal.app`;
+      const defaultPassword = 'username-auth-2024';
+
+      if (existingUser) {
+        // Username exists, sign in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: internalEmail,
+          password: defaultPassword
+        });
+        
+        if (signInError) {
+          toast({ title: 'Error signing in', description: signInError.message, variant: 'destructive' });
           return;
         }
-        throw insertError;
+        
+        toast({ title: 'Welcome back', description: `Hello, ${username}!` });
+      } else {
+        // Username doesn't exist, create new account
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: internalEmail,
+          password: defaultPassword,
+          options: {
+            data: { username },
+            emailRedirectTo: `${window.location.origin}/`
+          }
+        });
+        
+        if (signUpError) {
+          toast({ title: 'Error creating account', description: signUpError.message, variant: 'destructive' });
+          return;
+        }
+
+        // Insert username record
+        const { error: insertError } = await supabase.from('usernames').insert([{ username }]);
+        if (insertError) {
+          toast({ title: 'Error saving username', description: insertError.message, variant: 'destructive' });
+          return;
+        }
+
+        toast({ title: 'Account created', description: `Welcome, ${username}!` });
       }
+
       localStorage.setItem('username', username);
-      toast({ title: 'Username saved', description: `Hello, ${username}!` });
       setStep('role');
     } catch (e) {
       console.error(e);
-      toast({ title: 'Error', description: 'Could not save username. Try again.', variant: 'destructive' });
+      toast({ title: 'Error', description: 'Could not process username. Try again.', variant: 'destructive' });
     } finally {
       setChecking(false);
     }
