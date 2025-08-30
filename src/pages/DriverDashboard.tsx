@@ -47,7 +47,7 @@ const useToast = () => {
 // --- i18n Translations ---
 const translations = {
   en: {
-    ride: "Ride", newRide: "New Ride", myLines: "My Lines", profile: "Profile",
+    ride: "Ride", newRide: "New Ride", myLines: "My Lines", profile: "Profile", history: "History",
     totalEarnings: "Total Earnings", stats: "Statistics", safety: "Safety", yourActivity: "Your Activity",
     noLines: "No Lines Posted Yet", postRidePrompt: "Post a new ride to see it here.", active: "Active",
     postNewRide: "Post a New Ride", fromWhere: "From where", toWhere: "To where", departureDate: "Departure date",
@@ -81,9 +81,10 @@ const translations = {
     finishRide: "Finish Ride",
     areYouSureFinish: "Are you sure you want to finish the ride?",
     yesFinish: "Yes, Finish",
+    rideDetails: "Ride Details",
   },
   uz: {
-    ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil",
+    ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil", history: "Tarix",
     totalEarnings: "Jami daromad", stats: "Statistika", safety: "Xavfsizlik", yourActivity: "Sizning faoliyatingiz",
     noLines: "Hali e'lonlar joylanmagan", postRidePrompt: "Bu yerda ko'rish uchun yangi e'lon joylashtiring.", active: "Faol",
     postNewRide: "Yangi e'lon joylash", fromWhere: "Qayerdan", toWhere: "Qayerga", departureDate: "Jo'nash sanasi",
@@ -117,9 +118,10 @@ const translations = {
     finishRide: "Sayohatni yakunlash",
     areYouSureFinish: "Sayohatni yakunlashga ishonchingiz komilmi?",
     yesFinish: "Ha, yakunlash",
+    rideDetails: "Sayohat tafsilotlari",
   },
   ru: {
-    ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль",
+    ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль", history: "История",
     totalEarnings: "Общий заработок", stats: "Статистика", safety: "Безопасность", yourActivity: "Ваша активность",
     noLines: "Поездки еще не опубликованы", postRidePrompt: "Опубликуйте новую поездку, чтобы увидеть ее здесь.", active: "Активна",
     postNewRide: "Опубликовать новую поездку", fromWhere: "Откуда", toWhere: "Куда", departureDate: "Дата отправления",
@@ -134,7 +136,7 @@ const translations = {
     reviews: "отзывов", rides: "поездок", username: "Имя пользователя", gender: "Пол", memberSince: "На сайте с",
     contactVerification: "Контакт и верификация", phone: "Номер телефона", email: "Электронная почта", idVerification: "Подтверждение личности",
     verified: "Подтверждено", notVerified: "Не подтверждено", driverDetails: "Данные водителя", vehicle: "Автомобиль",
-    licensePlate: "Гос. номер", drivingLicense: "Водительское удостоверение", activity: "Активность", history: "История поездок",
+    licensePlate: "Гос. номер", drivingLicense: "Водительское удостоверение", activity: "Активность", rideHistory: "История поездок",
     upcomingRides: "Предстоящие поездки", settings: "Настройки", language: "Язык", notifications: "Настройки уведомлений",
     paymentMethods: "Способы оплаты", privacy: "Конфиденциальность", security: "Безопасность", changePassword: "Изменить пароль",
     logout: "Выйти", editProfile: "Редактировать профиль", fullName: "Полное имя", saveChanges: "Сохранить изменения",
@@ -153,6 +155,7 @@ const translations = {
     finishRide: "Завершить поездку",
     areYouSureFinish: "Вы уверены, что хотите завершить поездку?",
     yesFinish: "Да, завершить",
+    rideDetails: "Детали поездки",
   },
 };
 
@@ -796,6 +799,89 @@ const SeatIndicator = ({ totalSeats = 4, availableSeats }) => {
   );
 };
 
+// --- Ride Detail Modal ---
+const RideDetailModal = ({ ride, isOpen, onClose }) => {
+    const { t } = useLanguage();
+    const [selectedPassenger, setSelectedPassenger] = useState(null);
+    const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
+
+    const handlePassengerClick = (passenger, e) => {
+      e.stopPropagation();
+      const rect = e.currentTarget.getBoundingClientRect();
+      setPopoverPosition({
+          top: rect.bottom + window.scrollY + 5,
+          left: rect.left + window.scrollX,
+      });
+      setSelectedPassenger(passenger);
+    };
+
+
+    if (!isOpen || !ride) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans" onClick={() => setSelectedPassenger(null)}>
+            {selectedPassenger && (
+              <div 
+                  className="fixed bg-white rounded-xl shadow-2xl z-50 p-2 space-y-1"
+                  style={{ top: popoverPosition.top, left: popoverPosition.left }}
+              >
+                  <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-neutral-100 rounded-lg"><Phone className="h-4 w-4 mr-2"/>{t('call')}</button>
+                  <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-neutral-100 rounded-lg"><Send className="h-4 w-4 mr-2"/>{t('message')}</button>
+              </div>
+            )}
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+                <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">{t('rideDetails')}</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100">
+                        <X className="h-6 w-6" />
+                    </button>
+                </div>
+                <div className="p-4 space-y-4 overflow-y-auto custom-scrollbar">
+                    {/* Ride Details */}
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <div className="flex items-center text-lg font-bold text-gray-800"><MapPin className="h-5 w-5 mr-2 text-green-600" />{ride.fromLocation}</div>
+                            <div className="flex items-center text-lg font-bold text-gray-800 mt-1"><MapPin className="h-5 w-5 mr-2 text-red-600" />{ride.toLocation}</div>
+                        </div>
+                        <span className="text-3xl font-bold text-gray-800">${ride.price}</span>
+                    </div>
+                    <div className="border-t border-neutral-200/50"></div>
+                    <div className="flex justify-between items-center text-sm text-neutral-600">
+                        <div className="flex items-center"><Calendar className="h-5 w-5 mr-2" /><span>{ride.departureDate}</span></div>
+                        {ride.departureTime && (<div className="flex items-center"><Clock className="h-5 w-5 mr-2" /><span>{ride.departureTime}</span></div>)}
+                    </div>
+                    <div className="flex justify-between items-center text-sm text-neutral-600">
+                        <div className="flex items-center"><Mail className="h-5 w-5 mr-2" /><span>{ride.mailService === 'yes' ? t('yesCarryMail') : t('noCarryMail')}</span></div>
+                        <div className="flex items-center">{ride.departureType === 'fixed' ? <Clock className="h-5 w-5 mr-2" /> : <Users className="h-5 w-5 mr-2" />}<span>{ride.departureType === 'fixed' ? t('fixedDeparture') : t('whenFills')}</span></div>
+                    </div>
+                    <div className="flex items-center text-sm text-neutral-600"><div className="flex items-center"><Car className="h-5 w-5 mr-2" /><span>{ride.carType}</span></div></div>
+                    
+                    {/* Passengers List */}
+                    <div className="border-t border-neutral-200/50"></div>
+                    <div>
+                        <h3 className="text-md font-semibold text-gray-800 mb-2">{t('passengers')}</h3>
+                        <div className="space-y-2">
+                            {ride.passengers && ride.passengers.length > 0 ? (
+                                ride.passengers.map(p => (
+                                    <button key={p.id} onClick={(e) => handlePassengerClick(p, e)} className="w-full flex items-center p-2 bg-neutral-100/50 rounded-lg text-left hover:bg-neutral-200/50 transition-colors">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${p.gender === 'male' ? 'bg-blue-200' : 'bg-green-200'}`}>
+                                            {p.gender === 'male' ? <User className="h-5 w-5 text-blue-800" /> : <UserRound className="h-5 w-5 text-green-800" />}
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-700">{p.name}</span>
+                                    </button>
+                                ))
+                            ) : (
+                                <p className="text-sm text-neutral-500">No passengers on this ride.</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
 // --- Edit Profile Modal ---
 const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
     const { t } = useLanguage();
@@ -913,6 +999,41 @@ const SettingsModal = ({ title, isOpen, onClose, children }) => {
     );
 };
 
+const HistoryPage = ({ rides, onRideClick }) => {
+    const { t } = useLanguage();
+    const completedRides = rides.filter(r => r.status === 'completed');
+
+    if (completedRides.length === 0) {
+        return (
+            <div className="p-4 text-center">
+                <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
+                    <History className="h-12 w-12 mx-auto text-neutral-400" />
+                    <p className="text-gray-600 mt-4 mb-2">{t('noCompletedRides')}</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="p-4 space-y-4 pb-20">
+            {completedRides.map(ride => (
+                <button key={ride.id} onClick={() => onRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                            <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="font-bold text-lg text-green-600">+${ride.price}</p>
+                            <p className="text-xs text-neutral-500">Completed</p>
+                        </div>
+                    </div>
+                </button>
+            ))}
+        </div>
+    );
+};
+
 // --- Profile Page Component ---
 const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
     const { t, language, setLanguage } = useLanguage();
@@ -949,18 +1070,6 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
                 <ChevronRight className="h-5 w-5 text-neutral-400" />
             </div>
         </button>
-    );
-
-    const RideHistoryContent = () => (
-        <div>
-            <h3 className="font-semibold mb-2">{t('pastRides')}</h3>
-            {myRides.filter(r => r.status === 'completed').length > 0 ? myRides.filter(r => r.status === 'completed').map(ride => (
-                <div key={ride.id} className="mb-2 p-2 border-b border-neutral-200/50">
-                    <p>{ride.fromLocation} to {ride.toLocation}</p>
-                    <p className="text-xs text-neutral-500">{ride.departureDate}</p>
-                </div>
-            )) : <p className="text-neutral-500">{t('noCompletedRides')}</p>}
-        </div>
     );
     
     const UpcomingRidesContent = () => (
@@ -1046,7 +1155,6 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
             {/* --- Activity & History --- */}
             <div className="bg-white/80 backdrop-blur-sm p-2 rounded-2xl shadow-lg border border-white/20">
                  <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('activity')}</h3>
-                 <SettingsItem icon={History} label={t('rideHistory')} value="" action={() => handleOpenSettings(t('rideHistory'), <RideHistoryContent />)} />
                  <SettingsItem icon={Calendar} label={t('upcomingRides')} value="" action={() => handleOpenSettings(t('upcomingRides'), <UpcomingRidesContent />)} />
             </div>
 
@@ -1105,6 +1213,8 @@ const AppContent = () => {
   const [isRideInProgress, setIsRideInProgress] = useState(false);
   const [showActiveRideErrorModal, setShowActiveRideErrorModal] = useState(false);
   const [showFinishRideModal, setShowFinishRideModal] = useState(false);
+  const [showHistoryDetailModal, setShowHistoryDetailModal] = useState(false);
+  const [selectedHistoryRide, setSelectedHistoryRide] = useState(null);
 
   useEffect(() => {
     const fetchMyRides = async () => {
@@ -1187,7 +1297,7 @@ const AppContent = () => {
           mail_price: newRide.mailService === 'yes' ? parseFloat(newRide.mailPrice) || 0 : 0,
           available_seats: parseInt(newRide.freeSeats) || 4,
           total_seats: 4,
-          status: 'active',
+          status: 'upcoming', // Rides start as upcoming
           car_type: selectedCar
         })
         .select()
@@ -1201,8 +1311,7 @@ const AppContent = () => {
       }));
       const rideWithId = { ...newRide, id: insertedRide.id, status: "upcoming", passengers: mockPassengers, carType: selectedCar };
       
-      const { data: updatedRides } = await supabase.from('rides').select('*').eq('username', localStorage.getItem('username')).order('created_at', { ascending: false });
-      if (updatedRides) setMyRides(updatedRides);
+      setMyRides(prev => [rideWithId, ...prev]);
       
       setIsSearchingForClients(true);
       setTimeout(() => {
@@ -1240,10 +1349,19 @@ const AppContent = () => {
   
   const confirmFinishRide = () => {
     console.log("Ride Finished!");
-    // Here you would add logic to update ride status in DB
+    setMyRides(prevRides =>
+        prevRides.map(ride =>
+            ride.id === activeRide.id ? { ...ride, status: 'completed' } : ride
+        )
+    );
     setActiveRide(null);
     setIsRideInProgress(false);
     setShowFinishRideModal(false);
+  };
+
+  const handleHistoryRideClick = (ride) => {
+    setSelectedHistoryRide(ride);
+    setShowHistoryDetailModal(true);
   };
 
   const handleBack = () => {
@@ -1258,6 +1376,7 @@ const AppContent = () => {
   useEffect(() => {
     switch (activeTab) {
       case "dashboard": setHeaderTitle(t('ride')); break;
+      case "history": setHeaderTitle(t('history')); break;
       case "profile": setHeaderTitle(t('profile')); break;
       default: setHeaderTitle("Driver");
     }
@@ -1266,6 +1385,7 @@ const AppContent = () => {
 
   const bottomNavItems = [
     { id: "dashboard", label: t('ride'), icon: MapPin },
+    { id: "history", label: t('history'), icon: History },
     { id: "profile", label: t('profile'), icon: User },
   ];
 
@@ -1393,6 +1513,7 @@ const AppContent = () => {
           </div>
         </div>
       );
+      case "history": return <HistoryPage rides={myRides} onRideClick={handleHistoryRideClick} />;
       case "profile": return ( <ProfilePage user={{...userData, language}} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} myRides={myRides} /> );
       default: return null;
     }
@@ -1471,6 +1592,13 @@ const AppContent = () => {
           </div>
         </div>
       )}
+       {showHistoryDetailModal && (
+        <RideDetailModal 
+            isOpen={showHistoryDetailModal}
+            onClose={() => setShowHistoryDetailModal(false)}
+            ride={selectedHistoryRide}
+        />
+    )}
     </div>
   );
 };
