@@ -1162,7 +1162,8 @@ const AppContent = () => {
           mail_price: newRide.mailService === 'yes' ? parseFloat(newRide.mailPrice) || 0 : 0,
           available_seats: parseInt(newRide.freeSeats) || 4,
           total_seats: 4,
-          status: 'active'
+          status: 'active',
+          car_type: selectedCar // Automatically add the selected car type
         })
         .select()
         .single();
@@ -1192,6 +1193,7 @@ const AppContent = () => {
           id: insertedRide.id, 
           status: "upcoming",
           passengers: mockPassengers,
+          carType: selectedCar // Add carType to the local state object
       };
       
       // Refresh rides data from database
@@ -1372,6 +1374,12 @@ const AppContent = () => {
                               {activeRide.departureType === 'fixed' ? <Clock className="h-5 w-5 mr-2" /> : <Users className="h-5 w-5 mr-2" />}
                               <span>{activeRide.departureType === 'fixed' ? t('fixedDeparture') : t('whenFills')}</span>
                           </div>
+                      </div>
+                      <div className="flex items-center text-sm text-neutral-600 mt-2">
+                         <div className="flex items-center">
+                             <Car className="h-5 w-5 mr-2" />
+                             <span>{activeRide.carType}</span>
+                         </div>
                       </div>
                       <div className="border-t border-neutral-200/50 my-4"></div>
                       <div>
@@ -1624,3 +1632,4 @@ const App = () => (
 );
 
 export default App;
+
