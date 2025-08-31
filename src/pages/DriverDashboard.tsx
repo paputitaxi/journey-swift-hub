@@ -54,7 +54,7 @@ const translations = {
     mailService: "Mail Service", yesCarryMail: "Yes, I do carry Mail", mailDescYes: "I can transport both passengers and mail packages",
     noCarryMail: "No, I do not carry Mail", mailDescNo: "I only transport passengers, no mail service",
     freeSeats: "Free Seats", departureType: "Departure Type", fixedDeparture: "Fixed Departure Time",
-    fixedDepartureDesc: "Leave at a specific time regardless of seat availability",
+    fixedDepartureDesc: "Leave between the selected times",
     whenFills: "Leave When Seats Fill", whenFillsDesc: "Depart as soon as all available seats are booked",
     price: "Price", enterPrice: "Enter price", postRide: "Post Ride", submitted: "Submitted!",
     selectOrigin: "Select Origin", selectDestination: "Select Destination", searchCity: "Search for a city or region...",
@@ -82,6 +82,8 @@ const translations = {
     areYouSureFinish: "Are you sure you want to finish the ride?",
     yesFinish: "Yes, Finish",
     rideDetails: "Ride Details",
+    from: "from",
+    to: "to",
   },
   uz: {
     ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil", history: "Tarix",
@@ -91,7 +93,7 @@ const translations = {
     mailService: "Pochta xizmati", yesCarryMail: "Ha, pochta olaman", mailDescYes: "Yo'lovchilar va pochta jo'natmalarini tashiyman",
     noCarryMail: "Yo'q, pochta olmayman", mailDescNo: "Faqat yo'lovchilarni tashiyman, pochta xizmati yo'q",
     freeSeats: "Bo'sh o'rindiqlar", departureType: "Jo'nash turi", fixedDeparture: "Belgilangan vaqtda jo'nash",
-    fixedDepartureDesc: "O'rindiqlar to'lishidan qat'i nazar, belgilangan vaqtda jo'nab ketish",
+    fixedDepartureDesc: "Tanlangan vaqtlar oralig'ida jo'nang",
     whenFills: "O'rindiqlar to'lganda", whenFillsDesc: "Barcha mavjud o'rindiqlar band qilingan zahoti jo'nab ketish",
     price: "Narx", enterPrice: "Narxni kiriting", postRide: "E'lonni joylash", submitted: "Yuborildi!",
     selectOrigin: "Boshlanish nuqtasini tanlang", selectDestination: "Manzilni tanlang", searchCity: "Shahar yoki viloyatni qidiring...",
@@ -119,6 +121,8 @@ const translations = {
     areYouSureFinish: "Sayohatni yakunlashga ishonchingiz komilmi?",
     yesFinish: "Ha, yakunlash",
     rideDetails: "Sayohat tafsilotlari",
+    from: "-dan",
+    to: "-gacha",
   },
   ru: {
     ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль", history: "История",
@@ -128,7 +132,7 @@ const translations = {
     mailService: "Почтовая служба", yesCarryMail: "Да, перевожу посылки", mailDescYes: "Могу перевозить как пассажиров, так и посылки",
     noCarryMail: "Нет, не перевожу посылки", mailDescNo: "Перевожу только пассажиров, без почтовых услуг",
     freeSeats: "Свободные места", departureType: "Тип отправления", fixedDeparture: "Фиксированное время отправления",
-    fixedDepartureDesc: "Отправление в указанное время независимо от наличия пассажиров",
+    fixedDepartureDesc: "Отправление между выбранными временами",
     whenFills: "Когда места заполнятся", whenFillsDesc: "Отправление, как только все доступные места будут забронированы",
     price: "Цена", enterPrice: "Введите цену", postRide: "Опубликовать", submitted: "Отправлено!",
     selectOrigin: "Выберите место отправления", selectDestination: "Выберите пункт назначения", searchCity: "Поиск города или региона...",
@@ -156,6 +160,8 @@ const translations = {
     areYouSureFinish: "Вы уверены, что хотите завершить поездку?",
     yesFinish: "Да, завершить",
     rideDetails: "Детали поездки",
+    from: "с",
+    to: "до",
   },
 };
 
@@ -553,19 +559,19 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
   const [fromLocation, setFromLocation] = useState(initialValues?.fromLocation || "");
   const [toLocation, setToLocation] = useState(initialValues?.toLocation || "");
   const [departureDate, setDepartureDate] = useState(initialValues?.departureDate || "");
-  const [mailService, setMailService] = useState(initialValues?.mailService || ""); // "yes", "no"
+  const [mailService, setMailService] = useState(initialValues?.mailService || "");
   const [freeSeats, setFreeSeats] = useState(initialValues?.freeSeats || null);
-  const [departureType, setDepartureType] = useState(initialValues?.departureType || ""); // "fixed", "when_fills"
-  const [departureTime, setDepartureTime] = useState(initialValues?.departureTime || ""); // Only for fixed departure
+  const [departureType, setDepartureType] = useState(initialValues?.departureType || "");
+  const [departureStartTime, setDepartureStartTime] = useState(initialValues?.departureStartTime || "");
+  const [departureEndTime, setDepartureEndTime] = useState(initialValues?.departureEndTime || "");
   const [price, setPrice] = useState(initialValues?.price || "");
   const [mailPrice, setMailPrice] = useState(initialValues?.mailPrice || "");
-  const [submissionState, setSubmissionState] = useState('idle'); // 'idle', 'submitting', 'submitted'
+  const [submissionState, setSubmissionState] = useState('idle');
 
   const [showFromModal, setShowFromModal] = useState(false);
   const [showToModal, setShowToModal] = useState(false);
-  const [showDateModal, setShowDateModal] = useState(false); // For date picker modal
+  const [showDateModal, setShowDateModal] = useState(false);
 
-  // Simple validation for submit button
   const isFormValid =
     fromLocation &&
     toLocation &&
@@ -574,17 +580,16 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
     freeSeats !== null &&
     departureType &&
     price &&
-    (departureType !== "fixed" || departureTime) &&
+    (departureType !== "fixed" || (departureStartTime && departureEndTime)) &&
     (mailService !== "yes" || mailPrice);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isFormValid) {
       setSubmissionState('submitting');
-      const newRideData = { ...initialValues, fromLocation, toLocation, departureDate, mailService, freeSeats, totalSeats: 4, departureType, departureTime, price, mailPrice };
-
+      const newRideData = { ...initialValues, fromLocation, toLocation, departureDate, mailService, freeSeats, totalSeats: 4, departureType, departureStartTime, departureEndTime, price, mailPrice };
       setTimeout(() => {
-        onAddRide(newRideData); // Pass the data up to the parent component
+        onAddRide(newRideData);
         setSubmissionState('submitted');
         setTimeout(() => {
             onClose();
@@ -594,11 +599,10 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
     }
   };
 
-  // Date Picker Modal Component
   const DatePickerModal = ({ isOpen, onClose, onSelectDate }) => {
     if (!isOpen) return null;
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize to start of day for accurate comparison
+    today.setHours(0, 0, 0, 0);
     const currentMonth = today.toLocaleString('default', { month: 'long', year: 'numeric' });
     const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
     const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -615,13 +619,12 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
               <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
             </div>
             <div className="grid grid-cols-7 gap-2">
-              {/* Padding for days before the 1st of the month */}
               {Array.from({ length: new Date(today.getFullYear(), today.getMonth(), 1).getDay() }).map((_, i) => ( <div key={`pad-${i}`} className="p-2"></div> ))}
               {dates.map(day => {
                 const date = new Date(today.getFullYear(), today.getMonth(), day);
-                date.setHours(0, 0, 0, 0); // Normalize to start of day
+                date.setHours(0, 0, 0, 0);
                 const isToday = day === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
-                const isPast = date < today; // Compare normalized dates
+                const isPast = date < today;
                 const dateString = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
                 return (
                   <button key={day} onClick={() => { if (!isPast) { onSelectDate(dateString); onClose(); } }} className={`p-2 rounded-full text-gray-800 text-sm font-medium ${isToday ? 'bg-neutral-100 border border-neutral-300' : 'hover:bg-neutral-100'} ${isPast ? 'text-neutral-400 cursor-not-allowed' : ''}`} disabled={isPast} >
@@ -736,12 +739,15 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
                 {departureType === "fixed" && <CheckCircle className="h-6 w-6 text-teal-400" />}
               </button>
               {departureType === "fixed" && (
-                <div className="w-full p-3 bg-neutral-100 rounded-xl flex items-center border border-neutral-200 mt-2">
-                  <input type="time" value={departureTime} onChange={(e) => setDepartureTime(e.target.value)} className="flex-grow bg-transparent text-gray-800 placeholder-neutral-500 focus:outline-none" />
-                  <Clock className="h-5 w-5 text-neutral-500 ml-2" />
+                <div className="w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between border border-neutral-200 mt-2 gap-2">
+                    <span className="text-sm text-neutral-500">{t('from')}</span>
+                    <input type="time" value={departureStartTime} onChange={(e) => setDepartureStartTime(e.target.value)} className="bg-transparent text-gray-800 placeholder-neutral-500 focus:outline-none text-center" />
+                    <span className="text-sm text-neutral-500">{t('to')}</span>
+                    <input type="time" value={departureEndTime} onChange={(e) => setDepartureEndTime(e.target.value)} className="bg-transparent text-gray-800 placeholder-neutral-500 focus:outline-none text-center" />
+                    <Clock className="h-5 w-5 text-neutral-500" />
                 </div>
               )}
-              <button type="button" onClick={() => { setDepartureType("when_fills"); setDepartureTime(""); }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${departureType === "when_fills" ? "bg-teal-600/30 border border-teal-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
+              <button type="button" onClick={() => { setDepartureType("when_fills"); setDepartureStartTime(""); setDepartureEndTime("") }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${departureType === "when_fills" ? "bg-teal-600/30 border border-teal-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
                 <div className="flex items-center">
                   <Users className="h-6 w-6 mr-3 text-teal-400" />
                   <div className="text-left">
@@ -822,7 +828,7 @@ const RideDetailModal = ({ ride, isOpen, onClose }) => {
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans" onClick={() => setSelectedPassenger(null)}>
             {selectedPassenger && (
               <div 
-                  className="fixed bg-white rounded-xl shadow-2xl z-50 p-2 space-y-1"
+                  className="fixed bg-white rounded-xl shadow-2xl z-[51] p-2 space-y-1"
                   style={{ top: popoverPosition.top, left: popoverPosition.left }}
               >
                   <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-neutral-100 rounded-lg"><Phone className="h-4 w-4 mr-2"/>{t('call')}</button>
@@ -848,7 +854,15 @@ const RideDetailModal = ({ ride, isOpen, onClose }) => {
                     <div className="border-t border-neutral-200/50"></div>
                     <div className="flex justify-between items-center text-sm text-neutral-600">
                         <div className="flex items-center"><Calendar className="h-5 w-5 mr-2" /><span>{ride.departureDate}</span></div>
-                        {ride.departureTime && (<div className="flex items-center"><Clock className="h-5 w-5 mr-2" /><span>{ride.departureTime}</span></div>)}
+                        {ride.departureStartTime && (
+                            <div className="flex items-center">
+                                <Clock className="h-5 w-5 mr-2" />
+                                <span>
+                                    {ride.departureStartTime}
+                                    {ride.departureEndTime && ` - ${ride.departureEndTime}`}
+                                </span>
+                            </div>
+                        )}
                     </div>
                     <div className="flex justify-between items-center text-sm text-neutral-600">
                         <div className="flex items-center"><Mail className="h-5 w-5 mr-2" /><span>{ride.mailService === 'yes' ? t('yesCarryMail') : t('noCarryMail')}</span></div>
@@ -1290,7 +1304,8 @@ const AppContent = () => {
           departure_location: newRide.fromLocation,
           destination_location: newRide.toLocation,
           departure_date: newRide.departureDate,
-          departure_time: newRide.departureTime || null,
+          departure_start_time: newRide.departureStartTime,
+          departure_end_time: newRide.departureEndTime,
           departure_type: newRide.departureType === 'fixed' ? 'time' : newRide.departureType === 'when_fills' ? 'sitToGo' : newRide.departureType,
           mail_option: newRide.mailService,
           ride_price: parseFloat(newRide.price) || 0,
@@ -1440,7 +1455,15 @@ const AppContent = () => {
                       <div className="border-t border-neutral-200/50 my-4"></div>
                       <div className="flex justify-between items-center text-sm text-neutral-600">
                           <div className="flex items-center"><Calendar className="h-5 w-5 mr-2" /><span>{activeRide.departureDate}</span></div>
-                          {activeRide.departureTime && (<div className="flex items-center"><Clock className="h-5 w-5 mr-2" /><span>{activeRide.departureTime}</span></div>)}
+                          {activeRide.departureStartTime && (
+                              <div className="flex items-center">
+                                  <Clock className="h-5 w-5 mr-2" />
+                                  <span>
+                                      {activeRide.departureStartTime}
+                                      {activeRide.departureEndTime && ` - ${activeRide.departureEndTime}`}
+                                  </span>
+                              </div>
+                          )}
                       </div>
                       <div className="flex justify-between items-center text-sm text-neutral-600 mt-2">
                           <div className="flex items-center"><Mail className="h-5 w-5 mr-2" /><span>{activeRide.mailService === 'yes' ? t('yesCarryMail') : t('noCarryMail')}</span></div>
