@@ -84,6 +84,10 @@ const translations = {
     rideDetails: "Ride Details",
     from: "from",
     to: "to",
+    confirmRidePost: "Confirm Ride",
+    confirmPhone: "Is this your phone number?",
+    yesPost: "Yes, post",
+    noEdit: "No, edit",
   },
   uz: {
     ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil", history: "Tarix",
@@ -123,6 +127,10 @@ const translations = {
     rideDetails: "Sayohat tafsilotlari",
     from: "-dan",
     to: "-gacha",
+    confirmRidePost: "Sayohni Tasdiqlang",
+    confirmPhone: "Bu sizning telefon raqamingizmi?",
+    yesPost: "Ha, joylash",
+    noEdit: "Yo'q, tahrirlash",
   },
   ru: {
     ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль", history: "История",
@@ -162,6 +170,10 @@ const translations = {
     rideDetails: "Детали поездки",
     from: "с",
     to: "до",
+    confirmRidePost: "Подтвердить поездку",
+    confirmPhone: "Это ваш номер телефона?",
+    yesPost: "Да, опубликовать",
+    noEdit: "Нет, изменить",
   },
 };
 
@@ -554,7 +566,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
 };
 
 // Main Post Ride Form Component
-const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEditing }) => {
+const PostRideForm = ({ onClose, onPostSuccess, onConfirmPost, initialValues, isEditing }) => {
   const { t } = useLanguage();
   const [fromLocation, setFromLocation] = useState(initialValues?.fromLocation || "");
   const [toLocation, setToLocation] = useState(initialValues?.toLocation || "");
@@ -586,16 +598,8 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isFormValid) {
-      setSubmissionState('submitting');
       const newRideData = { ...initialValues, fromLocation, toLocation, departureDate, mailService, freeSeats, totalSeats: 4, departureType, departureStartTime, departureEndTime, price, mailPrice };
-      setTimeout(() => {
-        onAddRide(newRideData);
-        setSubmissionState('submitted');
-        setTimeout(() => {
-            onClose();
-            if (onPostSuccess) onPostSuccess(); 
-        }, 800);
-      }, 1500);
+      onConfirmPost(newRideData);
     }
   };
 
@@ -744,7 +748,7 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
                     <input type="time" value={departureStartTime} onChange={(e) => setDepartureStartTime(e.target.value)} className="bg-transparent text-gray-800 placeholder-neutral-500 focus:outline-none text-center" />
                     <span className="text-sm text-neutral-500">{t('to')}</span>
                     <input type="time" value={departureEndTime} onChange={(e) => setDepartureEndTime(e.target.value)} className="bg-transparent text-gray-800 placeholder-neutral-500 focus:outline-none text-center" />
-                    <Clock className="h-5 w-5 text-neutral-500" />
+                    <Clock className="h-5 w-5 text-neutral-500 ml-2" />
                 </div>
               )}
               <button type="button" onClick={() => { setDepartureType("when_fills"); setDepartureStartTime(""); setDepartureEndTime("") }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors shadow ${departureType === "when_fills" ? "bg-teal-600/30 border border-teal-400" : "bg-neutral-100 hover:bg-neutral-200 border border-transparent"}`} >
@@ -766,14 +770,9 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEdit
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">$</span>
             </div>
           </div>
-          <button type="submit" disabled={!isFormValid || submissionState !== 'idle'} className={`w-full py-3 rounded-xl text-lg font-semibold transition-colors flex items-center justify-center shadow-lg 
-            ${isFormValid && submissionState === 'idle' ? "bg-green-500 hover:bg-green-600 text-white" : 
-            submissionState === 'submitting' ? "bg-yellow-500 text-white cursor-wait" : 
-            submissionState === 'submitted' ? "bg-green-700 text-white" : 
-            "bg-gray-600 text-gray-400 cursor-not-allowed"}`} >
-            {submissionState === 'submitting' ? <><Loader2 className="h-6 w-6 mr-2 animate-spin" /> {t('submitting')}</> : 
-             submissionState === 'submitted' ? <><CheckCircle className="h-6 w-6 mr-2" /> {t('submitted')}</> : 
-             isEditing ? t('updateRide') : t('postRide')}
+          <button type="submit" disabled={!isFormValid} className={`w-full py-3 rounded-xl text-lg font-semibold transition-colors flex items-center justify-center shadow-lg 
+            ${isFormValid ? "bg-green-500 hover:bg-green-600 text-white" : "bg-gray-600 text-gray-400 cursor-not-allowed"}`} >
+             {isEditing ? t('updateRide') : t('postRide')}
           </button>
         </form>
       </div>
@@ -934,13 +933,9 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
                         <label className="block text-sm font-medium text-neutral-700 mb-1">{t('username')}</label>
                         <input type="text" name="username" value={formData.username} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-1">{t('gender')}</label>
-                        <select name="gender" value={formData.gender} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]">
-                            <option>Male</option>
-                            <option>Female</option>
-                            <option>Other</option>
-                        </select>
+                     <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">{t('phone')}</label>
+                        <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="w-full p-2 bg-neutral-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E1F87E]" />
                     </div>
                     <div className="flex justify-end pt-4">
                         <button type="submit" className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">{t('saveChanges')}</button>
@@ -1049,13 +1044,20 @@ const HistoryPage = ({ rides, onRideClick }) => {
 };
 
 // --- Profile Page Component ---
-const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
+const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides, openOnMount, onMountHandled }) => {
     const { t, language, setLanguage } = useLanguage();
     const [showEditProfile, setShowEditProfile] = useState(false);
     const [showEditCar, setShowEditCar] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
     const [settingsModalTitle, setSettingsModalTitle] = useState("");
     const [settingsModalContent, setSettingsModalContent] = useState(null);
+
+    useEffect(() => {
+        if (openOnMount) {
+            setShowEditProfile(true);
+            onMountHandled();
+        }
+    }, [openOnMount, onMountHandled]);
 
     const handleOpenSettings = (title, content) => {
         setSettingsModalTitle(title);
@@ -1153,6 +1155,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
             {/* --- Basic Info Card --- */}
             <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20">
                 <InfoItem icon={User} label={t('username')} value={`@${user.username}`} />
+                <InfoItem icon={Phone} label={t('phone')} value={user.phone} />
             </div>
             
             {/* --- Driver Details Card --- */}
@@ -1182,9 +1185,6 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
                     value={t(language === 'en' ? 'english' : language === 'uz' ? 'uzbek' : 'russian')}
                     action={() => handleOpenSettings(t('language'), <LanguageSelectionContent currentLanguage={language} onSelectLanguage={setLanguage} />)} 
                 />
-                <SettingsItem icon={Bell} label={t('notifications')} value="" action={() => handleOpenSettings(t('notifications'), <div className="p-4">Notification settings</div>)} />
-                <SettingsItem icon={CreditCard} label={t('paymentMethods')} value="" action={() => handleOpenSettings(t('paymentMethods'), <div className="p-4">Payment methods</div>)} />
-                <SettingsItem icon={Shield} label={t('privacy')} value="" action={() => handleOpenSettings(t('privacy'), <div className="p-4">Privacy settings</div>)} />
             </div>
         </div>
     );
@@ -1229,6 +1229,9 @@ const AppContent = () => {
   const [showFinishRideModal, setShowFinishRideModal] = useState(false);
   const [showHistoryDetailModal, setShowHistoryDetailModal] = useState(false);
   const [selectedHistoryRide, setSelectedHistoryRide] = useState(null);
+  const [openProfileEdit, setOpenProfileEdit] = useState(false);
+  const [showPostConfirmationModal, setShowPostConfirmationModal] = useState(false);
+  const [rideDataToPost, setRideDataToPost] = useState(null);
 
   useEffect(() => {
     const fetchMyRides = async () => {
@@ -1295,22 +1298,29 @@ const AppContent = () => {
     }
   };
 
-  const handleAddRide = async (newRide) => {
+  const handleConfirmPost = (newRideData) => {
+    setRideDataToPost(newRideData);
+    setShowPostRide(false);
+    setShowPostConfirmationModal(true);
+  }
+
+  const handleAddRide = async () => {
+    if (!rideDataToPost) return;
     try {
       const { data: insertedRide, error } = await supabase
         .from('rides')
         .insert({
           username: localStorage.getItem('username') || 'driver',
-          departure_location: newRide.fromLocation,
-          destination_location: newRide.toLocation,
-          departure_date: newRide.departureDate,
-          departure_start_time: newRide.departureStartTime,
-          departure_end_time: newRide.departureEndTime,
-          departure_type: newRide.departureType === 'fixed' ? 'time' : newRide.departureType === 'when_fills' ? 'sitToGo' : newRide.departureType,
-          mail_option: newRide.mailService,
-          ride_price: parseFloat(newRide.price) || 0,
-          mail_price: newRide.mailService === 'yes' ? parseFloat(newRide.mailPrice) || 0 : 0,
-          available_seats: parseInt(newRide.freeSeats) || 4,
+          departure_location: rideDataToPost.fromLocation,
+          destination_location: rideDataToPost.toLocation,
+          departure_date: rideDataToPost.departureDate,
+          departure_start_time: rideDataToPost.departureStartTime,
+          departure_end_time: rideDataToPost.departureEndTime,
+          departure_type: rideDataToPost.departureType === 'fixed' ? 'time' : rideDataToPost.departureType === 'when_fills' ? 'sitToGo' : rideDataToPost.departureType,
+          mail_option: rideDataToPost.mailService,
+          ride_price: parseFloat(rideDataToPost.price) || 0,
+          mail_price: rideDataToPost.mailService === 'yes' ? parseFloat(rideDataToPost.mailPrice) || 0 : 0,
+          available_seats: parseInt(rideDataToPost.freeSeats) || 4,
           total_seats: 4,
           status: 'upcoming', // Rides start as upcoming
           car_type: selectedCar
@@ -1320,13 +1330,16 @@ const AppContent = () => {
 
       if (error) { throw error; }
 
-      const bookedSeatsCount = 4 - newRide.freeSeats;
+      const bookedSeatsCount = 4 - rideDataToPost.freeSeats;
       const mockPassengers = Array.from({ length: bookedSeatsCount }, (_, i) => ({
           id: i + 1, name: `Passenger ${i + 1}`, gender: i % 2 === 0 ? "female" : "male",
       }));
-      const rideWithId = { ...newRide, id: insertedRide.id, status: "upcoming", passengers: mockPassengers, carType: selectedCar };
+      const rideWithId = { ...rideDataToPost, id: insertedRide.id, status: "upcoming", passengers: mockPassengers, carType: selectedCar };
       
       setMyRides(prev => [rideWithId, ...prev]);
+      
+      setShowPostConfirmationModal(false);
+      setRideDataToPost(null);
       
       setIsSearchingForClients(true);
       setTimeout(() => {
@@ -1377,6 +1390,11 @@ const AppContent = () => {
   const handleHistoryRideClick = (ride) => {
     setSelectedHistoryRide(ride);
     setShowHistoryDetailModal(true);
+  };
+  
+  const handleEditProfileClick = () => {
+    setActiveTab('profile');
+    setOpenProfileEdit(true);
   };
 
   const handleBack = () => {
@@ -1537,7 +1555,7 @@ const AppContent = () => {
         </div>
       );
       case "history": return <HistoryPage rides={myRides} onRideClick={handleHistoryRideClick} />;
-      case "profile": return ( <ProfilePage user={{...userData, language}} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} myRides={myRides} /> );
+      case "profile": return ( <ProfilePage user={{...userData, language}} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} myRides={myRides} openOnMount={openProfileEdit} onMountHandled={() => setOpenProfileEdit(false)} /> );
       default: return null;
     }
   };
@@ -1561,9 +1579,26 @@ const AppContent = () => {
           </div>
       )}
       <header className="bg-white/80 backdrop-blur-sm p-3 border-b border-white/20 flex items-center justify-between z-20 shadow-lg relative rounded-b-2xl">
-        {(activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal) && (<button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-black/10 transition-colors" ><ChevronLeft className="h-6 w-6" /></button>)}
-        {!(activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal) && (<div className="w-8 h-8"></div>)}
-        <h1 className="absolute left-1/2 -translate-x-1/2 text-xl font-bold text-gray-800">{headerTitle}</h1>
+          <div className="w-1/3 flex justify-start">
+            {(activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal) ? (
+              <button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-black/10 transition-colors" >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+            ) : (
+              <button onClick={handleEditProfileClick} className="text-sm font-semibold text-gray-700 ml-2 p-2 rounded-full hover:bg-black/10 transition-colors">{userData.phone}</button>
+            )}
+          </div>
+          <div className="w-1/3 text-center">
+            <h1 className="text-xl font-bold text-gray-800">{headerTitle}</h1>
+          </div>
+          <div className="w-1/3 flex justify-end">
+             {(activeTab === "dashboard" && !showPostRide && !showMessages && !showStatsModal) && (
+                <button onClick={handleEditProfileClick} className="flex items-center gap-2 p-2 rounded-full hover:bg-black/10 transition-colors">
+                    <span className="text-sm font-semibold text-gray-700">{userData.fullName}</span>
+                    <User className="h-5 w-5 text-gray-700" />
+                </button>
+             )}
+          </div>
       </header>
       <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative" onClick={() => selectedPassenger && setSelectedPassenger(null)}>
         {renderContent()}
@@ -1579,7 +1614,7 @@ const AppContent = () => {
           </div>
         </footer>
       )}
-      {showPostRide && <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle(t('ride')); }} onPostSuccess={() => {}} onAddRide={handleAddRide} initialValues={null} isEditing={false} />}
+      {showPostRide && <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle(t('ride')); }} onPostSuccess={() => {}} onConfirmPost={handleConfirmPost} initialValues={null} isEditing={false} />}
       {isEditModalOpen && editingRide && <PostRideForm onClose={() => { setIsEditModalOpen(false); setEditingRide(null); }} onPostSuccess={() => { setIsEditModalOpen(false); setEditingRide(null); }} onAddRide={handleSaveEditedRide} initialValues={editingRide} isEditing={true} />}
       <CarTypeModal isOpen={showCarTypeModal} onClose={() => setShowCarTypeModal(false)} onSelectCar={setSelectedCar} currentCar={selectedCar} />
       {showConfirmationModal && (
@@ -1621,6 +1656,19 @@ const AppContent = () => {
             onClose={() => setShowHistoryDetailModal(false)}
             ride={selectedHistoryRide}
         />
+    )}
+    {showPostConfirmationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+          <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">{t('confirmRidePost')}</h2>
+              <p className="text-neutral-600 mb-2">{t('confirmPhone')}</p>
+              <p className="text-gray-800 font-semibold mb-6">{userData.phone}</p>
+              <div className="flex justify-center gap-4">
+                  <button onClick={() => {setShowPostConfirmationModal(false); setShowPostRide(true);}} className="flex-1 py-2 px-4 bg-neutral-200 text-neutral-800 font-semibold rounded-xl hover:bg-neutral-300 transition-colors">{t('noEdit')}</button>
+                  <button onClick={handleAddRide} className="flex-1 py-2 px-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors">{t('yesPost')}</button>
+              </div>
+          </div>
+        </div>
     )}
     </div>
   );
