@@ -1419,7 +1419,6 @@ const AppContent = () => {
   const bottomNavItems = [
     { id: "dashboard", label: t('ride'), icon: MapPin },
     { id: "history", label: t('history'), icon: History },
-    { id: "profile", label: t('profile'), icon: User },
   ];
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
