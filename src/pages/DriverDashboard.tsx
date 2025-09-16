@@ -1091,70 +1091,71 @@ const SettingsModal = ({ title, isOpen, onClose, children }) => {
     );
 };
 
-const HistoryArchivePage = ({ onRideClick, rides, archivedRides }) => {
+const HistoryPage = ({ rides, onRideClick }) => {
     const { t } = useLanguage();
-    const [activeTab, setActiveTab] = useState('history');
+    const completedRides = rides.filter(r => r.status === 'completed');
 
-    const displayedRides = activeTab === 'history'
-        ? rides.filter(r => r.status === 'completed')
-        : archivedRides;
+    if (completedRides.length === 0) {
+        return (
+            <div className="p-4 text-center">
+                <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
+                    <History className="h-12 w-12 mx-auto text-neutral-400" />
+                    <p className="text-gray-600 mt-4 mb-2">{t('noCompletedRides')}</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="p-4 space-y-4 pb-20">
-            <div className="flex bg-neutral-100 rounded-xl p-1 shadow-inner">
-                <button
-                    onClick={() => setActiveTab('history')}
-                    className={`flex-1 py-2 text-center rounded-lg font-semibold transition-colors ${
-                        activeTab === 'history' ? 'bg-white text-gray-800 shadow' : 'text-neutral-600'
-                    }`}
-                >
-                    {t('history')}
-                </button>
-                <button
-                    onClick={() => setActiveTab('archive')}
-                    className={`flex-1 py-2 text-center rounded-lg font-semibold transition-colors ${
-                        activeTab === 'archive' ? 'bg-white text-gray-800 shadow' : 'text-neutral-600'
-                    }`}
-                >
-                    {t('archive')}
-                </button>
-            </div>
-            {displayedRides.length > 0 ? (
-                displayedRides.map(ride => (
-                    <button key={ride.id} onClick={() => onRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
-                                <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
-                            </div>
-                            <div className="text-right">
-                                <p className={`font-bold text-lg ${activeTab === 'history' ? 'text-green-600' : 'text-red-600'}`}>
-                                    {activeTab === 'history' ? `+${ride.price}` : 'Archived'}
-                                </p>
-                                <p className="text-xs text-neutral-500">
-                                    {ride.status === 'completed' ? 'Completed' : ride.status === 'cancelled' ? 'Cancelled' : 'Archived'}
-                                </p>
-                            </div>
+            {completedRides.map(ride => (
+                <button key={ride.id} onClick={() => onRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                            <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
                         </div>
-                    </button>
-                ))
-            ) : (
-                <div className="p-4 text-center">
-                    <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
-                        {activeTab === 'history' ? (
-                            <>
-                                <History className="h-12 w-12 mx-auto text-neutral-400" />
-                                <p className="text-gray-600 mt-4 mb-2">{t('noCompletedRides')}</p>
-                            </>
-                        ) : (
-                            <>
-                                <ArchiveIcon className="h-12 w-12 mx-auto text-neutral-400" />
-                                <p className="text-gray-600 mt-4 mb-2">No archived rides.</p>
-                            </>
-                        )}
+                        <div className="text-right">
+                            <p className="font-bold text-lg text-green-600">+${ride.price}</p>
+                            <p className="text-xs text-neutral-500">Completed</p>
+                        </div>
                     </div>
+                </button>
+            ))}
+        </div>
+    );
+};
+
+const ArchivePage = ({ archivedRides, onRideClick }) => {
+    const { t } = useLanguage();
+    if (archivedRides.length === 0) {
+        return (
+            <div className="p-4 text-center">
+                <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
+                    <ArchiveIcon className="h-12 w-12 mx-auto text-neutral-400" />
+                    <p className="text-gray-600 mt-4 mb-2">No archived rides.</p>
                 </div>
-            )}
+            </div>
+        );
+    }
+    return (
+        <div className="p-4 space-y-4 pb-20">
+            {archivedRides.map(ride => (
+                <button key={ride.id} onClick={() => onRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                            <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="font-bold text-lg text-red-600">Archived</p>
+                            <p className="text-xs text-neutral-500">
+                                {ride.status === 'cancelled' ? 'Cancelled' : 'Archived'}
+                            </p>
+                        </div>
+                    </div>
+                </button>
+            ))}
         </div>
     );
 };
@@ -1613,17 +1614,16 @@ const AppContent = () => {
     else if (showStatsModal) { setShowStatsModal(false); }
     else if (isEditModalOpen) { setIsEditModalOpen(false); }
     else if (showHistoryDetailModal) { setShowHistoryDetailModal(false); setSelectedHistoryRide(null);}
-    else if (activeTab === "profile") { setActiveTab("dashboard"); }
     else { setActiveTab("dashboard"); }
     setHeaderTitle(t('ride'));
   };
-  
 
   useEffect(() => {
     switch (activeTab) {
       case "dashboard": setHeaderTitle(t('ride')); break;
       case "history": setHeaderTitle(t('history')); break;
       case "profile": setHeaderTitle(t('profile')); break;
+      case "archive": setHeaderTitle(t('archive')); break;
       default: setHeaderTitle("Driver");
     }
      if (showStatsModal) { setHeaderTitle(t('stats')); }
@@ -1632,6 +1632,7 @@ const AppContent = () => {
   const bottomNavItems = [
     { id: "dashboard", label: t('ride'), icon: MapPin },
     { id: "history", label: t('history'), icon: History },
+    { id: "archive", label: t('archive'), icon: ArchiveIcon },
   ];
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -1757,6 +1758,8 @@ const AppContent = () => {
     if (showMessages) { return <MessageDashboard onClose={() => { setShowMessages(false); setHeaderTitle(t('ride')); }} />; }
     if (showStatsModal) { return <StatsModal onClose={() => setShowStatsModal(false)} />; }
 
+    const completedRides = myRides.filter(r => r.status === 'completed');
+
     switch (activeTab) {
       case "dashboard": return (
         <div className="p-4 space-y-4 text-gray-800 font-sans">
@@ -1782,7 +1785,63 @@ const AppContent = () => {
         </div>
       );
       case "history":
-        return <HistoryArchivePage onRideClick={handleHistoryRideClick} rides={myRides} archivedRides={archivedRides} />;
+        return (
+          <div className="p-4 space-y-4 pb-20">
+            {completedRides.length > 0 ? (
+                completedRides.map(ride => (
+                    <button key={ride.id} onClick={() => onRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                                <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="font-bold text-lg text-green-600">+${ride.price}</p>
+                                <p className="text-xs text-neutral-500">Completed</p>
+                            </div>
+                        </div>
+                    </button>
+                ))
+            ) : (
+                <div className="p-4 text-center">
+                    <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
+                        <History className="h-12 w-12 mx-auto text-neutral-400" />
+                        <p className="text-gray-600 mt-4 mb-2">{t('noCompletedRides')}</p>
+                    </div>
+                </div>
+            )}
+          </div>
+        );
+      case "archive":
+        return (
+          <div className="p-4 space-y-4 pb-20">
+            {archivedRides.length > 0 ? (
+                archivedRides.map(ride => (
+                    <button key={ride.id} onClick={() => onRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                                <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="font-bold text-lg text-red-600">Archived</p>
+                                <p className="text-xs text-neutral-500">
+                                    {ride.status === 'cancelled' ? 'Cancelled' : 'Archived'}
+                                </p>
+                            </div>
+                        </div>
+                    </button>
+                ))
+            ) : (
+                <div className="p-4 text-center">
+                    <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
+                        <ArchiveIcon className="h-12 w-12 mx-auto text-neutral-400" />
+                        <p className="text-gray-600 mt-4 mb-2">No archived rides.</p>
+                    </div>
+                </div>
+            )}
+          </div>
+        );
       case "profile": return ( <ProfilePage user={{...userData, language}} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} myRides={myRides} openOnMount={openProfileEdit} onMountHandled={() => setOpenProfileEdit(false)} /> );
       default: return null;
     }
@@ -1834,8 +1893,11 @@ const AppContent = () => {
       {!(showMessages || showPostRide || isEditModalOpen || showStatsModal || showHistoryDetailModal) && (
         <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-white/20 shadow-lg z-10">
           <div className="flex justify-around py-2">
-            <button key="dashboard" onClick={() => { setActiveTab("dashboard"); }} className={`flex-1 flex flex-col items-center py-2 transition-colors ${ activeTab === "dashboard" ? "text-gray-800" : "text-neutral-500" }`} ><MapPin className={`h-6 w-6 mb-1 ${ activeTab === "dashboard" ? "text-green-500" : "text-neutral-500" }`} /><span className="text-xs">Ride</span></button>
-            <button key="history" onClick={() => { setActiveTab("history"); }} className={`flex-1 flex flex-col items-center py-2 transition-colors ${ activeTab === "history" ? "text-gray-800" : "text-neutral-500" }`} ><History className={`h-6 w-6 mb-1 ${ activeTab === "history" ? "text-green-500" : "text-neutral-500" }`} /><span className="text-xs">History</span></button>
+            {bottomNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (<button key={item.id} onClick={() => { setActiveTab(item.id); }} className={`flex-1 flex flex-col items-center py-2 transition-colors ${ isActive ? "text-gray-800" : "text-neutral-500" }`} ><Icon className={`h-6 w-6 mb-1 ${ isActive ? "text-green-500" : "text-neutral-500" }`} /><span className="text-xs">{item.label}</span></button>);
+            })}
           </div>
         </footer>
       )}
