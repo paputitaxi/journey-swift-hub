@@ -96,7 +96,8 @@ const translations = {
     confirmArchiveRide: "Are you sure you want to archive this ride? It will be removed from your upcoming rides.",
     archive: "Archive",
     youLoseClients: "You lose your clients!",
-    repostRide: "Repost this ride"
+    repostRide: "Repost this ride",
+    yourNumber: "Your Number"
   },
   uz: {
     ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil", history: "Tarix",
@@ -140,7 +141,7 @@ const translations = {
     confirmPhone: "Bu sizning telefon raqamingizmi?",
     yesPost: "Ha, joylash",
     noEdit: "Yo'q, tahrirlash",
-    areYouReallySure: "Haqiqatan ham ishonchingiz komilmi?",
+    areYouReallySure: "Haqiqatan ham ishonchingiz komimmi?",
     yesPostAlready: "Ha, joylang",
     stopRide: "Bu sayohatni to'xtatish",
     archiveRide: "E'lonni arxivlash",
@@ -148,7 +149,8 @@ const translations = {
     confirmArchiveRide: "Bu sayohatni arxivlashga ishonchingiz komilmi? U yaqinlashib kelayotgan sayohatlaringizdan olib tashlanadi.",
     archive: "Arxiv",
     youLoseClients: "Mijozlaringizni yo'qotasiz!",
-    repostRide: "Bu sayohatni qayta joylash"
+    repostRide: "Bu sayohatni qayta joylash",
+    yourNumber: "Sizning raqamingiz"
   },
   ru: {
     ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль", history: "История",
@@ -593,7 +595,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
 };
 
 // Main Post Ride Form Component
-const PostRideForm = ({ onClose, onPostSuccess, onConfirmPost, initialValues, isEditing, onStopRide, onArchiveRide }) => {
+const PostRideForm = ({ onClose, onPostSuccess, onConfirmPost, initialValues, isEditing, onStopRide, onArchiveRide, userPhone }) => {
   const { t } = useLanguage();
   const [fromLocation, setFromLocation] = useState(initialValues?.fromLocation || "");
   const [toLocation, setToLocation] = useState(initialValues?.toLocation || "");
@@ -605,6 +607,7 @@ const PostRideForm = ({ onClose, onPostSuccess, onConfirmPost, initialValues, is
   const [departureEndTime, setDepartureEndTime] = useState(initialValues?.departureEndTime || "");
   const [price, setPrice] = useState(initialValues?.price || "");
   const [mailPrice, setMailPrice] = useState(initialValues?.mailPrice || "");
+  const [contactNumber, setContactNumber] = useState(initialValues?.contactNumber || userPhone);
   const [submissionAttempted, setSubmissionAttempted] = useState(false);
 
   const [showFromModal, setShowFromModal] = useState(false);
@@ -619,6 +622,7 @@ const PostRideForm = ({ onClose, onPostSuccess, onConfirmPost, initialValues, is
     freeSeats !== null &&
     departureType &&
     price &&
+    contactNumber &&
     (departureType !== "fixed" || (departureStartTime && departureEndTime)) &&
     (mailService !== "yes" || mailPrice);
 
@@ -626,7 +630,7 @@ const PostRideForm = ({ onClose, onPostSuccess, onConfirmPost, initialValues, is
     e.preventDefault();
     setSubmissionAttempted(true);
     if (isFormValid) {
-      const newRideData = { ...initialValues, fromLocation, toLocation, departureDate, mailService, freeSeats, totalSeats: 4, departureType, departureStartTime, departureEndTime, price, mailPrice };
+      const newRideData = { ...initialValues, fromLocation, toLocation, departureDate, mailService, freeSeats, totalSeats: 4, departureType, departureStartTime, departureEndTime, price, mailPrice, contactNumber };
       onConfirmPost(newRideData);
     }
   };
@@ -803,6 +807,18 @@ const PostRideForm = ({ onClose, onPostSuccess, onConfirmPost, initialValues, is
                 value={price} 
                 onChange={(e) => { const value = e.target.value; if (/^[0-9]*$/.test(value)) { setPrice(value); } }} />
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">$</span>
+            </div>
+          </div>
+          <div>
+            <label className="block text-neutral-800 text-sm font-medium mb-2">{t('yourNumber')}</label>
+            <div className="relative">
+              <input 
+                type="text" 
+                placeholder={t('phone')} 
+                className={`w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] ${submissionAttempted && !contactNumber ? 'border border-red-500' : ''}`} 
+                value={contactNumber} 
+                onChange={(e) => setContactNumber(e.target.value)} />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"><Phone className="h-5 w-5"/></span>
             </div>
           </div>
           <button type="submit" className={`w-full py-3 rounded-xl text-lg font-semibold transition-colors flex items-center justify-center shadow-lg 
@@ -1742,6 +1758,8 @@ const AppContent = () => {
     if (showMessages) { return <MessageDashboard onClose={() => { setShowMessages(false); setHeaderTitle(t('ride')); }} />; }
     if (showStatsModal) { return <StatsModal onClose={() => setShowStatsModal(false)} />; }
 
+    const completedRides = myRides.filter(r => r.status === 'completed');
+
     switch (activeTab) {
       case "dashboard": return (
         <div className="p-4 space-y-4 text-gray-800 font-sans">
@@ -1766,8 +1784,64 @@ const AppContent = () => {
           </div>
         </div>
       );
-      case "history": return <HistoryPage rides={myRides} onRideClick={handleHistoryRideClick} />;
-      case "archive": return <ArchivePage archivedRides={archivedRides} onRideClick={handleHistoryRideClick} />;
+      case "history":
+        return (
+          <div className="p-4 space-y-4 pb-20">
+            {completedRides.length > 0 ? (
+                completedRides.map(ride => (
+                    <button key={ride.id} onClick={() => onRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                                <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="font-bold text-lg text-green-600">+${ride.price}</p>
+                                <p className="text-xs text-neutral-500">Completed</p>
+                            </div>
+                        </div>
+                    </button>
+                ))
+            ) : (
+                <div className="p-4 text-center">
+                    <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
+                        <History className="h-12 w-12 mx-auto text-neutral-400" />
+                        <p className="text-gray-600 mt-4 mb-2">{t('noCompletedRides')}</p>
+                    </div>
+                </div>
+            )}
+          </div>
+        );
+      case "archive":
+        return (
+          <div className="p-4 space-y-4 pb-20">
+            {archivedRides.length > 0 ? (
+                archivedRides.map(ride => (
+                    <button key={ride.id} onClick={() => onRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                                <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="font-bold text-lg text-red-600">Archived</p>
+                                <p className="text-xs text-neutral-500">
+                                    {ride.status === 'cancelled' ? 'Cancelled' : 'Archived'}
+                                </p>
+                            </div>
+                        </div>
+                    </button>
+                ))
+            ) : (
+                <div className="p-4 text-center">
+                    <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
+                        <ArchiveIcon className="h-12 w-12 mx-auto text-neutral-400" />
+                        <p className="text-gray-600 mt-4 mb-2">No archived rides.</p>
+                    </div>
+                </div>
+            )}
+          </div>
+        );
       case "profile": return ( <ProfilePage user={{...userData, language}} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} myRides={myRides} openOnMount={openProfileEdit} onMountHandled={() => setOpenProfileEdit(false)} /> );
       default: return null;
     }
@@ -1827,8 +1901,8 @@ const AppContent = () => {
           </div>
         </footer>
       )}
-      {showPostRide && <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle(t('ride')); }} onPostSuccess={() => {}} onConfirmPost={handleConfirmPost} initialValues={repostRideData} isEditing={false} />}
-      {isEditModalOpen && editingRide && <PostRideForm onClose={() => { setIsEditModalOpen(false); setEditingRide(null); }} onConfirmPost={handleSaveEditedRide} onStopRide={() => {setEditingRide(activeRide); setShowArchiveConfirmModal(true);}} onArchiveRide={() => {setEditingRide(activeRide); setShowArchiveConfirmModal(true);}} initialValues={editingRide} isEditing={true} />}
+      {showPostRide && <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle(t('ride')); }} onPostSuccess={() => {}} onConfirmPost={handleConfirmPost} initialValues={repostRideData} isEditing={false} userPhone={userData.phone} />}
+      {isEditModalOpen && editingRide && <PostRideForm onClose={() => { setIsEditModalOpen(false); setEditingRide(null); }} onConfirmPost={handleSaveEditedRide} onStopRide={() => {setEditingRide(activeRide); setShowArchiveConfirmModal(true);}} onArchiveRide={() => {setEditingRide(activeRide); setShowArchiveConfirmModal(true);}} initialValues={editingRide} isEditing={true} userPhone={userData.phone} />}
       <CarTypeModal isOpen={showCarTypeModal} onClose={() => setShowCarTypeModal(false)} onSelectCar={setSelectedCar} currentCar={selectedCar} />
       {showConfirmationModal && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
@@ -1891,6 +1965,74 @@ const AppContent = () => {
     )}
     </div>
   );
+};
+
+const HistoryArchivePage = ({ onRideClick, rides, archivedRides }) => {
+    const { t } = useLanguage();
+    const [activeTab, setActiveTab] = useState('history');
+
+    const displayedRides = activeTab === 'history'
+        ? rides.filter(r => r.status === 'completed')
+        : archivedRides;
+
+    return (
+        <div className="p-4 space-y-4 pb-20">
+            <div className="flex bg-neutral-100 rounded-xl p-1 shadow-inner">
+                <button
+                    onClick={() => setActiveTab('history')}
+                    className={`flex-1 py-2 text-center rounded-lg font-semibold transition-colors ${
+                        activeTab === 'history' ? 'bg-white text-gray-800 shadow' : 'text-neutral-600'
+                    }`}
+                >
+                    {t('history')}
+                </button>
+                <button
+                    onClick={() => setActiveTab('archive')}
+                    className={`flex-1 py-2 text-center rounded-lg font-semibold transition-colors ${
+                        activeTab === 'archive' ? 'bg-white text-gray-800 shadow' : 'text-neutral-600'
+                    }`}
+                >
+                    {t('archive')}
+                </button>
+            </div>
+            {displayedRides.length > 0 ? (
+                displayedRides.map(ride => (
+                    <button key={ride.id} onClick={() => onRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                                <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className={`font-bold text-lg ${activeTab === 'history' ? 'text-green-600' : 'text-red-600'}`}>
+                                    {activeTab === 'history' ? `+${ride.price}` : 'Archived'}
+                                </p>
+                                <p className="text-xs text-neutral-500">
+                                    {ride.status === 'completed' ? 'Completed' : ride.status === 'cancelled' ? 'Cancelled' : 'Archived'}
+                                </p>
+                            </div>
+                        </div>
+                    </button>
+                ))
+            ) : (
+                <div className="p-4 text-center">
+                    <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
+                        {activeTab === 'history' ? (
+                            <>
+                                <History className="h-12 w-12 mx-auto text-neutral-400" />
+                                <p className="text-gray-600 mt-4 mb-2">{t('noCompletedRides')}</p>
+                            </>
+                        ) : (
+                            <>
+                                <ArchiveIcon className="h-12 w-12 mx-auto text-neutral-400" />
+                                <p className="text-gray-600 mt-4 mb-2">No archived rides.</p>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 };
 
 const StatsModal = ({ onClose }) => {
