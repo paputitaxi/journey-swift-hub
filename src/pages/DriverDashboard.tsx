@@ -18,10 +18,10 @@ import {
 // In a real environment, you'd use the actual libraries.
 // These mocks are for demonstration purposes to make the code runnable.
 const supabase = {
-  from: () => ({
-    select: () => ({
-      eq: () => ({
-        order: () => Promise.resolve({ data: [], error: null }),
+  from: (table) => ({
+    select: (columns = '*') => ({
+      eq: (column, value) => ({
+        order: (column, options) => Promise.resolve({ data: [], error: null }),
       }),
     }),
     insert: (data) => ({
@@ -1386,6 +1386,7 @@ const AppContent = () => {
   const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [headerTitle, setHeaderTitle] = useState(t('ride'));
+  const [historyView, setHistoryView] = useState('history'); // 'history' or 'archive'
   const [showPostRide, setShowPostRide] = useState(false);
   const [showEditRide, setShowEditRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
@@ -1621,18 +1622,16 @@ const AppContent = () => {
   useEffect(() => {
     switch (activeTab) {
       case "dashboard": setHeaderTitle(t('ride')); break;
-      case "history": setHeaderTitle(t('history')); break;
+      case "history": setHeaderTitle(historyView === 'history' ? t('history') : t('archive')); break;
       case "profile": setHeaderTitle(t('profile')); break;
-      case "archive": setHeaderTitle(t('archive')); break;
       default: setHeaderTitle("Driver");
     }
      if (showStatsModal) { setHeaderTitle(t('stats')); }
-  }, [activeTab, language, t, showStatsModal]);
+  }, [activeTab, historyView, language, t, showStatsModal]);
 
   const bottomNavItems = [
     { id: "dashboard", label: t('ride'), icon: MapPin },
     { id: "history", label: t('history'), icon: History },
-    { id: "archive", label: t('archive'), icon: ArchiveIcon },
   ];
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -1786,30 +1785,91 @@ const AppContent = () => {
       );
       case "history":
         return (
-          <div className="p-4 space-y-4 pb-20">
-            {completedRides.length > 0 ? (
-                completedRides.map(ride => (
-                    <button key={ride.id} onClick={() => onRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
-                                <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="font-bold text-lg text-green-600">+${ride.price}</p>
-                                <p className="text-xs text-neutral-500">Completed</p>
-                            </div>
-                        </div>
-                    </button>
-                ))
-            ) : (
-                <div className="p-4 text-center">
-                    <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
-                        <History className="h-12 w-12 mx-auto text-neutral-400" />
-                        <p className="text-gray-600 mt-4 mb-2">{t('noCompletedRides')}</p>
-                    </div>
+          <div className="flex flex-col h-full">
+            {/* Toggle Bar */}
+            <div className="p-4 pb-0">
+              <div className="bg-muted/50 p-1 rounded-xl flex">
+                <button
+                  onClick={() => setHistoryView('history')}
+                  className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    historyView === 'history'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {t('history')}
+                </button>
+                <button
+                  onClick={() => setHistoryView('archive')}
+                  className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    historyView === 'archive'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {t('archive')}
+                </button>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto">
+              {historyView === 'history' ? (
+                <div className="p-4 space-y-4 pb-20">
+                  {completedRides.length > 0 ? (
+                      completedRides.map(ride => (
+                          <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+                              <div className="flex justify-between items-center">
+                                  <div>
+                                      <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                                      <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
+                                  </div>
+                                  <div className="text-right">
+                                      <p className="font-bold text-lg text-green-600">+${ride.price}</p>
+                                      <p className="text-xs text-neutral-500">Completed</p>
+                                  </div>
+                              </div>
+                          </button>
+                      ))
+                  ) : (
+                      <div className="p-4 text-center">
+                          <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
+                              <History className="h-12 w-12 mx-auto text-neutral-400" />
+                              <p className="text-gray-600 mt-4 mb-2">{t('noCompletedRides')}</p>
+                          </div>
+                      </div>
+                  )}
                 </div>
-            )}
+              ) : (
+                <div className="p-4 space-y-4 pb-20">
+                  {archivedRides.length > 0 ? (
+                      archivedRides.map(ride => (
+                          <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+                              <div className="flex justify-between items-center">
+                                  <div>
+                                      <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                                      <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
+                                  </div>
+                                  <div className="text-right">
+                                      <p className="font-bold text-lg text-red-600">Archived</p>
+                                      <p className="text-xs text-neutral-500">
+                                          {ride.status === 'cancelled' ? 'Cancelled' : 'Archived'}
+                                      </p>
+                                  </div>
+                              </div>
+                          </button>
+                      ))
+                  ) : (
+                      <div className="p-4 text-center">
+                          <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
+                              <ArchiveIcon className="h-12 w-12 mx-auto text-neutral-400" />
+                              <p className="text-gray-600 mt-4 mb-2">No archived rides.</p>
+                          </div>
+                      </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         );
       case "archive":
@@ -1817,7 +1877,7 @@ const AppContent = () => {
           <div className="p-4 space-y-4 pb-20">
             {archivedRides.length > 0 ? (
                 archivedRides.map(ride => (
-                    <button key={ride.id} onClick={() => onRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+                    <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
                         <div className="flex justify-between items-center">
                             <div>
                                 <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
@@ -1901,8 +1961,8 @@ const AppContent = () => {
           </div>
         </footer>
       )}
-      {showPostRide && <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle(t('ride')); }} onPostSuccess={() => {}} onConfirmPost={handleConfirmPost} initialValues={repostRideData} isEditing={false} userPhone={userData.phone} />}
-      {isEditModalOpen && editingRide && <PostRideForm onClose={() => { setIsEditModalOpen(false); setEditingRide(null); }} onConfirmPost={handleSaveEditedRide} onStopRide={() => {setEditingRide(activeRide); setShowArchiveConfirmModal(true);}} onArchiveRide={() => {setEditingRide(activeRide); setShowArchiveConfirmModal(true);}} initialValues={editingRide} isEditing={true} userPhone={userData.phone} />}
+      {showPostRide && <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle(t('ride')); }} onPostSuccess={() => {}} onConfirmPost={handleConfirmPost} initialValues={repostRideData} isEditing={false} onStopRide={() => {}} onArchiveRide={() => {}} userPhone={userData.phone} />}
+      {isEditModalOpen && editingRide && <PostRideForm onClose={() => { setIsEditModalOpen(false); setEditingRide(null); }} onPostSuccess={() => {}} onConfirmPost={handleSaveEditedRide} onStopRide={() => {setEditingRide(activeRide); setShowArchiveConfirmModal(true);}} onArchiveRide={() => {setEditingRide(activeRide); setShowArchiveConfirmModal(true);}} initialValues={editingRide} isEditing={true} userPhone={userData.phone} />}
       <CarTypeModal isOpen={showCarTypeModal} onClose={() => setShowCarTypeModal(false)} onSelectCar={setSelectedCar} currentCar={selectedCar} />
       {showConfirmationModal && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
