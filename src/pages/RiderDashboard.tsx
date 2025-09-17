@@ -1,5 +1,116 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info, Car, MessageCircle, Send, Plus, Minus } from 'lucide-react';
+import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info, Car, MessageCircle, Send, Plus, Minus, Globe } from 'lucide-react';
+
+const translations = {
+  en: {
+    findYourNextRide: "Find Your Next Ride",
+    selectPickupAndDestination: "Select your pickup and destination locations.",
+    origin: "Origin",
+    destination: "Destination",
+    selectADate: "Select a date",
+    howManySeats: "How many seats?",
+    continue: "Continue",
+    search: "Search",
+    history: "History",
+    profile: "Profile",
+    results: "Results",
+    bySeat: "By seat",
+    byTime: "By time",
+    withMailOption: "With mail option",
+    saved: "Saved",
+    recommended: "Recommended",
+    seatsNeeded: "Seats Needed:",
+    allAvailableRides: "All Available Rides",
+    recommendedForYou: "Recommended for you",
+    savedRides: "Saved Rides",
+    mailDelivery: "Mail Delivery",
+    sortedBySeat: "Sorted by: Seat",
+    sortedByTime: "Sorted by: Time",
+    rideHistory: "Ride History",
+    pastRidesAppearHere: "Your past rides will appear here.",
+    bookedOn: "Booked on:",
+    seatsUnit: "seat(s)",
+    language: "Language",
+    goToDriverAccount: "Go to Driver Account",
+    memberSince: "Member since 2024",
+    selectOrigin: "Select Origin",
+    selectDestination: "Select Destination",
+    support: "Support",
+    selectLanguage: "Select Language",
+  },
+  uz: {
+    findYourNextRide: "Keyingi Sayohatni Toping",
+    selectPickupAndDestination: "Boshlanish va borish manzillarini tanlang.",
+    origin: "Boshlanish",
+    destination: "Manzil",
+    selectADate: "Sanani tanlang",
+    howManySeats: "Nechta o'rindiq?",
+    continue: "Davom etish",
+    search: "Qidirish",
+    history: "Tarix",
+    profile: "Profil",
+    results: "Natijalar",
+    bySeat: "O'rindiq bo'yicha",
+    byTime: "Vaqt bo'yicha",
+    withMailOption: "Pochta bilan",
+    saved: "Saqlangan",
+    recommended: "Tavsiya etilgan",
+    seatsNeeded: "Kerakli o'rindiqlar:",
+    allAvailableRides: "Barcha Mavjud Sayohatlar",
+    recommendedForYou: "Siz uchun tavsiya etilgan",
+    savedRides: "Saqlangan Sayohatlar",
+    mailDelivery: "Pochta Yetkazish",
+    sortedBySeat: "Saralash: O'rindiq",
+    sortedByTime: "Saralash: Vaqt",
+    rideHistory: "Sayohatlar Tarixi",
+    pastRidesAppearHere: "O'tgan sayohatlaringiz shu yerda paydo bo'ladi.",
+    bookedOn: "Band qilingan sana:",
+    seatsUnit: "o'rindiq",
+    language: "Til",
+    goToDriverAccount: "Haydovchi Akkountiga O'tish",
+    memberSince: "2024 yildan beri a'zo",
+    selectOrigin: "Boshlanish Manzilini Tanlang",
+    selectDestination: "Borish Manzilini Tanlang",
+    support: "Yordam",
+    selectLanguage: "Tilni Tanlang",
+  },
+  ru: {
+    findYourNextRide: "Найти следующую поездку",
+    selectPickupAndDestination: "Выберите места отправления и назначения.",
+    origin: "Откуда",
+    destination: "Куда",
+    selectADate: "Выберите дату",
+    howManySeats: "Сколько мест?",
+    continue: "Продолжить",
+    search: "Поиск",
+    history: "История",
+    profile: "Профиль",
+    results: "Результаты",
+    bySeat: "По местам",
+    byTime: "По времени",
+    withMailOption: "С почтой",
+    saved: "Сохраненные",
+    recommended: "Рекомендуемые",
+    seatsNeeded: "Нужно мест:",
+    allAvailableRides: "Все доступные поездки",
+    recommendedForYou: "Рекомендовано для вас",
+    savedRides: "Сохраненные поездки",
+    mailDelivery: "Доставка почты",
+    sortedBySeat: "Сортировка: Места",
+    sortedByTime: "Сортировка: Время",
+    rideHistory: "История поездок",
+    pastRidesAppearHere: "Ваши прошлые поездки появятся здесь.",
+    bookedOn: "Забронировано:",
+    seatsUnit: "мест(а)",
+    language: "Язык",
+    goToDriverAccount: "Перейти в аккаунт водителя",
+    memberSince: "Участник с 2024 года",
+    selectOrigin: "Выберите место отправления",
+    selectDestination: "Выберите место назначения",
+    support: "Поддержка",
+    selectLanguage: "Выберите язык",
+  },
+};
 
 // Expanded Data for Uzbekistan Regions and Cities - ALL 14 REGIONS INCLUDED
 const uzbekistanLocationsData = [
@@ -23,7 +134,7 @@ const uzbekistanLocationsData = [
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { weekday: 'short' as const, month: 'short' as const, day: 'numeric' as const };
+  const options = { weekday: 'short', month: 'short', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
 };
 
@@ -31,7 +142,7 @@ const formatDate = (dateString) => {
 const formatTime = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { hour: '2-digit' as const, minute: '2-digit' as const, hourCycle: 'h23' as const }; // 24-hour format
+  const options = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
   return date.toLocaleTimeString('en-US', options);
 };
 
@@ -140,6 +251,16 @@ const parseTripTimeToMinutes = (timeString) => {
     return totalMinutes;
 };
 
+// --- Custom Scrollbar Styles Component ---
+const CustomScrollbarStyles = () => (
+  <style>{`
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F8F8F8; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #94a3b8; border-radius: 10px; border: 2px solid #F8F8F8; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #64748b; }
+  `}</style>
+);
+
 // Component to render the styled car plate number
 const PlateNumber = ({ plate }) => {
   if (!plate) return null;
@@ -191,12 +312,6 @@ const TipBar = ({ icon, text, onClose }) => {
         </div>
     );
 };
-
-const CheapestIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-);
 
 const CalendarView = ({ onDayClick, selectedDate }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -261,37 +376,6 @@ const CalendarModal = ({ isOpen, onClose, onDayClick, selectedDate }) => {
         </div>
     );
 };
-  
-// --- Custom Scrollbar Styles Component ---
-const CustomScrollbarStyles = () => (
-  <style>{`
-    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #F8F8F8; border-radius: 10px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #94a3b8; border-radius: 10px; border: 2px solid #F8F8F8; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #64748b; }
-  `}</style>
-);
-
-// Component to visually represent seat availability
-const SeatAvailability = ({ count }) => {
-  const seatCount = parseInt(count) || 0;
-  if (seatCount === 0) return null;
-
-  return (
-    <div className="flex items-center">
-      <div className="flex items-center space-x-2">
-        {[...Array(seatCount)].map((_, i) => (
-          <User key={i} size={28} className="text-green-600 bg-green-100 p-1.5 rounded-full" />
-        ))}
-      </div>
-      <div className="ml-2 text-left">
-        <span className="text-lg font-bold text-gray-800">{seatCount}</span>
-        <p className="text-xs text-gray-600 -mt-1 leading-tight">available seats</p>
-      </div>
-    </div>
-  );
-};
-
 
 // Location Selection Modal Component
 const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
@@ -405,6 +489,41 @@ const BookingModal = ({ isOpen, onClose, ride, onConfirmBooking }) => {
   );
 };
 
+const LanguageSelectModal = ({ isOpen, onClose, onSelect, currentLanguage, t }) => {
+  if (!isOpen) return null;
+
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'uz', name: 'Oʻzbekcha' },
+    { code: 'ru', name: 'Русский' },
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm flex flex-col">
+        <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-800">{t.selectLanguage}</h2>
+          <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        <div className="p-2">
+          {languages.map(lang => (
+            <button
+              key={lang.code}
+              onClick={() => { onSelect(lang.code); onClose(); }}
+              className={`w-full text-left p-4 rounded-lg flex justify-between items-center hover:bg-gray-100 transition-colors ${currentLanguage === lang.code ? 'font-semibold text-green-600' : 'text-gray-800'}`}
+            >
+              <span>{lang.name}</span>
+              {currentLanguage === lang.code && <div className="w-2 h-2 bg-green-500 rounded-full"></div>}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 // Main App component
 const App = () => {
@@ -412,7 +531,6 @@ const App = () => {
   const [pickupLocation, setPickupLocation] = useState('');
   const [destinationLocation, setDestinationLocation] = useState('');
   const [pickupDate, setPickupDate] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [activeFilter, setActiveFilter] = useState(null); // 'saved', 'recommended', 'mail'
   const [activeSort, setActiveSort] = useState(null); // 'by_seat', 'by_time'
@@ -429,8 +547,12 @@ const App = () => {
   const [rideHistory, setRideHistory] = useState([]);
   const [isBooking, setIsBooking] = useState(false);
   const [rideToBook, setRideToBook] = useState(null);
+  const [language, setLanguage] = useState('en');
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   // Use the initial dummy data directly, as Supabase is not available in this environment.
   const [availableRides, setAvailableRides] = useState(initialDummySearchResults);
+
+  const t = translations[language];
 
   const handleBookClick = (ride) => {
     setRideToBook(ride);
@@ -507,7 +629,7 @@ const App = () => {
       case 'history':
         return (
           <div className="p-6">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Ride History</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">{t.rideHistory}</h2>
             {rideHistory.length > 0 ? (
               <div className="space-y-4">
                 {rideHistory.map(ride => (
@@ -515,18 +637,18 @@ const App = () => {
                        <div className="flex justify-between items-start">
                            <div>
                                <p className="font-semibold text-lg">{ride.origin} to {ride.destination}</p>
-                               <p className="text-sm text-gray-600">Booked on: {formatDate(ride.bookingDate)}</p>
+                               <p className="text-sm text-gray-600">{t.bookedOn} {formatDate(ride.bookingDate)}</p>
                            </div>
                            <div className="text-right">
                                <p className="font-bold text-lg text-green-600">${(ride.basePrice * ride.seatsBooked).toFixed(2)}</p>
-                               <p className="text-sm text-gray-600">{ride.seatsBooked} seat(s)</p>
+                               <p className="text-sm text-gray-600">{ride.seatsBooked} {t.seatsUnit}</p>
                            </div>
                        </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-600 text-center mt-10">Your past rides will appear here.</p>
+              <p className="text-gray-600 text-center mt-10">{t.pastRidesAppearHere}</p>
             )}
           </div>
         );
@@ -572,33 +694,36 @@ const App = () => {
               mail: { icon: <AmazonMailLogo className="text-white"/>, text: "Showing rides that can also deliver mail. Mail should not be more than 5 kg." },
           };
           
-          let stickyTitle = "All Available Rides";
-          if(activeFilter === 'recommended') stickyTitle = "Recommended for you";
-          else if(activeFilter === 'saved') stickyTitle = "Saved Rides";
-          else if(activeFilter === 'mail') stickyTitle = "Mail Delivery";
-          else if(activeSort === 'by_seat') stickyTitle = "Sorted by: Seat";
-          else if(activeSort === 'by_time') stickyTitle = "Sorted by: Time";
+          let stickyTitle = t.allAvailableRides;
+          if(activeFilter === 'recommended') stickyTitle = t.recommendedForYou;
+          else if(activeFilter === 'saved') stickyTitle = t.savedRides;
+          else if(activeFilter === 'mail') stickyTitle = t.mailDelivery;
+          else if(activeSort === 'by_seat') stickyTitle = t.sortedBySeat;
+          else if(activeSort === 'by_time') stickyTitle = t.sortedByTime;
 
 
           return (
             <div className="flex flex-col h-full">
               <div className="flex-shrink-0 bg-white shadow-sm z-10">
                 <div className="p-4 border-b border-neutral-200">
-                  <h2 className="text-lg font-semibold text-gray-800 text-left mb-3">Results</h2>
+                  <div className="flex items-center mb-3">
+                    <button className="p-2 rounded-full hover:bg-neutral-100 transition-colors -ml-2 mr-2" onClick={() => { setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setShowSearchResults(false); setActiveFilter(null); setActiveSort(null); setSeatsNeeded(null); }}><ChevronLeft size={24} /></button>
+                    <h2 className="text-lg font-semibold text-gray-800 text-left">{t.results}</h2>
+                  </div>
                   <div className="flex flex-col gap-4">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                           <div className="flex items-center space-x-2 flex-wrap gap-2">
                               <button onClick={() => handleSortClick('by_seat')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'by_seat' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
                                   <Users size={16} />
-                                  <span>By seat</span>
+                                  <span>{t.bySeat}</span>
                               </button>
                               <button onClick={() => handleSortClick('by_time')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'by_time' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
                                   <History size={16} />
-                                  <span>By time</span>
+                                  <span>{t.byTime}</span>
                               </button>
                                <button onClick={() => handleFilterClick('mail')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'mail' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
                                   {activeFilter === 'mail' ? <X size={16} /> : <AmazonMailLogo className="w-5 h-5"/>}
-                                  <span>With mail option</span>
+                                  <span>{t.withMailOption}</span>
                               </button>
                           </div>
 
@@ -606,16 +731,16 @@ const App = () => {
                               <div className="w-px h-6 bg-gray-300 mx-1 hidden sm:block"></div>
                               <button onClick={() => handleFilterClick('saved')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'saved' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
                                   {activeFilter === 'saved' ? <X size={16} /> : <Bookmark size={16} />}
-                                  <span>Saved</span>
+                                  <span>{t.saved}</span>
                               </button>
                                <button onClick={() => handleFilterClick('recommended')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'recommended' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
                                   {activeFilter === 'recommended' ? <X size={16} /> : <Lightbulb size={16} />}
-                                  <span>Recommended</span>
+                                  <span>{t.recommended}</span>
                               </button>
                           </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                          <span className="text-sm font-semibold text-gray-700">Seats Needed:</span>
+                          <span className="text-sm font-semibold text-gray-700">{t.seatsNeeded}</span>
                           {[1, 2, 3, 4].map(num => (
                               <button key={num} onClick={() => handleSeatsNeededClick(num)} className={`w-10 h-10 rounded-full text-sm font-semibold transition-colors ${seatsNeeded === num ? 'bg-green-500 text-white' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
                                   {num}
@@ -694,47 +819,31 @@ const App = () => {
           // Display initial location/date selection form
           return (
             <div className="p-6 text-center">
-              <h2 className="text-2xl font-semibold mb-2 text-gray-800">Find Your Next Ride</h2>
-              <p className="text-md text-gray-600 mb-6">Select your pickup and destination locations.</p>
+              <h2 className="text-2xl font-semibold mb-2 text-gray-800">{t.findYourNextRide}</h2>
+              <p className="text-md text-gray-600 mb-6">{t.selectPickupAndDestination}</p>
               <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200 space-y-4">
                 
                 <div onClick={() => setShowFromModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${pickupLocation ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
-                    <span>{pickupLocation || "Origin"}</span>
+                    <span>{pickupLocation || t.origin}</span>
                     <MapPin className="h-5 w-5 text-neutral-500" />
                 </div>
-                <LocationSelectModal title="Select Origin" isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setPickupLocation} />
+                <LocationSelectModal title={t.selectOrigin} isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setPickupLocation} />
 
                 <div onClick={() => setShowToModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${destinationLocation ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
-                    <span>{destinationLocation || "Destination"}</span>
+                    <span>{destinationLocation || t.destination}</span>
                     <Target className="h-5 w-5 text-neutral-500" />
                 </div>
-                <LocationSelectModal title="Select Destination" isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setDestinationLocation} />
+                <LocationSelectModal title={t.selectDestination} isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setDestinationLocation} />
                 
                 <div className="relative text-left">
                    <button onClick={() => setShowCalendar(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${pickupDate ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`}>
-                        <span>{pickupDate ? formatDate(pickupDate) : 'Select a date'}</span>
+                        <span>{pickupDate ? formatDate(pickupDate) : t.selectADate}</span>
                         <Calendar className="h-5 w-5 text-neutral-500" />
                     </button>
                 </div>
                 
-                <div className={`relative flex items-center w-full p-3 bg-neutral-100 rounded-xl border ${phoneNumber.length === 9 ? 'border-green-700' : 'border-transparent'} focus-within:border-green-700`}>
-                    <span className="text-gray-800 font-semibold pr-2 border-r border-neutral-300">+998</span>
-                    <input 
-                        type="tel" 
-                        placeholder="Phone Number" 
-                        value={phoneNumber}
-                        onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, ''); // Allow only digits
-                            if (value.length <= 9) { // e.g. 901234567 (9 digits)
-                                setPhoneNumber(value);
-                            }
-                        }}
-                        className="w-full bg-transparent pl-2 text-gray-800 font-semibold placeholder-neutral-600 focus:outline-none"
-                    />
-                </div>
-
                 <div className="pt-4 border-t border-neutral-200">
-                    <p className="text-left font-semibold text-gray-700 mb-2">How many seats?</p>
+                    <p className="text-left font-semibold text-gray-700 mb-2">{t.howManySeats}</p>
                     <div className="flex items-center justify-center space-x-4">
                         {[1, 2, 3, 4].map(num => (
                             <button key={num} onClick={() => handleSeatsNeededClick(num)} className={`w-12 h-12 rounded-full text-md font-semibold transition-colors flex items-center justify-center ${seatsNeeded === num ? 'bg-green-500 text-white' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
@@ -745,15 +854,38 @@ const App = () => {
                 </div>
 
               </div>
-              <p className="mt-6 text-gray-700 font-medium">Ready to hit the road? Let's find your perfect ride!</p>
             </div>
           );
         }
       case 'profile':
         return (
-          <div className="p-6 text-center">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">User Profile</h2>
-            <p className="text-gray-600">Your profile details will appear here.</p>
+          <div className="p-6 bg-gray-50 h-full">
+            <div className="text-center mb-8">
+                <img src="https://placehold.co/100x100/E2E8F0/4A5568?text=JD" alt="User" className="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-lg"/>
+                <h2 className="text-2xl font-bold text-gray-800">John Doe</h2>
+                <p className="text-sm text-gray-600">{t.memberSince}</p>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
+                <button className="w-full text-left p-4 flex items-center hover:bg-gray-50 transition-colors">
+                    <Car size={22} className="text-gray-600 mr-4"/>
+                    <span className="flex-grow font-semibold text-gray-700">{t.goToDriverAccount}</span>
+                    <ChevronRight size={20} className="text-gray-400"/>
+                </button>
+
+                <button onClick={() => setShowLanguageModal(true)} className="w-full text-left p-4 flex items-center border-t border-neutral-200 hover:bg-gray-50 transition-colors">
+                    <Globe size={22} className="text-gray-600 mr-4"/>
+                    <span className="flex-grow font-semibold text-gray-700">{t.language}</span>
+                    <span className="text-gray-600 mr-2">{language.toUpperCase()}</span>
+                    <ChevronRight size={20} className="text-gray-400"/>
+                </button>
+
+                <button className="w-full text-left p-4 flex items-center border-t border-neutral-200 hover:bg-gray-50 transition-colors">
+                    <MessageCircle size={22} className="text-gray-600 mr-4"/>
+                    <span className="flex-grow font-semibold text-gray-700">{t.support}</span>
+                    <ChevronRight size={20} className="text-gray-400"/>
+                </button>
+            </div>
           </div>
         );
       default:
@@ -764,11 +896,6 @@ const App = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F8F8] font-sans antialiased">
       <CustomScrollbarStyles />
-      <header className="bg-white text-gray-800 p-3 flex items-center justify-between shadow-md border-b border-neutral-200 z-20 relative">
-        {showSearchResults || selectedRide ? (<button className="p-2 rounded-full hover:bg-neutral-100 transition-colors" onClick={() => { if(selectedRide) {setSelectedRide(null)} else {setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setPhoneNumber(''); setShowSearchResults(false); setActiveFilter(null); setActiveSort(null); setSeatsNeeded(null); } }}><ChevronLeft size={24} /></button>) : (<div className="w-10"></div>)}
-        <h1 className="text-xl font-bold absolute left-1/2 -translate-x-1/2">Rider's Dashboard</h1>
-        <div className="w-10"></div>
-      </header>
 
       <main className="flex-grow overflow-hidden flex flex-col">
         {renderContent()}
@@ -778,14 +905,14 @@ const App = () => {
         <div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40">
           <button 
             className={`w-full py-3 rounded-lg font-semibold transition duration-300 shadow-xl transform hover:scale-105 ${
-              pickupLocation && destinationLocation && pickupDate && phoneNumber.length === 9
+              pickupLocation && destinationLocation && pickupDate && seatsNeeded
                 ? 'bg-green-500 text-white hover:bg-green-600' 
                 : 'bg-gray-300 text-gray-600 cursor-not-allowed'
             }`} 
             onClick={() => setShowSearchResults(true)}
-            disabled={!(pickupLocation && destinationLocation && pickupDate && phoneNumber.length === 9)}
+            disabled={!(pickupLocation && destinationLocation && pickupDate && seatsNeeded)}
           >
-            Continue
+            {t.continue}
           </button>
         </div>
       )}
@@ -794,21 +921,21 @@ const App = () => {
         <div className="bg-neutral-100 rounded-full flex items-center p-1 max-w-sm mx-auto">
           <button
             className={`flex-1 py-2 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === 'search' ? 'bg-white shadow text-gray-800' : 'text-neutral-500'}`}
-            onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setPhoneNumber(''); setActiveFilter(null); setActiveSort(null); setSelectedRide(null); setSeatsNeeded(null); }}>
+            onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setActiveFilter(null); setActiveSort(null); setSelectedRide(null); setSeatsNeeded(null); }}>
               <Search size={20} />
-              <span>Search</span>
+              <span>{t.search}</span>
           </button>
           <button
             className={`flex-1 py-2 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === 'history' ? 'bg-white shadow text-gray-800' : 'text-neutral-500'}`}
             onClick={() => setActiveTab('history')}>
               <History size={20} />
-              <span>History</span>
+              <span>{t.history}</span>
           </button>
           <button
             className={`flex-1 py-2 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === 'profile' ? 'bg-white shadow text-gray-800' : 'text-neutral-500'}`}
             onClick={() => setActiveTab('profile')}>
               <User size={20} />
-              <span>Profile</span>
+              <span>{t.profile}</span>
           </button>
         </div>
       </nav>
@@ -826,6 +953,13 @@ const App = () => {
         onClose={() => setIsBooking(false)}
         ride={rideToBook}
         onConfirmBooking={handleConfirmBooking}
+      />
+      <LanguageSelectModal
+        isOpen={showLanguageModal}
+        onClose={() => setShowLanguageModal(false)}
+        currentLanguage={language}
+        onSelect={setLanguage}
+        t={t}
       />
     </div>
   );
@@ -874,7 +1008,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
             <div className="bg-white text-gray-800 p-4 flex-shrink-0 border-b border-neutral-200">
                  <div className="flex items-center">
                     <button onClick={onBack} className="mr-3 text-gray-600 hover:text-gray-800"><ChevronLeft size={24} /></button>
-                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4" onError={(e) => ((e.target as HTMLImageElement).src = 'https://placehold.co/200x150/E2E8F0/4A5568?text=Image+Error')}/>
+                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4" onError={(e) => (e.target.src = 'https://placehold.co/200x150/E2E8F0/4A5568?text=Image+Error')}/>
                     <div className="flex items-stretch w-full">
                         <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
                             <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-neutral-300 rounded-full"></div>
@@ -929,7 +1063,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
                         </AccordionItem>
                          <AccordionItem icon={<User className="text-gray-600" />} title="Driver & Car" value="">
                             <div className="flex space-x-4">
-                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full" onError={(e) => ((e.target as HTMLImageElement).src = 'https://placehold.co/100x100/E2E8F0/4A5568?text=N/A')}/>
+                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full" onError={(e) => (e.target.src = 'https://placehold.co/100x100/E2E8F0/4A5568?text=N/A')}/>
                                 <div>
                                     <p className="font-semibold">{ride.driverName}</p>
                                     <div className="flex items-center text-sm text-gray-600">
@@ -959,5 +1093,4 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
 };
 
 export default App;
-
 
