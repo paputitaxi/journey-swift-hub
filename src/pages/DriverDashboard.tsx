@@ -1,9 +1,4 @@
-// Driver Dashboard - With Custom Scrollbar Styling
 import React, { useState, useEffect, useRef, createContext, useContext } from "react";
-// Note: In a real app, these would be properly imported from your project structure
-// For this example, we'll assume they are available.
-// import { supabase } from "@/integrations/supabase/client";
-// import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   Plus, User, MapPin, Calendar, Clock, Shield, Navigation, MessageCircle, Users,
@@ -14,9 +9,6 @@ import {
   UserRound, LifeBuoy, Archive as ArchiveIcon
 } from "lucide-react";
 
-// --- Mock Supabase and Toast ---
-// In a real environment, you'd use the actual libraries.
-// These mocks are for demonstration purposes to make the code runnable.
 const supabase = {
   from: (table) => ({
     select: (columns = '*') => ({
@@ -36,15 +28,11 @@ const useToast = () => {
     return {
         toast: ({ title, description }) => {
             console.log(`Toast: ${title} - ${description}`);
-            // A simple alert to simulate a toast notification for this example
-            // In a real app, you'd use a proper toast component library.
             alert(`${title}\n${description}`);
         }
     };
 };
 
-
-// --- i18n Translations ---
 const translations = {
   en: {
     ride: "Ride", newRide: "New Ride", myLines: "My Lines", profile: "Profile", history: "History",
@@ -97,7 +85,9 @@ const translations = {
     archive: "Archive",
     youLoseClients: "You lose your clients!",
     repostRide: "Repost this ride",
-    yourNumber: "Your Number"
+    yourNumber: "Your Number",
+    driverLabel: "Driver",
+    switchAccount: "Switch to Rider Account"
   },
   uz: {
     ride: "Yo'lga chiqish", newRide: "Yangi e'lon", myLines: "Mening yo'nalishlarim", profile: "Profil", history: "Tarix",
@@ -150,7 +140,9 @@ const translations = {
     archive: "Arxiv",
     youLoseClients: "Mijozlaringizni yo'qotasiz!",
     repostRide: "Bu sayohatni qayta joylash",
-    yourNumber: "Sizning raqamingiz"
+    yourNumber: "Sizning raqamingiz",
+    driverLabel: "Haydovchi",
+    switchAccount: "Yo'lovchi hisobiga o'tish"
   },
   ru: {
     ride: "Поездка", newRide: "Новая поездка", myLines: "Мои поездки", profile: "Профиль", history: "История",
@@ -202,27 +194,24 @@ const translations = {
     confirmArchiveRide: "Вы уверены, что хотите архивировать эту поездку? Она будет удалена из ваших предстоящих поездок.",
     archive: "Архив",
     youLoseClients: "Вы потеряете своих клиентов!",
-    repostRide: "Повторно опубликовать"
+    repostRide: "Повторно опубликовать",
+    driverLabel: "Водитель",
+    switchAccount: "Переключиться на аккаунт пассажира"
   },
 };
 
-// --- Language Context ---
 const LanguageContext = createContext({ t: (key) => key, language: 'en', setLanguage: (lang) => {} });
 const useLanguage = () => useContext(LanguageContext);
 
-// --- Custom Scrollbar Styles Component ---
 const CustomScrollbarStyles = () => (
   <style>{`
-    /* For Webkit-based browsers (Chrome, Safari, Edge) */
     .custom-scrollbar::-webkit-scrollbar { width: 8px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #94a3b8; border-radius: 10px; border: 2px solid #F8F8F800; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #64748b; }
     .animate-spin-slow { animation: spin 2s linear infinite; }
-    /* Hide the default Leaflet routing instructions panel */
     .leaflet-routing-container { display: none !important; }
 
-    /* Radar Animation */
     .radar-emitter {
         position: relative;
         width: 100px;
@@ -281,15 +270,12 @@ const CustomScrollbarStyles = () => (
   `}</style>
 );
 
-
-// Helper component for a simple avatar
 const Avatar = ({ initials, bgColor, size = 'w-10 h-10', src = null }) => (
     <div className={`relative rounded-full flex items-center justify-center text-white text-lg font-semibold ${bgColor} ${size}`} >
         {src ? <img src={src} alt="profile" className="rounded-full w-full h-full object-cover" /> : initials}
     </div>
 );
 
-// Message Dashboard component with Telegram-like UX
 const MessageDashboard = ({ onClose }) => {
   const { t } = useLanguage();
   const [activeMessageTab, setActiveMessageTab] = useState("chats");
@@ -344,7 +330,6 @@ const MessageDashboard = ({ onClose }) => {
       };
     });
     setDraft("");
-    // Simulate quick auto-reply
     setTimeout(() => {
       setConversations((prev) => {
         const msgs = prev[selectedChat.id] || [];
@@ -422,7 +407,7 @@ const MessageDashboard = ({ onClose }) => {
               <ChevronLeft className="h-6 w-6" />
             </button>
             <h2 className="text-lg font-semibold text-gray-800 flex-1 truncate">{selectedChat.name}</h2>
-            <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
+            <div className="w-6 h-6"></div>
           </>
         ) : isSearching ? (
           <>
@@ -478,7 +463,6 @@ const MessageDashboard = ({ onClose }) => {
   );
 };
 
-// Expanded Data for Uzbekistan Regions and Cities - ALL 14 REGIONS INCLUDED
 const uzbekistanLocations = [
   { region: "Andijan Region", cities: ["Andijan", "Asaka", "Baliqchi", "Bo'ston", "Buloqboshi", "Izboskan", "Jalaquduq", "Marhamat", "Oltinko'l", "Paxtaobod", "Qo'rg'ontepa", "Shahrixon", "Ulug'nor", "Xo'jaobod"] },
   { region: "Bukhara Region", cities: ["Bukhara", "Galaosiyo", "G'ijduvon", "Jondor", "Kogon", "Olot", "Peshku", "Qorako'l", "Qorovulbozor", "Romitan", "Shofirkon", "Vobkent"] },
@@ -497,12 +481,11 @@ const uzbekistanLocations = [
 ];
 
 const uzbekistanCars = [
-    'Chevrolet Cobalt', 'Chevrolet Lacetti', 'Chevrolet Nexia 3', 'Chevrolet Spark', 
+    'Chevrolet Cobalt', 'Chevrolet Lacetti', 'Chevrolet Nexia 3', 'Chevrolet Spark',
     'Chevrolet Damas', 'Daewoo Matiz', 'Daewoo Nexia', 'Hyundai Elantra', 'Kia K5',
     'Lada Vesta', 'BYD Song Plus', 'Chery Tiggo 7 Pro'
 ];
 
-// Car Type Selection Modal
 const CarTypeModal = ({ isOpen, onClose, onSelectCar, currentCar }) => {
     const { t } = useLanguage();
     if (!isOpen) return null;
@@ -538,8 +521,6 @@ const CarTypeModal = ({ isOpen, onClose, onSelectCar, currentCar }) => {
     );
 };
 
-
-// Location Selection Modal Component
 const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
@@ -594,7 +575,6 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
   );
 };
 
-// Main Post Ride Form Component
 const PostRideForm = ({ onClose, onPostSuccess, onConfirmPost, initialValues, isEditing, onStopRide, onArchiveRide, userPhone }) => {
   const { t } = useLanguage();
   const [fromLocation, setFromLocation] = useState(initialValues?.fromLocation || "");
@@ -718,14 +698,14 @@ const PostRideForm = ({ onClose, onPostSuccess, onConfirmPost, initialValues, is
                 <div className="mt-3">
                     <label className="block text-neutral-800 text-sm font-medium mb-2">{t('mailPriceLabel')}</label>
                     <div className="relative">
-                        <input 
-                            type="text" 
-                            inputMode="numeric" 
-                            pattern="[0-9]*" 
-                            placeholder={t('enterMailPrice')} 
+                        <input
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            placeholder={t('enterMailPrice')}
                             className={`w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] ${submissionAttempted && mailService === 'yes' && !mailPrice ? 'border border-red-500' : ''}`}
-                            value={mailPrice} 
-                            onChange={(e) => { const value = e.target.value; if (/^[0-9]*$/.test(value)) { setMailPrice(value); } }} 
+                            value={mailPrice}
+                            onChange={(e) => { const value = e.target.value; if (/^[0-9]*$/.test(value)) { setMailPrice(value); } }}
                         />
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">$</span>
                     </div>
@@ -798,13 +778,13 @@ const PostRideForm = ({ onClose, onPostSuccess, onConfirmPost, initialValues, is
           <div>
             <label className="block text-neutral-800 text-sm font-medium mb-2">{t('price')}</label>
             <div className="relative">
-              <input 
-                type="text" 
-                inputMode="numeric" 
-                pattern="[0-9]*" 
-                placeholder={t('enterPrice')} 
-                className={`w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] ${submissionAttempted && !price ? 'border border-red-500' : ''}`} 
-                value={price} 
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder={t('enterPrice')}
+                className={`w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] ${submissionAttempted && !price ? 'border border-red-500' : ''}`}
+                value={price}
                 onChange={(e) => { const value = e.target.value; if (/^[0-9]*$/.test(value)) { setPrice(value); } }} />
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">$</span>
             </div>
@@ -812,16 +792,16 @@ const PostRideForm = ({ onClose, onPostSuccess, onConfirmPost, initialValues, is
           <div>
             <label className="block text-neutral-800 text-sm font-medium mb-2">{t('yourNumber')}</label>
             <div className="relative">
-              <input 
-                type="text" 
-                placeholder={t('phone')} 
-                className={`w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] ${submissionAttempted && !contactNumber ? 'border border-red-500' : ''}`} 
-                value={contactNumber} 
+              <input
+                type="text"
+                placeholder={t('phone')}
+                className={`w-full p-3 pl-10 bg-neutral-100 rounded-xl text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] ${submissionAttempted && !contactNumber ? 'border border-red-500' : ''}`}
+                value={contactNumber}
                 onChange={(e) => setContactNumber(e.target.value)} />
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"><Phone className="h-5 w-5"/></span>
             </div>
           </div>
-          <button type="submit" className={`w-full py-3 rounded-xl text-lg font-semibold transition-colors flex items-center justify-center shadow-lg 
+          <button type="submit" className={`w-full py-3 rounded-xl text-lg font-semibold transition-colors flex items-center justify-center shadow-lg
             ${isFormValid ? "bg-green-500 hover:bg-green-600 text-white" : "bg-gray-600 text-gray-400 cursor-not-allowed"}`} >
              {isEditing ? t('updateRide') : t('postRide')}
           </button>
@@ -855,7 +835,6 @@ const PostRideForm = ({ onClose, onPostSuccess, onConfirmPost, initialValues, is
   );
 };
 
-// --- Seat Indicator Component ---
 const SeatIndicator = ({ totalSeats = 4, availableSeats }) => {
   return (
     <div className="flex flex-col items-center">
@@ -879,7 +858,6 @@ const SeatIndicator = ({ totalSeats = 4, availableSeats }) => {
   );
 };
 
-// --- Ride Detail Modal ---
 const RideDetailModal = ({ ride, isOpen, onClose, onRepost }) => {
     const { t } = useLanguage();
     const [selectedPassenger, setSelectedPassenger] = useState(null);
@@ -901,7 +879,7 @@ const RideDetailModal = ({ ride, isOpen, onClose, onRepost }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans" onClick={() => setSelectedPassenger(null)}>
             {selectedPassenger && (
-              <div 
+              <div
                   className="fixed bg-white rounded-xl shadow-2xl z-[51] p-2 space-y-1"
                   style={{ top: popoverPosition.top, left: popoverPosition.left }}
               >
@@ -917,7 +895,6 @@ const RideDetailModal = ({ ride, isOpen, onClose, onRepost }) => {
                     </button>
                 </div>
                 <div className="p-4 space-y-4 overflow-y-auto custom-scrollbar">
-                    {/* Ride Details */}
                     <div className="flex justify-between items-start">
                         <div>
                             <div className="flex items-center text-lg font-bold text-gray-800"><MapPin className="h-5 w-5 mr-2 text-green-600" />{ride.fromLocation}</div>
@@ -943,8 +920,7 @@ const RideDetailModal = ({ ride, isOpen, onClose, onRepost }) => {
                         <div className="flex items-center">{ride.departureType === 'fixed' ? <Clock className="h-5 w-5 mr-2" /> : <Users className="h-5 w-5 mr-2" />}<span>{ride.departureType === 'fixed' ? t('fixedDeparture') : t('whenFills')}</span></div>
                     </div>
                     <div className="flex items-center text-sm text-neutral-600"><div className="flex items-center"><Car className="h-5 w-5 mr-2" /><span>{ride.carType}</span></div></div>
-                    
-                    {/* Passengers List */}
+
                     <div className="border-t border-neutral-200/50"></div>
                     <div>
                         <h3 className="text-md font-semibold text-gray-800 mb-2">{t('passengers')}</h3>
@@ -978,7 +954,6 @@ const RideDetailModal = ({ ride, isOpen, onClose, onRepost }) => {
 };
 
 
-// --- Edit Profile Modal ---
 const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
     const { t } = useLanguage();
     const [formData, setFormData] = useState(user);
@@ -1029,7 +1004,6 @@ const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
     );
 };
 
-// --- Edit Car Modal ---
 const EditCarModal = ({ car, isOpen, onClose, onSave }) => {
     const { t } = useLanguage();
     const [formData, setFormData] = useState(car);
@@ -1073,7 +1047,6 @@ const EditCarModal = ({ car, isOpen, onClose, onSave }) => {
     );
 };
 
-// --- Generic Settings Modal ---
 const SettingsModal = ({ title, isOpen, onClose, children }) => {
     if (!isOpen) return null;
     return (
@@ -1160,7 +1133,6 @@ const ArchivePage = ({ archivedRides, onRideClick }) => {
     );
 };
 
-// --- Profile Page Component ---
 const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides, openOnMount, onMountHandled }) => {
     const { t, language, setLanguage } = useLanguage();
     const [showEditProfile, setShowEditProfile] = useState(false);
@@ -1204,7 +1176,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides, openOnMount, on
             </div>
         </button>
     );
-    
+
     const UpcomingRidesContent = () => (
         <div>
             <h3 className="font-semibold mb-2">{t('upcomingRides')}</h3>
@@ -1219,8 +1191,8 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides, openOnMount, on
 
     const LanguageSelectionContent = ({ currentLanguage, onSelectLanguage }) => {
         const languages = [
-            { key: "uz", name: t('uzbek')}, 
-            { key: "en", name: t('english')}, 
+            { key: "uz", name: t('uzbek')},
+            { key: "en", name: t('english')},
             { key: "ru", name: t('russian')}
         ];
         return (
@@ -1250,7 +1222,6 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides, openOnMount, on
                 {settingsModalContent}
             </SettingsModal>
 
-            {/* --- Profile Header --- */}
             <div className="flex flex-col items-center space-y-3">
                 <div className="relative">
                     <Avatar src={user.profilePicture} size="w-24 h-24" initials="JD" bgColor="bg-gray-700" />
@@ -1259,6 +1230,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides, openOnMount, on
                     </button>
                 </div>
                 <h2 className="text-2xl font-bold">{user.fullName}</h2>
+                <p className="text-sm text-neutral-500 font-medium -mt-2">{t('driverLabel')}</p>
                 <div className="flex items-center space-x-4 text-sm text-neutral-600">
                     <div className="flex items-center">
                         <Star className="h-4 w-4 text-yellow-400 mr-1" />
@@ -1269,13 +1241,11 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides, openOnMount, on
                 </div>
             </div>
 
-            {/* --- Basic Info Card --- */}
             <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20">
                 <InfoItem icon={User} label={t('username')} value={`@${user.username}`} />
                 <InfoItem icon={Phone} label={t('phone')} value={user.phone} />
             </div>
-            
-            {/* --- Driver Details Card --- */}
+
             <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20">
                 <div className="flex justify-between items-center mb-2">
                     <h3 className="text-sm font-semibold text-neutral-800">{t('driverDetails')}</h3>
@@ -1286,21 +1256,23 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides, openOnMount, on
                 <InfoItem icon={Car} label={t('vehicle')} value={`${user.car.brand} ${user.car.model} (${user.car.year})`} />
             </div>
 
-            {/* --- Activity & History --- */}
             <div className="bg-white/80 backdrop-blur-sm p-2 rounded-2xl shadow-lg border border-white/20">
                  <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('activity')}</h3>
                  <SettingsItem icon={Calendar} label={t('upcomingRides')} value="" action={() => handleOpenSettings(t('upcomingRides'), <UpcomingRidesContent />)} />
             </div>
 
-
-            {/* --- Settings & Preferences --- */}
             <div className="bg-white/80 backdrop-blur-sm p-2 rounded-2xl shadow-lg border border-white/20">
                 <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('settings')}</h3>
-                <SettingsItem 
-                    icon={Languages} 
-                    label={t('language')} 
+                <SettingsItem
+                    icon={Languages}
+                    label={t('language')}
                     value={t(language === 'en' ? 'english' : language === 'uz' ? 'uzbek' : 'russian')}
-                    action={() => handleOpenSettings(t('language'), <LanguageSelectionContent currentLanguage={language} onSelectLanguage={setLanguage} />)} 
+                    action={() => handleOpenSettings(t('language'), <LanguageSelectionContent currentLanguage={language} onSelectLanguage={setLanguage} />)}
+                />
+                <SettingsItem
+                  icon={UserPlus}
+                  label={t('switchAccount')}
+                  action={() => console.log("Switching to rider account...")}
                 />
             </div>
         </div>
@@ -1308,7 +1280,7 @@ const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides, openOnMount, on
 };
 
 const LanguageProvider = ({ children }) => {
-    const [language, setLanguage] = useState("en"); // 'en', 'uz', 'ru'
+    const [language, setLanguage] = useState("en");
 
     const t = (key) => {
         return translations[language][key] || key;
@@ -1341,7 +1313,7 @@ const ArchiveConfirmModal = ({ isOpen, onClose, onConfirm, rideStatus }) => {
     </div>
   );
 };
-// --- Single, unified Confirmation Modal ---
+
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, onEdit, rideData, userData }) => {
     const { t } = useLanguage();
     if (!isOpen) return null;
@@ -1386,7 +1358,7 @@ const AppContent = () => {
   const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [headerTitle, setHeaderTitle] = useState(t('ride'));
-  const [historyView, setHistoryView] = useState('history'); // 'history' or 'archive'
+  const [historyView, setHistoryView] = useState('history');
   const [showPostRide, setShowPostRide] = useState(false);
   const [showEditRide, setShowEditRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
@@ -1399,8 +1371,7 @@ const AppContent = () => {
   const [activeRide, setActiveRide] = useState(null);
   const [selectedPassenger, setSelectedPassenger] = useState(null);
   const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
-  
-  // New state variables for ride flow
+
   const [isRideInProgress, setIsRideInProgress] = useState(false);
   const [showActiveRideErrorModal, setShowActiveRideErrorModal] = useState(false);
   const [showFinishRideModal, setShowFinishRideModal] = useState(false);
@@ -1488,7 +1459,7 @@ const AppContent = () => {
     setShowPostRide(false);
     setShowPostConfirmationModal(true);
   }
-  
+
   const executeAddRide = async () => {
     if (!rideDataToPost) return;
     try {
@@ -1508,7 +1479,7 @@ const AppContent = () => {
           mail_price: rideDataToPost.mailService === 'yes' ? parseFloat(rideDataToPost.mailPrice) || 0 : 0,
           available_seats: parseInt(rideDataToPost.freeSeats) || 4,
           total_seats: 4,
-          status: 'upcoming', // Rides start as upcoming
+          status: 'upcoming',
           car_type: selectedCar
         })
         .select()
@@ -1521,11 +1492,11 @@ const AppContent = () => {
           id: i + 1, name: `Passenger ${i + 1}`, gender: i % 2 === 0 ? "female" : "male",
       }));
       const rideWithId = { ...rideDataToPost, id: insertedRide.id, status: "upcoming", passengers: mockPassengers, carType: selectedCar };
-      
+
       setActiveRide(rideWithId);
-      
+
       setRideDataToPost(null);
-      
+
       setIsSearchingForClients(true);
       setTimeout(() => {
           setActiveRide(rideWithId);
@@ -1535,13 +1506,12 @@ const AppContent = () => {
       console.error('Error in handleAddRide:', error);
     }
   };
- 
+
   const handleUpdateRide = (updatedRideData) => {
-    // Logic to update the ride in the mock DB and state
     setActiveRide(updatedRideData);
     setMyRides(prev => prev.map(ride => ride.id === updatedRideData.id ? updatedRideData : ride));
   };
-  
+
   const handleStopRide = () => {
     const rideToStop = editingRide;
     if(rideToStop) {
@@ -1581,11 +1551,11 @@ const AppContent = () => {
       setShowConfirmationModal(false);
       setIsRideInProgress(true);
   };
-  
+
   const handleFinishRideClick = () => {
     setShowFinishRideModal(true);
   };
-  
+
   const confirmFinishRide = () => {
     console.log("Ride Finished!");
     setMyRides(prevRides =>
@@ -1597,12 +1567,12 @@ const AppContent = () => {
     setIsRideInProgress(false);
     setShowFinishRideModal(false);
   };
-  
+
   const handleHistoryRideClick = (ride) => {
     setSelectedHistoryRide(ride);
     setShowHistoryDetailModal(true);
   };
-  
+
   const handleEditProfileClick = () => {
     setActiveTab('profile');
     setOpenProfileEdit(true);
@@ -1610,11 +1580,16 @@ const AppContent = () => {
 
   const handleBack = () => {
     if (showPostRide) { setShowPostRide(false); }
-    else if (showMessages) { setShowMessages(false); } 
+    else if (showMessages) { setShowMessages(false); }
     else if (showEditRide) { setShowEditRide(false); }
     else if (showStatsModal) { setShowStatsModal(false); }
     else if (isEditModalOpen) { setIsEditModalOpen(false); }
     else if (showHistoryDetailModal) { setShowHistoryDetailModal(false); setSelectedHistoryRide(null);}
+    else if (showCarTypeModal) { setShowCarTypeModal(false); }
+    else if (showFinishRideModal) { setShowFinishRideModal(false); }
+    else if (showActiveRideErrorModal) { setShowActiveRideErrorModal(false); }
+    else if (showPostConfirmationModal) { setShowPostConfirmationModal(false); }
+    else if (showArchiveConfirmModal) { setShowArchiveConfirmModal(false); }
     else { setActiveTab("dashboard"); }
     setHeaderTitle(t('ride'));
   };
@@ -1653,14 +1628,14 @@ const AppContent = () => {
     setIsEditModalOpen(false);
     setEditingRide(null);
   };
-  
+
   const handlePassengerClick = (passenger, e) => {
       e.stopPropagation();
       const rect = e.currentTarget.getBoundingClientRect();
       setPopoverPosition({ top: rect.bottom + window.scrollY + 5, left: rect.left + window.scrollX, });
       setSelectedPassenger(passenger);
   };
-  
+
   const handleArchiveConfirm = (rideStatus) => {
       if (rideStatus === 'upcoming') {
           handleArchiveRide();
@@ -1675,7 +1650,7 @@ const AppContent = () => {
     setRepostRideData(ride);
     setShowPostRide(true);
   };
-  
+
   const renderActiveRideContent = () => {
       if (isSearchingForClients) {
           return (
@@ -1689,7 +1664,6 @@ const AppContent = () => {
           return (
               <>
                   <div className="p-4">
-                      {/* Ride Details */}
                       <div className="flex justify-between items-start">
                           <div>
                               <div className="flex items-center text-lg font-bold text-gray-800"><MapPin className="h-5 w-5 mr-2 text-green-600" />{activeRide.fromLocation}</div>
@@ -1716,7 +1690,6 @@ const AppContent = () => {
                       </div>
                       <div className="flex items-center text-sm text-neutral-600 mt-2"><div className="flex items-center"><Car className="h-5 w-5 mr-2" /><span>{activeRide.carType}</span></div></div>
                       <div className="border-t border-neutral-200/50 my-4"></div>
-                      {/* Passengers Section */}
                       <div>
                           <p className="text-sm font-medium text-neutral-800 mb-2">{t('passengers')}</p>
                           <div className="flex space-x-2">
@@ -1733,7 +1706,6 @@ const AppContent = () => {
                           </div>
                       </div>
                   </div>
-                  {/* Action Buttons */}
                   <div className="border-t border-neutral-200/50 p-4 flex gap-2">
                       {isRideInProgress ? (
                          <button onClick={handleFinishRideClick} className="w-full py-2 px-4 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-colors flex items-center justify-center">
@@ -1786,7 +1758,6 @@ const AppContent = () => {
       case "history":
         return (
           <div className="flex flex-col h-full">
-            {/* Toggle Bar */}
             <div className="p-4 pb-0">
               <div className="bg-muted/50 p-1 rounded-xl flex">
                 <button
@@ -1811,8 +1782,7 @@ const AppContent = () => {
                 </button>
               </div>
             </div>
-            
-            {/* Content */}
+
             <div className="flex-1 overflow-y-auto">
               {historyView === 'history' ? (
                 <div className="p-4 space-y-4 pb-20">
@@ -1908,13 +1878,13 @@ const AppContent = () => {
   };
 
   return (
-    <div 
+    <div
       className="h-screen text-gray-800 flex flex-col font-sans"
       style={{ backgroundImage: `url('https://images.unsplash.com/photo-1533106418989-88406e768d19?q=80&w=2940&auto=format&fit=crop')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
     >
       <CustomScrollbarStyles />
       {selectedPassenger && (
-          <div 
+          <div
               className="fixed bg-white rounded-xl shadow-2xl z-50 p-2 space-y-1"
               style={{ top: popoverPosition.top, left: popoverPosition.left }}
               onClick={() => setSelectedPassenger(null)}
@@ -1927,7 +1897,8 @@ const AppContent = () => {
       )}
       <header className="bg-white/80 backdrop-blur-sm p-3 border-b border-white/20 flex items-center justify-between z-20 shadow-lg relative rounded-b-2xl">
           <div className="w-1/3 flex justify-start">
-            {(activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal) ? (
+            {/* The back button is now shown if any state is active that isn't the main dashboard */}
+            {(activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal || showCarTypeModal || isEditModalOpen || showHistoryDetailModal || showPostConfirmationModal || showArchiveConfirmModal || showFinishRideModal || showActiveRideErrorModal) ? (
               <button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-black/10 transition-colors" >
                 <ChevronLeft className="h-6 w-6" />
               </button>
@@ -1998,7 +1969,7 @@ const AppContent = () => {
         </div>
       )}
        {showHistoryDetailModal && (
-        <RideDetailModal 
+        <RideDetailModal
             isOpen={showHistoryDetailModal}
             onClose={() => setShowHistoryDetailModal(false)}
             ride={selectedHistoryRide}
