@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 export type Language = 'uz' | 'en' | 'ru';
 
 interface LanguageContextType {
-  language: Language;
+  language: Language | null;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
 }
@@ -124,25 +124,23 @@ export const useLanguage = () => {
 };
 
 export const useLanguageProvider = () => {
-  const [language, setLanguageState] = useState<Language>(() => {
+  const [language, setLanguageState] = useState<Language | null>(() => {
     const saved = localStorage.getItem('app-language');
+    console.log('Saved language from localStorage:', saved);
     if (saved && ['uz', 'en', 'ru'].includes(saved)) {
       return saved as Language;
     }
-    
-    // Detect device language
-    const deviceLang = navigator.language.toLowerCase();
-    if (deviceLang.startsWith('uz')) return 'uz';
-    if (deviceLang.startsWith('ru')) return 'ru';
-    return 'en'; // Default fallback
+    return null; // Return null to show language selector
   });
 
   const setLanguage = (lang: Language) => {
+    console.log('Setting language to:', lang);
     setLanguageState(lang);
     localStorage.setItem('app-language', lang);
   };
 
   const t = (key: string): string => {
+    if (!language) return key;
     return translations[language][key] || key;
   };
 

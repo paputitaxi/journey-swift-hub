@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -59,6 +59,81 @@ export type Database = {
           id?: string
           nickname?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      rides: {
+        Row: {
+          available_seats: number
+          created_at: string
+          departure_date: string
+          departure_time: string | null
+          departure_type: string
+          driver_username: string
+          from_location: string
+          has_mail_service: boolean
+          id: string
+          mail_price: number | null
+          phone_number: string
+          ride_price: number
+          status: string
+          to_location: string
+          total_seats: number
+          updated_at: string
+        }
+        Insert: {
+          available_seats: number
+          created_at?: string
+          departure_date: string
+          departure_time?: string | null
+          departure_type: string
+          driver_username: string
+          from_location: string
+          has_mail_service?: boolean
+          id?: string
+          mail_price?: number | null
+          phone_number: string
+          ride_price: number
+          status?: string
+          to_location: string
+          total_seats: number
+          updated_at?: string
+        }
+        Update: {
+          available_seats?: number
+          created_at?: string
+          departure_date?: string
+          departure_time?: string | null
+          departure_type?: string
+          driver_username?: string
+          from_location?: string
+          has_mail_service?: boolean
+          id?: string
+          mail_price?: number | null
+          phone_number?: string
+          ride_price?: number
+          status?: string
+          to_location?: string
+          total_seats?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      usernames: {
+        Row: {
+          created_at: string
+          id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          username?: string
         }
         Relationships: []
       }

@@ -28,7 +28,7 @@ const ProtectedRoute: React.FC = () => {
     );
   }
 
-  if (!isAuthed) return <Navigate to="/auth" replace />;
+  if (!isAuthed) return <Navigate to="/" replace />;
 
   return <Outlet />;
 };

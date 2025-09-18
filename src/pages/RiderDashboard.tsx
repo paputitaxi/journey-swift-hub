@@ -1,5 +1,116 @@
- import React, { useState, useRef, useEffect } from 'react';
-import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info, Car, MessageCircle, Send } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info, Car, MessageCircle, Send, Plus, Minus, Globe } from 'lucide-react';
+
+const translations = {
+  en: {
+    findYourNextRide: "Find Your Next Ride",
+    selectPickupAndDestination: "Select your pickup and destination locations.",
+    origin: "Origin",
+    destination: "Destination",
+    selectADate: "Select a date",
+    howManySeats: "How many seats?",
+    continue: "Continue",
+    search: "Search",
+    history: "History",
+    profile: "Profile",
+    results: "Results",
+    bySeat: "By seat",
+    byTime: "By time",
+    withMailOption: "With mail option",
+    saved: "Saved",
+    recommended: "Recommended",
+    seatsNeeded: "Seats Needed:",
+    allAvailableRides: "All Available Rides",
+    recommendedForYou: "Recommended for you",
+    savedRides: "Saved Rides",
+    mailDelivery: "Mail Delivery",
+    sortedBySeat: "Sorted by: Seat",
+    sortedByTime: "Sorted by: Time",
+    rideHistory: "Ride History",
+    pastRidesAppearHere: "Your past rides will appear here.",
+    bookedOn: "Booked on:",
+    seatsUnit: "seat(s)",
+    language: "Language",
+    goToDriverAccount: "Go to Driver Account",
+    memberSince: "Member since 2024",
+    selectOrigin: "Select Origin",
+    selectDestination: "Select Destination",
+    support: "Support",
+    selectLanguage: "Select Language",
+  },
+  uz: {
+    findYourNextRide: "Keyingi Sayohatni Toping",
+    selectPickupAndDestination: "Boshlanish va borish manzillarini tanlang.",
+    origin: "Boshlanish",
+    destination: "Manzil",
+    selectADate: "Sanani tanlang",
+    howManySeats: "Nechta o'rindiq?",
+    continue: "Davom etish",
+    search: "Qidirish",
+    history: "Tarix",
+    profile: "Profil",
+    results: "Natijalar",
+    bySeat: "O'rindiq bo'yicha",
+    byTime: "Vaqt bo'yicha",
+    withMailOption: "Pochta bilan",
+    saved: "Saqlangan",
+    recommended: "Tavsiya etilgan",
+    seatsNeeded: "Kerakli o'rindiqlar:",
+    allAvailableRides: "Barcha Mavjud Sayohatlar",
+    recommendedForYou: "Siz uchun tavsiya etilgan",
+    savedRides: "Saqlangan Sayohatlar",
+    mailDelivery: "Pochta Yetkazish",
+    sortedBySeat: "Saralash: O'rindiq",
+    sortedByTime: "Saralash: Vaqt",
+    rideHistory: "Sayohatlar Tarixi",
+    pastRidesAppearHere: "O'tgan sayohatlaringiz shu yerda paydo bo'ladi.",
+    bookedOn: "Band qilingan sana:",
+    seatsUnit: "o'rindiq",
+    language: "Til",
+    goToDriverAccount: "Haydovchi Akkountiga O'tish",
+    memberSince: "2024 yildan beri a'zo",
+    selectOrigin: "Boshlanish Manzilini Tanlang",
+    selectDestination: "Borish Manzilini Tanlang",
+    support: "Yordam",
+    selectLanguage: "Tilni Tanlang",
+  },
+  ru: {
+    findYourNextRide: "Найти следующую поездку",
+    selectPickupAndDestination: "Выберите места отправления и назначения.",
+    origin: "Откуда",
+    destination: "Куда",
+    selectADate: "Выберите дату",
+    howManySeats: "Сколько мест?",
+    continue: "Продолжить",
+    search: "Поиск",
+    history: "История",
+    profile: "Профиль",
+    results: "Результаты",
+    bySeat: "По местам",
+    byTime: "По времени",
+    withMailOption: "С почтой",
+    saved: "Сохраненные",
+    recommended: "Рекомендуемые",
+    seatsNeeded: "Нужно мест:",
+    allAvailableRides: "Все доступные поездки",
+    recommendedForYou: "Рекомендовано для вас",
+    savedRides: "Сохраненные поездки",
+    mailDelivery: "Доставка почты",
+    sortedBySeat: "Сортировка: Места",
+    sortedByTime: "Сортировка: Время",
+    rideHistory: "История поездок",
+    pastRidesAppearHere: "Ваши прошлые поездки появятся здесь.",
+    bookedOn: "Забронировано:",
+    seatsUnit: "мест(а)",
+    language: "Язык",
+    goToDriverAccount: "Перейти в аккаунт водителя",
+    memberSince: "Участник с 2024 года",
+    selectOrigin: "Выберите место отправления",
+    selectDestination: "Выберите место назначения",
+    support: "Поддержка",
+    selectLanguage: "Выберите язык",
+  },
+};
 
 // Expanded Data for Uzbekistan Regions and Cities - ALL 14 REGIONS INCLUDED
 const uzbekistanLocationsData = [
@@ -23,7 +134,7 @@ const uzbekistanLocationsData = [
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { weekday: 'short' as const, month: 'short' as const, day: 'numeric' as const };
+  const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
 };
 
@@ -31,21 +142,12 @@ const formatDate = (dateString) => {
 const formatTime = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { hour: '2-digit' as const, minute: '2-digit' as const, hourCycle: 'h23' as const }; // 24-hour format
+  const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
   return date.toLocaleTimeString('en-US', options);
 };
 
-// Helper to calculate a dummy drop-off date (e.g., next day)
-const getDropOffDate = (pickupDateString) => {
-  if (!pickupDateString) return '';
-  const pickupDate = new Date(pickupDateString);
-  pickupDate.setDate(pickupDate.getDate() + 1); // Add one day
-  const options = { weekday: 'short' as const, month: 'short' as const, day: 'numeric' as const };
-  return pickupDate.toLocaleDateString('en-US', options);
-};
-
-// Dummy data for search results - now includes more details
-const dummySearchResults = [
+// Initial dummy data for search results
+const initialDummySearchResults = [
   {
     id: 1,
     driverName: 'Alisher V.',
@@ -56,11 +158,11 @@ const dummySearchResults = [
     imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Chevrolet+Cobalt',
     plateNumber: { locationCode: '01', series: 'A', serialNumber: '123BC' },
     origin: 'Tashkent',
-    originDate: '2025-08-08T11:45:00',
+    originDate: '2025-08-26T09:00:00',
     destination: 'Tashkent Region',
-    destinationDate: '2025-08-08T15:27:00',
+    destinationDate: '2025-08-26T13:00:00',
     estimatedMiles: '192 mi',
-    tripTime: '5h 1m',
+    tripTime: '4h 0m',
     sitsAvailable: '2 sits',
     basePrice: 284.44,
     avgFuelPerMile: '$0.85/mi',
@@ -77,9 +179,9 @@ const dummySearchResults = [
     imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Lada+Granta',
     plateNumber: { locationCode: '30', series: 'D', serialNumber: '456EF' },
     origin: 'Fergana',
-    originDate: '2025-08-09T22:30:00',
+    originDate: '2025-08-27T14:00:00',
     destination: 'Samarkand Region',
-    destinationDate: '2025-08-10T03:31:00',
+    destinationDate: '2025-08-27T21:30:00',
     estimatedMiles: '350 mi',
     tripTime: '7h 30m',
     sitsAvailable: '1 sit',
@@ -100,9 +202,9 @@ const dummySearchResults = [
     imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Kia+K5',
     plateNumber: { locationCode: '50', series: 'G', serialNumber: '789HI' },
     origin: 'Andijan',
-    originDate: '2025-08-11T16:30:00',
+    originDate: '2025-08-28T10:00:00',
     destination: 'Namangan Region',
-    destinationDate: '2025-08-12T05:30:00',
+    destinationDate: '2025-08-29T23:00:00',
     estimatedMiles: 'Block',
     tripTime: '1d 13h',
     sitsAvailable: '3 sits',
@@ -123,12 +225,12 @@ const dummySearchResults = [
     imageUrl: 'https://placehold.co/600x400/E2E8F0/4A5568?text=Hyundai+Elantra',
     plateNumber: { locationCode: '80', series: 'J', serialNumber: '321KL' },
     origin: 'Bukhara',
-    originDate: '2025-08-13T08:00:00',
+    originDate: '2025-08-29T08:30:00',
     destination: 'Khorezm Region',
-    destinationDate: '2025-08-13T12:00:00',
+    destinationDate: '2025-08-29T16:30:00',
     estimatedMiles: '400 mi',
     tripTime: '8h 0m',
-    sitsAvailable: '2 sits',
+    sitsAvailable: '4 sits',
     basePrice: 388.89,
     avgFuelPerMile: '$0.80/mi',
     serviceType: 'rider',
@@ -148,6 +250,16 @@ const parseTripTimeToMinutes = (timeString) => {
     if (minutesMatch) totalMinutes += parseInt(minutesMatch[1]);
     return totalMinutes;
 };
+
+// --- Custom Scrollbar Styles Component ---
+const CustomScrollbarStyles = () => (
+  <style>{`
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F8F8F8; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #94a3b8; border-radius: 10px; border: 2px solid #F8F8F8; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #64748b; }
+  `}</style>
+);
 
 // Component to render the styled car plate number
 const PlateNumber = ({ plate }) => {
@@ -201,14 +313,10 @@ const TipBar = ({ icon, text, onClose }) => {
     );
 };
 
-const CheapestIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-);
-
 const CalendarView = ({ onDayClick, selectedDate }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
   
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -218,242 +326,55 @@ const CalendarView = ({ onDayClick, selectedDate }) => {
     const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     const emptyDays = Array.from({ length: startDay });
   
-    const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-    const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-  
     return (
-      <div className="bg-white p-4 rounded-lg shadow-lg border mt-2">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold text-lg text-gray-800">{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
-          <div className="flex space-x-2">
-            <button onClick={prevMonth} className="p-1 rounded-full hover:bg-gray-100"><ChevronLeft size={20} /></button>
-            <button onClick={nextMonth} className="p-1 rounded-full hover:bg-gray-100"><ChevronRight size={20} /></button>
-          </div>
+      <div className="bg-white p-4 rounded-lg">
+        <div className="flex justify-center items-center mb-4">
+          <h3 className="font-semibold text-lg text-gray-800">{currentDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h3>
         </div>
-        <div className="grid grid-cols-7 gap-2 text-center text-sm text-gray-500">
-          {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(day => <div key={day}>{day}</div>)}
-          {emptyDays.map((_, i) => <div key={`empty-${i}`}></div>)}
-          {days.map(day => {
-            const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-            const isSelected = selectedDate && date.toDateString() === new Date(selectedDate).toDateString();
-            return (
-              <button
-                key={day}
-                onClick={() => onDayClick(date)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                  isSelected ? 'bg-green-500 text-white' : 'hover:bg-gray-100'
-                }`}
-              >
-                {day}
-              </button>
-            );
-          })}
+        <div className="grid grid-cols-7 gap-2 text-center text-sm text-gray-500 mb-2">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => <div key={day}>{day}</div>)}
+        </div>
+        <div className="grid grid-cols-7 gap-2 text-center">
+            {emptyDays.map((_, i) => <div key={`empty-${i}`}></div>)}
+            {days.map(day => {
+                const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                const isSelected = selectedDate && date.toDateString() === new Date(selectedDate).toDateString();
+                const isPast = date < today;
+                return (
+                <button
+                    key={day}
+                    onClick={() => onDayClick(date)}
+                    disabled={isPast}
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                        isPast ? 'text-gray-400 cursor-not-allowed' :
+                        isSelected ? 'bg-gray-200 text-gray-900 font-semibold' : 'hover:bg-gray-100'
+                    }`}
+                >
+                    {day}
+                </button>
+                );
+            })}
         </div>
       </div>
     );
   };
-  
-// --- Custom Scrollbar Styles Component ---
-const CustomScrollbarStyles = () => (
-  <style>{`
-    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #F8F8F8; border-radius: 10px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #94a3b8; border-radius: 10px; border: 2px solid #F8F8F8; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #64748b; }
-  `}</style>
-);
 
-// Helper component for a simple avatar
-const Avatar = ({ initials, bgColor, size = 'w-10 h-10' }) => (
-  <div className={`rounded-full flex items-center justify-center text-white text-sm font-semibold ${bgColor} ${size}`} >
-    {initials}
-  </div>
-);
+const CalendarModal = ({ isOpen, onClose, onDayClick, selectedDate }) => {
+    if (!isOpen) return null;
 
-// Message Dashboard component with Telegram-like UX
-const MessageDashboard = ({ onClose }) => {
-  const [activeMessageTab, setActiveMessageTab] = useState("chats");
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [draft, setDraft] = useState("");
-  const [conversations, setConversations] = useState({
-    1: [
-      { id: "m1", sender: "Jane Doe", text: "Hey, are you available for a ride?", time: "10:30 AM" },
-      { id: "m2", sender: "me", text: "Hi Jane, yes I am!", time: "10:31 AM" },
-    ],
-    2: [
-      { id: "m3", sender: "Mike Smith", text: "Thanks for the ride last week!", time: "Yesterday" },
-    ],
-  });
-
-  const messageNavItems = [
-    { id: "chats", label: "Chats", icon: MessageCircle },
-    { id: "groups", label: "Groups", icon: Users },
-    { id: "channels", label: "Channels", icon: Users },
-    { id: "market", label: "Market", icon: Users },
-  ];
-
-  const chatItems = {
-    chats: [
-      { id: 1, name: "Jane Doe", lastMessage: "Hey, are you available for a ride?", time: "10:30 AM", avatar: <Avatar initials="JD" bgColor="bg-purple-500" /> },
-      { id: 2, name: "Mike Smith", lastMessage: "Thanks for the ride last week!", time: "Yesterday", avatar: <Avatar initials="MS" bgColor="bg-blue-500" /> },
-    ],
-    groups: [ { id: 101, name: "Drivers Community", lastMessage: "New update on city regulations.", time: "1 hr ago", avatar: <Avatar initials="DC" bgColor="bg-yellow-500" /> } ],
-    channels: [ { id: 201, name: "Ride Alerts Official", lastMessage: "High demand in downtown area!", time: "15 min ago", avatar: <Avatar initials="RA" bgColor="bg-red-500" /> } ],
-    market: [ { id: 301, name: "Special Offers", lastMessage: "Discount on car maintenance this week.", time: "2 days ago", avatar: <Avatar initials="SO" bgColor="bg-indigo-500" /> } ],
-  };
-
-  const currentChats = chatItems[activeMessageTab] || [];
-  const filteredChats = currentChats.filter((chat) =>
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const sendMessage = (e) => {
-    e.preventDefault();
-    if (!selectedChat || !draft.trim()) return;
-    setConversations((prev) => {
-      const msgs = prev[selectedChat.id] || [];
-      return {
-        ...prev,
-        [selectedChat.id]: [
-          ...msgs,
-          { id: `${Date.now()}`, sender: "me", text: draft.trim(), time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
-        ],
-      };
-    });
-    setDraft("");
-    // Simulate quick auto-reply
-    setTimeout(() => {
-      setConversations((prev) => {
-        const msgs = prev[selectedChat.id] || [];
-        return {
-          ...prev,
-          [selectedChat.id]: [
-            ...msgs,
-            { id: `${Date.now()}-r`, sender: selectedChat.name, text: "Got it!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
-          ],
-        };
-      });
-    }, 800);
-  };
-
-  const renderList = () => (
-    <div className="flex-grow overflow-y-auto custom-scrollbar">
-      {filteredChats.length > 0 ? (
-        <div className="space-y-1">
-          {filteredChats.map((chat) => (
-            <button
-              key={chat.id}
-              onClick={() => setSelectedChat(chat)}
-              className="w-full flex items-center p-3 hover:bg-neutral-100 cursor-pointer transition-colors text-left"
-            >
-              {chat.avatar}
-              <div className="ml-3 flex-grow">
-                <p className="font-medium text-gray-800">{chat.name}</p>
-                <p className="text-sm text-neutral-600 truncate">{chat.lastMessage}</p>
-              </div>
-              <span className="text-xs text-neutral-500">{chat.time}</span>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <p className="text-neutral-500 text-center mt-10">No messages found.</p>
-      )}
-    </div>
-  );
-
-  const renderChat = () => {
-    const msgs = conversations[selectedChat?.id] || [];
     return (
-      <div className="flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
-          {msgs.map((m) => (
-            <div key={m.id} className={`flex ${m.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.sender === 'me' ? 'bg-[#E1F87E] text-[#121212]' : 'bg-neutral-100 text-gray-800'}`}>
-                <p className="whitespace-pre-wrap">{m.text}</p>
-                <div className="text-[10px] opacity-70 mt-1 text-right">{m.time}</div>
-              </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-sm">
+                <div className="p-4 border-b flex justify-between items-center">
+                    <h2 className="font-semibold text-lg">Select Departure Date</h2>
+                    <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
+                        <X size={20} />
+                    </button>
+                </div>
+                <CalendarView onDayClick={onDayClick} selectedDate={selectedDate} />
             </div>
-          ))}
         </div>
-        <form onSubmit={sendMessage} className="p-3 border-t border-neutral-200 bg-white flex items-center gap-2">
-          <input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Type a message"
-            className="flex-1 p-2 rounded-lg bg-neutral-100 text-gray-800 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#E1F87E]"
-          />
-          <button type="submit" className="p-2 rounded-lg bg-[#E1F87E] text-[#121212] hover:bg-opacity-80">
-            <Send className="h-5 w-5" />
-          </button>
-        </form>
-      </div>
     );
-  };
-
-  return (
-    <div className="flex flex-col h-full bg-white rounded-3xl overflow-hidden">
-      <div className="bg-white p-3 border-b border-neutral-200 flex items-center justify-between gap-2">
-        {selectedChat ? (
-          <>
-            <button onClick={() => setSelectedChat(null)} className="text-neutral-800 hover:text-gray-900">
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <h2 className="text-lg font-semibold text-gray-800 flex-1 truncate">{selectedChat.name}</h2>
-            <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
-          </>
-        ) : isSearching ? (
-          <>
-            <div className="relative flex-1">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full bg-neutral-100 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#E1F87E] text-gray-800"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-              />
-            </div>
-            <button onClick={() => { setIsSearching(false); setSearchQuery(''); }} className="text-sm font-semibold text-gray-700 hover:text-gray-900">
-              Cancel
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="w-6 h-6"></div> {/* Placeholder for alignment */}
-            <div className="flex-1"></div> {/* Placeholder to push search icon to the right */}
-            <button onClick={() => setIsSearching(true)} className="text-neutral-800 hover:text-gray-900">
-              <Search className="h-6 w-6" />
-            </button>
-          </>
-        )}
-      </div>
-
-      {!selectedChat && (
-        <div className="flex justify-around bg-white p-2 border-b border-neutral-200">
-          {messageNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeMessageTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => { setActiveMessageTab(item.id); setSearchQuery(""); setIsSearching(false); }}
-                className={`flex-1 flex flex-col items-center py-2 transition-colors relative ${isActive ? "text-gray-800" : "text-neutral-500"}`}
-              >
-                <Icon className="h-5 w-5 mb-1" />
-                <span className="text-xs">{item.label}</span>
-                {isActive && (<div className="absolute bottom-0 h-0.5 w-full bg-[#E1F87E] rounded-full"></div>)}
-              </button>
-            );
-          })}
-        </div>
-      )}
-      {selectedChat ? renderChat() : renderList()}
-    </div>
-  );
 };
 
 // Location Selection Modal Component
@@ -510,6 +431,99 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
   );
 };
 
+const BookingModal = ({ isOpen, onClose, ride, onConfirmBooking }) => {
+  if (!isOpen) return null;
+
+  const maxSeats = parseInt(ride.sitsAvailable) || 1;
+  const [seats, setSeats] = useState(1);
+  
+  const handleConfirm = () => {
+    onConfirmBooking(ride, seats);
+  };
+
+  const incrementSeats = () => {
+    setSeats(prev => Math.min(prev + 1, maxSeats));
+  };
+
+  const decrementSeats = () => {
+    setSeats(prev => Math.max(1, prev - 1));
+  };
+
+  const totalPrice = (ride.basePrice * seats).toFixed(2);
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
+        <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-800">Confirm Your Booking</h2>
+          <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        <div className="p-6 space-y-4">
+            <div>
+                <p className="text-sm text-gray-500">You are booking a ride from</p>
+                <p className="font-semibold text-lg text-gray-800">{ride.origin} to {ride.destination}</p>
+                <p className="text-sm text-gray-600">{formatDate(ride.originDate)} at {formatTime(ride.originDate)}</p>
+            </div>
+            <div className="flex items-center justify-between">
+                <span className="font-semibold text-gray-800">Seats to book:</span>
+                <div className="flex items-center space-x-4">
+                    <button onClick={decrementSeats} className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50" disabled={seats <= 1}><Minus size={16}/></button>
+                    <span className="text-xl font-bold w-8 text-center">{seats}</span>
+                    <button onClick={incrementSeats} className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50" disabled={seats >= maxSeats}><Plus size={16}/></button>
+                </div>
+            </div>
+            <div className="flex justify-between items-baseline pt-4 border-t">
+                <span className="font-semibold text-lg text-gray-800">Total Price:</span>
+                <span className="font-bold text-2xl text-green-600">${totalPrice}</span>
+            </div>
+        </div>
+        <div className="p-4 bg-gray-50 rounded-b-3xl">
+            <button onClick={handleConfirm} className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300 shadow-lg">
+                Confirm Booking
+            </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const LanguageSelectModal = ({ isOpen, onClose, onSelect, currentLanguage, t }) => {
+  if (!isOpen) return null;
+
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'uz', name: 'Oʻzbekcha' },
+    { code: 'ru', name: 'Русский' },
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm flex flex-col">
+        <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-800">{t.selectLanguage}</h2>
+          <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        <div className="p-2">
+          {languages.map(lang => (
+            <button
+              key={lang.code}
+              onClick={() => { onSelect(lang.code); onClose(); }}
+              className={`w-full text-left p-4 rounded-lg flex justify-between items-center hover:bg-gray-100 transition-colors ${currentLanguage === lang.code ? 'font-semibold text-green-600' : 'text-gray-800'}`}
+            >
+              <span>{lang.name}</span>
+              {currentLanguage === lang.code && <div className="w-2 h-2 bg-green-500 rounded-full"></div>}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 // Main App component
 const App = () => {
@@ -519,17 +533,49 @@ const App = () => {
   const [pickupDate, setPickupDate] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [activeFilter, setActiveFilter] = useState(null); // 'saved', 'recommended', 'mail'
-  const [activeSort, setActiveSort] = useState(null); // 'cheapest', 'fastest'
+  const [activeSort, setActiveSort] = useState(null); // 'by_seat', 'by_time'
+  const [seatsNeeded, setSeatsNeeded] = useState(null);
   const [savedRides, setSavedRides] = useState([]);
-  const [firstUse, setFirstUse] = useState({ cheapest: true, fastest: true, saved: true, recommended: true, mail: true });
+  const [firstUse, setFirstUse] = useState({ by_seat: true, by_time: true, saved: true, recommended: true, mail: true });
   const [tipToShow, setTipToShow] = useState(null);
   const [dismissedTips, setDismissedTips] = useState([]);
   const [selectedRide, setSelectedRide] = useState(null);
   const [isUnreliableRider, setIsUnreliableRider] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [showMessages, setShowMessages] = useState(false);
   const [showFromModal, setShowFromModal] = useState(false);
   const [showToModal, setShowToModal] = useState(false);
+  const [rideHistory, setRideHistory] = useState([]);
+  const [isBooking, setIsBooking] = useState(false);
+  const [rideToBook, setRideToBook] = useState(null);
+  const [language, setLanguage] = useState('en');
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  // Use the initial dummy data directly, as Supabase is not available in this environment.
+  const [availableRides, setAvailableRides] = useState(initialDummySearchResults);
+
+  const t = translations[language];
+
+  const handleBookClick = (ride) => {
+    setRideToBook(ride);
+    setIsBooking(true);
+  };
+  
+  const handleCardClick = (ride) => {
+      setSelectedRide(ride);
+  }
+
+  const handleConfirmBooking = (bookedRide, seats) => {
+    const newBooking = { ...bookedRide, seatsBooked: seats, bookingDate: new Date().toISOString() };
+    setRideHistory(prev => [newBooking, ...prev]);
+    // Simulate booking by removing the ride from the available list
+    setAvailableRides(prev => prev.filter(r => r.id !== bookedRide.id));
+    
+    setIsBooking(false);
+    setRideToBook(null);
+    setSelectedRide(null); // Go back to the search results after booking
+    
+    // A simple confirmation alert. In a real app, use a toast notification.
+    console.log(`Booking confirmed for ${seats} seat(s) on ride #${bookedRide.id}!`);
+  };
 
   const handleFilterClick = (filterType) => {
     const newFilter = activeFilter === filterType ? null : filterType;
@@ -551,6 +597,10 @@ const App = () => {
     } else {
         setTipToShow(null);
     }
+  };
+
+  const handleSeatsNeededClick = (numSeats) => {
+    setSeatsNeeded(prev => prev === numSeats ? null : numSeats);
   };
   
   const handleCloseTip = () => {
@@ -575,24 +625,41 @@ const App = () => {
   }
 
   const renderContent = () => {
-    if (showMessages) {
-        return <MessageDashboard onClose={() => setShowMessages(false)} />;
-    }
     switch (activeTab) {
       case 'history':
         return (
-          <div className="p-6 text-center">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Ride History</h2>
-            <p className="text-gray-600">Your past rides will appear here.</p>
+          <div className="p-6">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">{t.rideHistory}</h2>
+            {rideHistory.length > 0 ? (
+              <div className="space-y-4">
+                {rideHistory.map(ride => (
+                  <div key={`${ride.id}-${ride.bookingDate}`} className="bg-white p-4 rounded-xl shadow-lg border">
+                       <div className="flex justify-between items-start">
+                           <div>
+                               <p className="font-semibold text-lg">{ride.origin} to {ride.destination}</p>
+                               <p className="text-sm text-gray-600">{t.bookedOn} {formatDate(ride.bookingDate)}</p>
+                           </div>
+                           <div className="text-right">
+                               <p className="font-bold text-lg text-green-600">${(ride.basePrice * ride.seatsBooked).toFixed(2)}</p>
+                               <p className="text-sm text-gray-600">{ride.seatsBooked} {t.seatsUnit}</p>
+                           </div>
+                       </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-600 text-center mt-10">{t.pastRidesAppearHere}</p>
+            )}
           </div>
         );
       case 'search':
         if (selectedRide) {
-            return <TripDetails ride={selectedRide} onBack={() => setSelectedRide(null)} isUnreliable={isUnreliableRider} onToggleReliability={() => setIsUnreliableRider(p => !p)} />;
+            return <TripDetails ride={selectedRide} onBack={() => setSelectedRide(null)} onBook={handleBookClick} isUnreliable={isUnreliableRider} onToggleReliability={() => setIsUnreliableRider(p => !p)} />;
         }
         if (showSearchResults) {
-          let results = [...dummySearchResults];
+          let results = [...availableRides];
 
+          // Filtering logic
           if (activeFilter === 'saved') {
             results = results.filter(ride => savedRides.includes(ride.id));
           } else if (activeFilter === 'recommended') {
@@ -600,66 +667,85 @@ const App = () => {
           } else if (activeFilter === 'mail') {
             results = results.filter(ride => ride.serviceType === 'mail' || ride.serviceType === 'both');
           }
-
-          const cheapestRideId = results.length > 0 ? results.reduce((prev, curr) => (calculatePayout(prev.basePrice) < calculatePayout(curr.basePrice) ? prev : curr)).id : null;
           
-          if (activeSort === 'cheapest') {
-            results.sort((a, b) => {
-                const priceA = activeFilter === 'mail' ? parseInt(a.mailPayout?.replace('$', '') || '99999') : calculatePayout(a.basePrice);
-                const priceB = activeFilter === 'mail' ? parseInt(b.mailPayout?.replace('$', '') || '99999') : calculatePayout(b.basePrice);
-                return priceA - priceB;
+          if (seatsNeeded) {
+            results = results.filter(ride => {
+                const availableSeats = parseInt(ride.sitsAvailable) || 0;
+                return availableSeats >= seatsNeeded;
             });
-          } else if (activeSort === 'fastest') {
-            results.sort((a, b) => parseTripTimeToMinutes(a.tripTime) - parseTripTimeToMinutes(b.tripTime));
+          }
+
+          // Sorting logic
+          if (activeSort === 'by_time') {
+            results.sort((a, b) => new Date(a.originDate).getTime() - new Date(b.originDate).getTime());
+          } else if (activeSort === 'by_seat') {
+            results.sort((a, b) => {
+                const seatsA = parseInt(a.sitsAvailable) || 0;
+                const seatsB = parseInt(b.sitsAvailable) || 0;
+                return seatsB - seatsA; // Sort by most seats available
+            });
           }
           
           const tipContent = {
-              cheapest: { icon: <DollarSign size={20} className="text-white"/>, text: "Now sorting rides from the lowest to the highest price." },
-              fastest: { icon: <Wind size={20} className="text-white"/>, text: "Now sorting rides by the shortest trip duration." },
+              by_time: { icon: <History size={20} className="text-white"/>, text: "The ride will start at the scheduled time, regardless of seat availability." },
+              by_seat: { icon: <Users size={20} className="text-white"/>, text: "The driver departs once all seats are filled." },
               saved: { icon: <Bookmark size={20} className="text-white"/>, text: "Showing only the rides you have saved." },
               recommended: { icon: <Lightbulb size={20} className="text-white"/>, text: "Showing recommended rides based on driver ratings and your history." },
               mail: { icon: <AmazonMailLogo className="text-white"/>, text: "Showing rides that can also deliver mail. Mail should not be more than 5 kg." },
           };
           
-          let stickyTitle = "All Available Rides";
-          if(activeFilter === 'recommended') stickyTitle = "Recommended for you";
-          else if(activeFilter === 'saved') stickyTitle = "Saved Rides";
-          else if(activeFilter === 'mail') stickyTitle = "Mail Delivery";
-          else if(activeSort === 'cheapest') stickyTitle = "Sorted by: Cheapest";
-          else if(activeSort === 'fastest') stickyTitle = "Sorted by: Fastest";
+          let stickyTitle = t.allAvailableRides;
+          if(activeFilter === 'recommended') stickyTitle = t.recommendedForYou;
+          else if(activeFilter === 'saved') stickyTitle = t.savedRides;
+          else if(activeFilter === 'mail') stickyTitle = t.mailDelivery;
+          else if(activeSort === 'by_seat') stickyTitle = t.sortedBySeat;
+          else if(activeSort === 'by_time') stickyTitle = t.sortedByTime;
 
 
           return (
             <div className="flex flex-col h-full">
               <div className="flex-shrink-0 bg-white shadow-sm z-10">
                 <div className="p-4 border-b border-neutral-200">
-                  <h2 className="text-lg font-semibold text-gray-800 text-left mb-3">Results</h2>
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                      <div className="flex items-center space-x-2 flex-wrap gap-2">
-                          <button onClick={() => handleSortClick('cheapest')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'cheapest' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                              <DollarSign size={16} />
-                              <span>Cheapest</span>
-                          </button>
-                          <button onClick={() => handleSortClick('fastest')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'fastest' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                              <Wind size={16} />
-                              <span>Fastest</span>
-                          </button>
-                           <button onClick={() => handleFilterClick('mail')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'mail' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                              {activeFilter === 'mail' ? <X size={16} /> : <AmazonMailLogo className="w-5 h-5"/>}
-                              <span>Mail Only</span>
-                          </button>
-                      </div>
+                  <div className="flex items-center mb-3">
+                    <button className="p-2 rounded-full hover:bg-neutral-100 transition-colors -ml-2 mr-2" onClick={() => { setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setShowSearchResults(false); setActiveFilter(null); setActiveSort(null); setSeatsNeeded(null); }}><ChevronLeft size={24} /></button>
+                    <h2 className="text-lg font-semibold text-gray-800 text-left">{t.results}</h2>
+                  </div>
+                  <div className="flex flex-col gap-4">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                          <div className="flex items-center space-x-2 flex-wrap gap-2">
+                              <button onClick={() => handleSortClick('by_seat')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'by_seat' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                  <Users size={16} />
+                                  <span>{t.bySeat}</span>
+                              </button>
+                              <button onClick={() => handleSortClick('by_time')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === 'by_time' ? 'bg-[#E1F87E] text-gray-800' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                  <History size={16} />
+                                  <span>{t.byTime}</span>
+                              </button>
+                               <button onClick={() => handleFilterClick('mail')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'mail' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                  {activeFilter === 'mail' ? <X size={16} /> : <AmazonMailLogo className="w-5 h-5"/>}
+                                  <span>{t.withMailOption}</span>
+                              </button>
+                          </div>
 
+                          <div className="flex items-center space-x-2">
+                              <div className="w-px h-6 bg-gray-300 mx-1 hidden sm:block"></div>
+                              <button onClick={() => handleFilterClick('saved')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'saved' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                  {activeFilter === 'saved' ? <X size={16} /> : <Bookmark size={16} />}
+                                  <span>{t.saved}</span>
+                              </button>
+                               <button onClick={() => handleFilterClick('recommended')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'recommended' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                  {activeFilter === 'recommended' ? <X size={16} /> : <Lightbulb size={16} />}
+                                  <span>{t.recommended}</span>
+                              </button>
+                          </div>
+                      </div>
                       <div className="flex items-center space-x-2">
-                          <div className="w-px h-6 bg-gray-300 mx-1 hidden sm:block"></div>
-                          <button onClick={() => handleFilterClick('saved')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'saved' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                              {activeFilter === 'saved' ? <X size={16} /> : <Bookmark size={16} />}
-                              <span>Saved</span>
-                          </button>
-                           <button onClick={() => handleFilterClick('recommended')} className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === 'recommended' ? 'bg-green-100 text-green-700 border border-green-600' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
-                              {activeFilter === 'recommended' ? <X size={16} /> : <Lightbulb size={16} />}
-                              <span>Recommended</span>
-                          </button>
+                          <span className="text-sm font-semibold text-gray-700">{t.seatsNeeded}</span>
+                          {[1, 2, 3, 4].map(num => (
+                              <button key={num} onClick={() => handleSeatsNeededClick(num)} className={`w-10 h-10 rounded-full text-sm font-semibold transition-colors ${seatsNeeded === num ? 'bg-green-500 text-white' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                  {num}
+                              </button>
+                          ))}
                       </div>
                   </div>
                 </div>
@@ -674,58 +760,54 @@ const App = () => {
               <div className="flex-grow overflow-y-auto bg-[#F8F8F8]">
                 <div className="p-4 space-y-4">
                     {results.map(item => (
-                      <div key={item.id} onClick={() => setSelectedRide(item)} className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 text-left relative cursor-pointer hover:shadow-xl transition-shadow">
-                        <button onClick={(e) => { e.stopPropagation(); handleSaveRide(item.id); }} className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition-colors">
-                            <Bookmark size={20} className="text-gray-500 hover:text-green-600" fill={savedRides.includes(item.id) ? '#10B981' : 'none'} />
-                        </button>
-                        <div className="flex flex-col sm:flex-row justify-between items-start mb-3">
-                          <div className="flex flex-col">
-                            <div className="flex items-center text-gray-600 text-sm mb-2">
-                              <p className="font-semibold text-gray-800 text-base mr-2">{item.driverName}</p>
-                              {[...Array(5)].map((_, i) => <Star key={i} size={14} fill={i < Math.floor(item.reliabilityStars) ? "#facc15" : "none"} stroke="#facc15" className="mr-0.5"/>)}
-                              <span className="text-gray-600 text-xs ml-1">({item.reliabilityStars})</span>
-                            </div>
-                             <div className="flex items-center space-x-2 text-sm text-gray-800 mb-2">
-                                <Car size={16} className="text-gray-600" />
-                                <span>{item.carYear} {item.carModel}</span>
-                            </div>
-                             <PlateNumber plate={item.plateNumber} />
+                      <div key={item.id} onClick={() => handleCardClick(item)} className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 text-left cursor-pointer hover:shadow-xl transition-shadow">
+                        <div className="space-y-3">
+                          {/* Driver Name */}
+                          <div className="flex items-center">
+                            <img src={item.driverImageUrl} alt={item.driverName} className="w-8 h-8 rounded-full object-cover mr-3" />
+                            <p className="font-semibold text-gray-800 text-lg">{item.driverName}</p>
                           </div>
-                          <div className="text-right mt-2 sm:mt-0 sm:mr-10">
-                            <div className="text-2xl font-bold text-green-700 flex items-center justify-end">
-                                {item.id === cheapestRideId && <CheapestIcon />}
-                                {activeFilter === 'mail' ? item.mailPayout : `$${calculatePayout(item.basePrice).toFixed(2)}`}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                                {activeFilter === 'mail' ? item.ratePerMail : item.avgFuelPerMile}
-                            </div>
-                          </div>
-                        </div>
 
-                        <div className="flex items-stretch mt-4">
-                            <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
-                                <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-gray-300 rounded-full"></div>
-                                <MapPin size={20} className="text-green-600 bg-white z-10" />
-                                <Target size={20} className="text-red-600 bg-white z-10" />
+                          {/* Route */}
+                          <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2 flex-1">
+                              <MapPin size={16} className="text-green-600" />
+                              <span className="text-gray-800 font-medium">{item.origin}</span>
                             </div>
-                            <div className="flex flex-col justify-between w-full">
-                                <div className="mb-4">
-                                    <p className="font-semibold text-gray-800 text-base">{item.origin}</p>
-                                    <p className="text-gray-600 text-sm">{formatDate(item.originDate)} {formatTime(item.originDate)}</p>
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-gray-800 text-base">{item.destination}</p>
-                                    <p className="text-gray-600 text-sm">{formatDate(item.destinationDate)} {formatTime(item.destinationDate)}</p>
-                                </div>
+                            <div className="text-gray-400">→</div>
+                            <div className="flex items-center space-x-2 flex-1">
+                              <Target size={16} className="text-red-600" />
+                              <span className="text-gray-800 font-medium">{item.destination}</span>
                             </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-gray-700 text-sm mt-3">
-                          <div className="flex items-center space-x-2">
-                            <span>{item.estimatedMiles}</span><span className="mx-1">•</span><span>{item.tripTime}</span>
-                            {activeFilter !== 'mail' && <><span className="mx-1">•</span><Users size={16} className="text-gray-500" /><span>{item.sitsAvailable}</span></>}
                           </div>
-                          <button onClick={(e) => e.stopPropagation()} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-600 transition duration-200 shadow">Book</button>
+
+                          {/* Date and Time */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <Calendar size={16} className="text-gray-600" />
+                              <span className="text-gray-700">{formatDate(item.originDate)}</span>
+                              <span className="text-gray-700">at {formatTime(item.originDate)}</span>
+                            </div>
+                          </div>
+
+                          {/* Seats and Price */}
+                          <div className="flex items-center justify-between text-sm pt-2 border-t mt-2">
+                            <div className="flex items-center space-x-4">
+                                { (item.serviceType === 'mail' || item.serviceType === 'both') && (
+                                    <div className="flex items-center space-x-1 text-blue-600">
+                                        <Mail size={16} />
+                                        <span>Mail: {item.mailPayout}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center space-x-1 text-gray-600">
+                                    <Users size={16} />
+                                    <span>{item.sitsAvailable}</span>
+                                </div>
+                            </div>
+                            <div className="text-xl font-bold text-green-600">
+                                ${item.basePrice.toFixed(2)}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -737,39 +819,73 @@ const App = () => {
           // Display initial location/date selection form
           return (
             <div className="p-6 text-center">
-              <h2 className="text-2xl font-semibold mb-2 text-gray-800">Find Your Next Ride</h2>
-              <p className="text-md text-gray-600 mb-6">Select your pickup and destination locations.</p>
+              <h2 className="text-2xl font-semibold mb-2 text-gray-800">{t.findYourNextRide}</h2>
+              <p className="text-md text-gray-600 mb-6">{t.selectPickupAndDestination}</p>
               <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200 space-y-4">
                 
                 <div onClick={() => setShowFromModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${pickupLocation ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
-                    <span>{pickupLocation || "Origin"}</span>
+                    <span>{pickupLocation || t.origin}</span>
                     <MapPin className="h-5 w-5 text-neutral-500" />
                 </div>
-                <LocationSelectModal title="Select Origin" isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setPickupLocation} />
+                <LocationSelectModal title={t.selectOrigin} isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setPickupLocation} />
 
                 <div onClick={() => setShowToModal(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${destinationLocation ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`} >
-                    <span>{destinationLocation || "Destination"}</span>
+                    <span>{destinationLocation || t.destination}</span>
                     <Target className="h-5 w-5 text-neutral-500" />
                 </div>
-                <LocationSelectModal title="Select Destination" isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setDestinationLocation} />
+                <LocationSelectModal title={t.selectDestination} isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setDestinationLocation} />
                 
                 <div className="relative text-left">
-                   <button onClick={() => setShowCalendar(!showCalendar)} className="w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border text-gray-800 font-semibold border-green-700">
-                        <span>{pickupDate ? formatDate(pickupDate) : 'Select a date'}</span>
+                   <button onClick={() => setShowCalendar(true)} className={`w-full p-3 bg-neutral-100 rounded-xl flex items-center justify-between cursor-pointer border ${pickupDate ? 'text-gray-800 font-semibold border-green-700' : 'text-neutral-600 border-transparent'}`}>
+                        <span>{pickupDate ? formatDate(pickupDate) : t.selectADate}</span>
                         <Calendar className="h-5 w-5 text-neutral-500" />
                     </button>
-                    {showCalendar && <CalendarView selectedDate={pickupDate} onDayClick={(date) => { setPickupDate(date.toISOString().split('T')[0]); setShowCalendar(false);}}/>}
                 </div>
+                
+                <div className="pt-4 border-t border-neutral-200">
+                    <p className="text-left font-semibold text-gray-700 mb-2">{t.howManySeats}</p>
+                    <div className="flex items-center justify-center space-x-4">
+                        {[1, 2, 3, 4].map(num => (
+                            <button key={num} onClick={() => handleSeatsNeededClick(num)} className={`w-12 h-12 rounded-full text-md font-semibold transition-colors flex items-center justify-center ${seatsNeeded === num ? 'bg-green-500 text-white' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                                {num}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
               </div>
-              <p className="mt-6 text-gray-700 font-medium">Ready to hit the road? Let's find your perfect ride!</p>
             </div>
           );
         }
       case 'profile':
         return (
-          <div className="p-6 text-center">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">User Profile</h2>
-            <p className="text-gray-600">Your profile details will appear here.</p>
+          <div className="p-6 bg-gray-50 h-full">
+            <div className="text-center mb-8">
+                <img src="https://placehold.co/100x100/E2E8F0/4A5568?text=JD" alt="User" className="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-lg"/>
+                <h2 className="text-2xl font-bold text-gray-800">John Doe</h2>
+                <p className="text-sm text-gray-600">{t.memberSince}</p>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
+                <button className="w-full text-left p-4 flex items-center hover:bg-gray-50 transition-colors">
+                    <Car size={22} className="text-gray-600 mr-4"/>
+                    <span className="flex-grow font-semibold text-gray-700">{t.goToDriverAccount}</span>
+                    <ChevronRight size={20} className="text-gray-400"/>
+                </button>
+
+                <button onClick={() => setShowLanguageModal(true)} className="w-full text-left p-4 flex items-center border-t border-neutral-200 hover:bg-gray-50 transition-colors">
+                    <Globe size={22} className="text-gray-600 mr-4"/>
+                    <span className="flex-grow font-semibold text-gray-700">{t.language}</span>
+                    <span className="text-gray-600 mr-2">{language.toUpperCase()}</span>
+                    <ChevronRight size={20} className="text-gray-400"/>
+                </button>
+
+                <button className="w-full text-left p-4 flex items-center border-t border-neutral-200 hover:bg-gray-50 transition-colors">
+                    <MessageCircle size={22} className="text-gray-600 mr-4"/>
+                    <span className="flex-grow font-semibold text-gray-700">{t.support}</span>
+                    <ChevronRight size={20} className="text-gray-400"/>
+                </button>
+            </div>
           </div>
         );
       default:
@@ -780,29 +896,76 @@ const App = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F8F8] font-sans antialiased">
       <CustomScrollbarStyles />
-      <header className="bg-white text-gray-800 p-3 flex items-center justify-between shadow-md border-b border-neutral-200 z-20 relative">
-        {showSearchResults || selectedRide || showMessages ? (<button className="p-2 rounded-full hover:bg-neutral-100 transition-colors" onClick={() => { if(selectedRide) {setSelectedRide(null)} else if (showMessages) {setShowMessages(false)} else {setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setShowSearchResults(false); setActiveFilter(null); setActiveSort(null); } }}><ChevronLeft size={24} /></button>) : (<div className="w-10"></div>)}
-        <h1 className="text-xl font-bold absolute left-1/2 -translate-x-1/2">Rider's Dashboard</h1>
-        <button onClick={() => setShowMessages(true)} className="p-2 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors">
-            <MessageCircle className="h-8 w-8" />
-        </button>
-      </header>
+
+      {!selectedRide && (
+        <header className="flex-shrink-0 bg-white p-4 flex items-center justify-between shadow-sm z-20">
+          <span className="font-semibold text-gray-800">+998 90 123 45 67</span>
+          <button onClick={() => setActiveTab('profile')} className="p-2 rounded-full hover:bg-gray-100">
+            <User size={24} className="text-gray-700" />
+          </button>
+        </header>
+      )}
 
       <main className="flex-grow overflow-hidden flex flex-col">
         {renderContent()}
       </main>
 
-      {pickupLocation && destinationLocation && pickupDate && !showSearchResults && (<div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40"><button className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300 shadow-xl transform hover:scale-105" onClick={() => setShowSearchResults(true)}>See my results</button></div>)}
-
-      {!showMessages && (
-          <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50">
-            <div className="flex justify-around items-center h-16">
-              <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'search' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setActiveFilter(null); setActiveSort(null); setSelectedRide(null); }}><Search size={24} strokeWidth={activeTab === 'search' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'search' ? 'text-gray-800' : 'text-neutral-500'}`}>Search</span></button>
-              <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'history' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => setActiveTab('history')}><History size={24} strokeWidth={activeTab === 'history' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'history' ? 'text-gray-800' : 'text-neutral-500'}`}>History</span></button>
-              <button className={`flex flex-col items-center p-2 rounded-lg transition-colors duration-200 w-20 ${activeTab === 'profile' ? 'text-gray-800' : 'text-neutral-500 hover:text-gray-800'}`} onClick={() => setActiveTab('profile')}><User size={24} strokeWidth={activeTab === 'profile' ? 2.5 : 2} /><span className={`text-xs mt-1 font-semibold ${activeTab === 'profile' ? 'text-gray-800' : 'text-neutral-500'}`}>Profile</span></button>
-            </div>
-          </nav>
+      {!selectedRide && !showSearchResults && activeTab === 'search' && (
+        <div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40">
+          <button 
+            className={`w-full py-3 rounded-lg font-semibold transition duration-300 shadow-xl transform hover:scale-105 ${
+              pickupLocation && destinationLocation && pickupDate && seatsNeeded
+                ? 'bg-green-500 text-white hover:bg-green-600' 
+                : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+            }`} 
+            onClick={() => setShowSearchResults(true)}
+            disabled={!(pickupLocation && destinationLocation && pickupDate && seatsNeeded)}
+          >
+            {t.continue}
+          </button>
+        </div>
       )}
+
+      {!selectedRide && (
+        <nav className="fixed bottom-0 left-0 right-0 bg-white p-2.5 z-50 border-t border-neutral-200">
+          <div className="bg-neutral-100 rounded-full flex items-center p-1 max-w-sm mx-auto">
+            <button
+              className={`flex-1 py-2 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === 'search' ? 'bg-white shadow text-gray-800' : 'text-neutral-500'}`}
+              onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setActiveFilter(null); setActiveSort(null); setSelectedRide(null); setSeatsNeeded(null); }}>
+                <Search size={20} />
+                <span>{t.search}</span>
+            </button>
+            <button
+              className={`flex-1 py-2 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === 'history' ? 'bg-white shadow text-gray-800' : 'text-neutral-500'}`}
+              onClick={() => setActiveTab('history')}>
+                <History size={20} />
+                <span>{t.history}</span>
+            </button>
+          </div>
+        </nav>
+      )}
+      <CalendarModal 
+        isOpen={showCalendar}
+        onClose={() => setShowCalendar(false)}
+        selectedDate={pickupDate}
+        onDayClick={(date) => {
+            setPickupDate(date.toISOString().split('T')[0]);
+            setShowCalendar(false);
+        }}
+      />
+      <BookingModal 
+        isOpen={isBooking}
+        onClose={() => setIsBooking(false)}
+        ride={rideToBook}
+        onConfirmBooking={handleConfirmBooking}
+      />
+      <LanguageSelectModal
+        isOpen={showLanguageModal}
+        onClose={() => setShowLanguageModal(false)}
+        currentLanguage={language}
+        onSelect={setLanguage}
+        t={t}
+      />
     </div>
   );
 };
@@ -841,7 +1004,7 @@ const SpecialService = ({ service }) => {
 }
 
 
-const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack }) => {
+const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }) => {
     const discount = ride.basePrice * 0.10;
     const finalPrice = isUnreliable ? ride.basePrice : ride.basePrice - discount;
 
@@ -850,7 +1013,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack }) => {
             <div className="bg-white text-gray-800 p-4 flex-shrink-0 border-b border-neutral-200">
                  <div className="flex items-center">
                     <button onClick={onBack} className="mr-3 text-gray-600 hover:text-gray-800"><ChevronLeft size={24} /></button>
-                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4"/>
+                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4" onError={(e) => ((e.target as HTMLImageElement).src = 'https://placehold.co/200x150/E2E8F0/4A5568?text=Image+Error')}/>
                     <div className="flex items-stretch w-full">
                         <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
                             <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-neutral-300 rounded-full"></div>
@@ -905,7 +1068,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack }) => {
                         </AccordionItem>
                          <AccordionItem icon={<User className="text-gray-600" />} title="Driver & Car" value="">
                             <div className="flex space-x-4">
-                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full"/>
+                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full" onError={(e) => ((e.target as HTMLImageElement).src = 'https://placehold.co/100x100/E2E8F0/4A5568?text=N/A')}/>
                                 <div>
                                     <p className="font-semibold">{ride.driverName}</p>
                                     <div className="flex items-center text-sm text-gray-600">
@@ -928,10 +1091,13 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack }) => {
                     <p className="text-2xl font-bold text-gray-800">${finalPrice.toFixed(2)}</p>
                     <p className="text-sm text-gray-600">{ride.ratePerMail || ride.avgFuelPerMile}</p>
                 </div>
-                <button className="bg-green-500 text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-green-600 transition-colors shadow-lg">Book</button>
+                <button onClick={() => onBook(ride)} className="bg-green-500 text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-green-600 transition-colors shadow-lg">Book</button>
             </div>
         </div>
     );
 };
 
 export default App;
+
+
+

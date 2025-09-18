@@ -10,13 +10,17 @@ import { MapPin, Calendar as CalendarIcon, Mail, Clock, Users, DollarSign, Car }
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import LocationSelector from "./LocationSelector";
-
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useUsername } from "@/hooks/useUsername";
 interface PostRideModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
+  const { toast } = useToast();
+  const { username: savedUsername } = useUsername();
   const [step, setStep] = useState(1);
   const [departure, setDeparture] = useState("");
   const [destination, setDestination] = useState("");
@@ -25,10 +29,13 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
   const [mailOption, setMailOption] = useState<string | null>(null);
   const [ridePrice, setRidePrice] = useState("");
   const [mailPrice, setMailPrice] = useState("");
-  const [departureType, setDepartureType] = useState<"time" | "sitToGo" | null>(null);
+  const [departureType, setDepartureType] = useState<"fixed" | "seat_fill" | null>(null);
   const [departureTime, setDepartureTime] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [totalSeats, setTotalSeats] = useState("4");
   const [showDepartureSelector, setShowDepartureSelector] = useState(false);
   const [showDestinationSelector, setShowDestinationSelector] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const mailOptions = [
     {
@@ -56,19 +63,115 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
     setShowMailOptions(false);
   };
 
-  const handlePost = () => {
-    // Handle posting the ride
-    onOpenChange(false);
-    // Reset form
-    setStep(1);
-    setDeparture("");
-    setDestination("");
-    setDate(undefined);
-    setMailOption(null);
-    setRidePrice("");
-    setMailPrice("");
-    setDepartureType(null);
-    setDepartureTime("");
+  const handlePost = async () => {
+    console.log('=== HANDLE POST CALLED ===');
+    console.log('Current form state:', {
+      date,
+      mailOption,
+      departureType,
+      phoneNumber,
+      departure,
+      destination,
+      ridePrice,
+      mailPrice,
+      totalSeats
+    });
+
+    if (!date || !mailOption || !departureType || !phoneNumber) {
+      console.log('Form validation failed - missing required fields');
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields including phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Get username from localStorage
+      const finalUsername = localStorage.getItem('username');
+      console.log('PostRideModal - Username from localStorage:', finalUsername);
+      
+      if (!finalUsername) {
+        console.log('PostRideModal - No username found, redirecting to welcome');
+        toast({
+          title: "Set username first",
+          description: "Please choose a username on the welcome screen.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const seats = parseInt(totalSeats);
+      console.log('Parsed seats:', seats);
+      
+      const rideData: any = {
+        driver_username: finalUsername,
+        from_location: departure,
+        to_location: destination,
+        departure_date: format(date, 'yyyy-MM-dd'),
+        departure_time: departureType === 'fixed' ? departureTime : null,
+        departure_type: departureType,
+        total_seats: seats,
+        available_seats: seats,
+        ride_price: ridePrice ? parseFloat(ridePrice) : 0,
+        has_mail_service: mailOption === 'yes' || mailOption === 'mailOnly',
+        mail_price: (mailOption === 'yes' || mailOption === 'mailOnly') && mailPrice ? parseFloat(mailPrice) : null,
+        phone_number: phoneNumber,
+        status: 'active',
+      };
+
+      console.log('PostRideModal - About to insert ride data:', rideData);
+      console.log('Mail service logic:', {
+        mailOption,
+        hasMailService: mailOption === 'yes' || mailOption === 'mailOnly',
+        mailPrice: (mailOption === 'yes' || mailOption === 'mailOnly') && mailPrice ? parseFloat(mailPrice) : null
+      });
+
+      const { data, error } = await supabase.from('rides').insert([rideData]).select();
+
+      console.log('PostRideModal - Insert response:', { data, error });
+
+      if (error) {
+        console.error('PostRideModal - Error posting ride:', error);
+        toast({
+          title: "Error",
+          description: "Failed to post ride. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('PostRideModal - Ride posted successfully:', data);
+      toast({
+        title: "Ride Posted!",
+        description: "Your ride has been posted successfully.",
+      });
+
+      onOpenChange(false);
+      // Reset form
+      setStep(1);
+      setDeparture("");
+      setDestination("");
+      setDate(undefined);
+      setMailOption(null);
+      setRidePrice("");
+      setMailPrice("");
+      setDepartureType(null);
+      setDepartureTime("");
+      setPhoneNumber("");
+      setTotalSeats("4");
+    } catch (error) {
+      console.error('Error posting ride:', error);
+      toast({
+        title: "Error",
+        description: "Failed to post ride. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const renderStep = () => {
@@ -288,9 +391,9 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
               
               <div className="space-y-3">
                 <button
-                  onClick={() => setDepartureType("time")}
+                  onClick={() => setDepartureType("fixed")}
                   className={`w-full p-4 text-left border rounded-lg transition-colors ${
-                    departureType === "time" ? "border-primary bg-primary/10" : "hover:bg-muted/50"
+                    departureType === "fixed" ? "border-primary bg-primary/10" : "hover:bg-muted/50"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -303,9 +406,9 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
                 </button>
 
                 <button
-                  onClick={() => setDepartureType("sitToGo")}
+                  onClick={() => setDepartureType("seat_fill")}
                   className={`w-full p-4 text-left border rounded-lg transition-colors ${
-                    departureType === "sitToGo" ? "border-primary bg-primary/10" : "hover:bg-muted/50"
+                    departureType === "seat_fill" ? "border-primary bg-primary/10" : "hover:bg-muted/50"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -318,7 +421,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
                 </button>
               </div>
 
-              {departureType === "time" && (
+              {departureType === "fixed" && (
                 <div className="mt-4">
                   <Label htmlFor="time">Departure Time</Label>
                   <Input
@@ -330,6 +433,32 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
                   />
                 </div>
               )}
+
+              <div className="mt-4 space-y-4">
+                <div>
+                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <Input
+                    id="phoneNumber"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="Enter your phone number"
+                    className="mt-2 h-12"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="totalSeats">Number of Seats (1-4)</Label>
+                  <Input
+                    id="totalSeats"
+                    type="number"
+                    min="1"
+                    max="4"
+                    value={totalSeats}
+                    onChange={(e) => setTotalSeats(e.target.value)}
+                    className="mt-2 h-12"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-4">
@@ -338,13 +467,13 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
               </Button>
               <Button 
                 onClick={handlePost}
-                disabled={!departureType || (departureType === "time" && !departureTime)}
+                disabled={!departureType || (departureType === "fixed" && !departureTime) || !phoneNumber || isLoading}
                 variant="hero"
                 size="xl"
                 className="flex-1"
               >
                 <Car className="mr-2 h-5 w-5" />
-                Post Ride
+                {isLoading ? "Posting..." : "Post Ride"}
               </Button>
             </div>
           </div>
