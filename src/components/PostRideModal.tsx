@@ -64,7 +64,28 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
   };
 
   const handlePost = async () => {
-    if (!date || !mailOption || !departureType || !phoneNumber) return;
+    console.log('=== HANDLE POST CALLED ===');
+    console.log('Current form state:', {
+      date,
+      mailOption,
+      departureType,
+      phoneNumber,
+      departure,
+      destination,
+      ridePrice,
+      mailPrice,
+      totalSeats
+    });
+
+    if (!date || !mailOption || !departureType || !phoneNumber) {
+      console.log('Form validation failed - missing required fields');
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields including phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -83,6 +104,8 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
       }
 
       const seats = parseInt(totalSeats);
+      console.log('Parsed seats:', seats);
+      
       const rideData: any = {
         driver_username: finalUsername,
         from_location: departure,
@@ -100,6 +123,11 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
       };
 
       console.log('PostRideModal - About to insert ride data:', rideData);
+      console.log('Mail service logic:', {
+        mailOption,
+        hasMailService: mailOption === 'yes' || mailOption === 'mailOnly',
+        mailPrice: (mailOption === 'yes' || mailOption === 'mailOnly') && mailPrice ? parseFloat(mailPrice) : null
+      });
 
       const { data, error } = await supabase.from('rides').insert([rideData]).select();
 

@@ -1630,7 +1630,7 @@ const AppContent = () => {
       const {
         data,
         error
-      } = await supabase.from('rides').select('*').eq('username', username).order('created_at', {
+      } = await supabase.from('rides').select('*').eq('driver_username', username).order('created_at', {
         ascending: false
       });
       if (error) {
@@ -1712,20 +1712,19 @@ const AppContent = () => {
         data: insertedRide,
         error
       } = await supabase.from('rides').insert({
-        username: localStorage.getItem('username') || 'driver',
-        departure_location: rideDataToPost.fromLocation,
-        destination_location: rideDataToPost.toLocation,
+        driver_username: localStorage.getItem('username') || 'driver',
+        from_location: rideDataToPost.fromLocation,
+        to_location: rideDataToPost.toLocation,
         departure_date: rideDataToPost.departureDate,
-        departure_start_time: rideDataToPost.departureStartTime,
-        departure_end_time: rideDataToPost.departureEndTime,
-        departure_type: rideDataToPost.departureType === 'fixed' ? 'time' : rideDataToPost.departureType === 'when_fills' ? 'sitToGo' : rideDataToPost.departureType,
-        mail_option: rideDataToPost.mailService,
+        departure_time: rideDataToPost.departureStartTime,
+        departure_type: rideDataToPost.departureType === 'fixed' ? 'fixed' : rideDataToPost.departureType === 'when_fills' ? 'seat_fill' : rideDataToPost.departureType,
+        has_mail_service: rideDataToPost.mailService === 'yes' || rideDataToPost.mailService === 'mailOnly',
         ride_price: parseFloat(rideDataToPost.price) || 0,
-        mail_price: rideDataToPost.mailService === 'yes' ? parseFloat(rideDataToPost.mailPrice) || 0 : 0,
+        mail_price: (rideDataToPost.mailService === 'yes' || rideDataToPost.mailService === 'mailOnly') && rideDataToPost.mailPrice ? parseFloat(rideDataToPost.mailPrice) : null,
+        total_seats: parseInt(rideDataToPost.freeSeats) || 4,
         available_seats: parseInt(rideDataToPost.freeSeats) || 4,
-        total_seats: 4,
-        status: 'upcoming',
-        car_type: selectedCar
+        phone_number: localStorage.getItem('userPhone') || '998901234567', // Default phone if not set
+        status: 'active'
       }).select().single();
       if (error) {
         throw error;
