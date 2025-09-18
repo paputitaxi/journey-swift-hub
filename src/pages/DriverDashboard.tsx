@@ -358,7 +358,6 @@ const uzbekistanLocations = [
   { region: "Republic of Karakalpakstan", cities: ["Nukus", "Beruniy", "Chimboy", "Ellikqala", "Kegeyli", "Qo'ng'irot", "Qorao'zak", "Shumanay", "Taxtako'pir", "To'rtko'l", "Xo'jayli", "Amudaryo", "Bo'zatov", "Qanliko'l", "Taxiatosh"] },
 ];
 
-
 // Location Selection Modal Component
 const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
   const { t } = useLanguage();
@@ -414,18 +413,17 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
   );
 };
 
-
 // Main Post Ride Form Component
-const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
+const PostRideForm = ({ onClose, onPostSuccess, onAddRide, initialValues, isEditing }) => {
   const { t } = useLanguage();
-  const [fromLocation, setFromLocation] = useState("");
-  const [toLocation, setToLocation] = useState("");
-  const [departureDate, setDepartureDate] = useState("");
-  const [mailService, setMailService] = useState(""); // "yes", "no"
-  const [freeSeats, setFreeSeats] = useState(null); // New state for free seats
-  const [departureType, setDepartureType] = useState(""); // "fixed", "when_fills"
-  const [departureTime, setDepartureTime] = useState(""); // Only for fixed departure
-  const [price, setPrice] = useState("");
+  const [fromLocation, setFromLocation] = useState(initialValues?.fromLocation || "");
+  const [toLocation, setToLocation] = useState(initialValues?.toLocation || "");
+  const [departureDate, setDepartureDate] = useState(initialValues?.departureDate || "");
+  const [mailService, setMailService] = useState(initialValues?.mailService || ""); // "yes", "no"
+  const [freeSeats, setFreeSeats] = useState(initialValues?.freeSeats || null); // New state for free seats
+  const [departureType, setDepartureType] = useState(initialValues?.departureType || ""); // "fixed", "when_fills"
+  const [departureTime, setDepartureTime] = useState(initialValues?.departureTime || ""); // Only for fixed departure
+  const [price, setPrice] = useState(initialValues?.price || "");
   const [submissionState, setSubmissionState] = useState('idle'); // 'idle', 'submitting', 'submitted'
 
   const [showFromModal, setShowFromModal] = useState(false);
@@ -502,12 +500,11 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
     );
   };
 
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 p-4 font-sans">
       <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[90vh] flex flex-col">
         <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-800">{t('postNewRide')}</h2>
+          <h2 className="text-lg font-semibold text-gray-800">{isEditing ? t('editRide') : t('postNewRide')}</h2>
           <button onClick={onClose} className="p-1 rounded-full text-neutral-800 hover:bg-neutral-100 hover:text-gray-900 transition-colors"> <X className="h-6 w-6" /> </button>
         </div>
         <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-4 space-y-6 custom-scrollbar">
@@ -617,7 +614,7 @@ const PostRideForm = ({ onClose, onPostSuccess, onAddRide }) => {
             "bg-gray-600 text-gray-400 cursor-not-allowed"}`} >
             {submissionState === 'submitting' ? <><Loader2 className="h-6 w-6 mr-2 animate-spin" /> {t('submitting')}</> : 
              submissionState === 'submitted' ? <><CheckCircle className="h-6 w-6 mr-2" /> {t('submitted')}</> : 
-             t('postRide')}
+             isEditing ? t('updateRide') : t('postRide')}
           </button>
         </form>
       </div>
@@ -765,7 +762,6 @@ const SettingsModal = ({ title, isOpen, onClose, children }) => {
         </div>
     );
 };
-
 
 // --- Profile Page Component ---
 const ProfilePage = ({ user, onUpdateUser, onUpdateCar, myRides }) => {
@@ -1074,6 +1070,22 @@ const AppContent = () => {
     { id: "profile", label: t('profile'), icon: User },
   ];
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingRide, setEditingRide] = useState(null);
+
+  const handleEditRide = (ride) => {
+    setEditingRide(ride);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEditedRide = (updatedRide) => {
+    setMyRides(prev => 
+      prev.map(ride => ride.id === updatedRide.id ? { ...ride, ...updatedRide } : ride)
+    );
+    setIsEditModalOpen(false);
+    setEditingRide(null);
+  };
+
   const renderContent = () => {
     if (showMessages) { return <MessageDashboard onClose={() => { setShowMessages(false); setHeaderTitle(t('ride')); }} />; }
     if (showPostRide) { return <PostRideForm onClose={() => { setShowPostRide(false); setHeaderTitle(t('ride')); }} onPostSuccess={() => setHeaderTitle(t('ride'))} onAddRide={handleAddRide} />; }
@@ -1116,21 +1128,12 @@ const AppContent = () => {
                     <div className="flex flex-col space-y-2">
                         <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> {activeRide.fromLocation} </div>
                         <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> {activeRide.toLocation} </div>
-                        <div className="flex items-center text-neutral-600"> 
-                            <Users className="h-4 w-4 mr-2" /> 
-                            <button onClick={(e) => {e.stopPropagation(); handleSeatChange(1)}} disabled={activeRide.freeSeats === activeRide.totalSeats} className="mr-2 p-1 rounded-full hover:bg-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed"><MinusCircle size={16}/></button>
-                            <span>{activeRide.totalSeats - activeRide.freeSeats}/{activeRide.totalSeats} {t('passengers')}</span>
-                            <button onClick={(e) => {e.stopPropagation(); handleSeatChange(-1)}} disabled={activeRide.freeSeats === 0} className="ml-2 p-1 rounded-full hover:bg-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed"><PlusCircle size={16}/></button>
-                        </div>
-                        <div className="flex items-center text-neutral-600"> <Calendar className="h-4 w-4 mr-2" /> {activeRide.departureDate} {activeRide.departureTime && <><Clock className="h-4 w-4 mx-2" /> {activeRide.departureTime}</>}</div>
+                        <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> {activeRide.departureDate} {activeRide.departureTime && <><Clock className="h-4 w-4 mx-2" /> {activeRide.departureTime}</>} </div>
                     </div>
+                    
                     <div className="flex flex-col items-end space-y-2">
-                        <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full"> {t('active')} </span>
-                        <button onClick={(e) => {e.stopPropagation(); handleCancelRide()}} className="p-1 rounded-full hover:bg-neutral-100 transition-colors"> <XCircle className="h-5 w-5 text-red-500" /> </button>
-                        <button onClick={(e) => {e.stopPropagation(); handleSeatChange(-1)}} disabled={activeRide.freeSeats === 0} className="flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold hover:bg-green-200 disabled:bg-neutral-100 disabled:text-neutral-400 disabled:cursor-not-allowed">
-                            <UserPlus size={14} className="mr-1.5"/>
-                            {t('iTookAClient')}
-                        </button>
+                        <span className="text-xl font-bold text-gray-800">${activeRide.price}</span>
+                        <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full">{t('active')}</span>
                     </div>
                 </div>
               ) : (
@@ -1143,27 +1146,31 @@ const AppContent = () => {
         <div className="p-4 text-gray-800 font-sans space-y-4">
             {myRides.filter(r => r.status === 'upcoming').length > 0 ? (
                 myRides.filter(r => r.status === 'upcoming').map(ride => (
-                    <div key={ride.id} className="p-4 bg-white border border-neutral-200 rounded-2xl shadow-lg">
-                        <div className="flex justify-between items-center text-sm">
-                             <div className="flex flex-col space-y-1">
-                                <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> {ride.fromLocation} </div>
-                                <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> {ride.toLocation} </div>
-                                <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> {ride.departureDate} {ride.departureTime && <><Clock className="h-4 w-4 mx-2" /> {ride.departureTime}</>} </div>
-                            </div>
-                            
-                            <SeatIndicator availableSeats={ride.freeSeats} />
-
-                            <div className="flex flex-col items-end space-y-2">
-                                <span className="text-xl font-bold text-gray-800">${ride.price}</span>
-                                <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full">{t('active')}</span>
-                            </div>
+                    <div 
+                      key={ride.id} 
+                      onClick={() => handleEditRide(ride)}
+                      className="p-4 bg-white border border-neutral-200 rounded-2xl shadow-lg mb-4 cursor-pointer hover:shadow-xl transition-shadow duration-200"
+                    >
+                      <div className="flex justify-between items-center text-sm">
+                         <div className="flex flex-col space-y-1">
+                            <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-green-600" /> {ride.fromLocation} </div>
+                            <div className="flex items-center text-gray-800 font-medium"> <MapPin className="h-4 w-4 mr-2 text-red-600" /> {ride.toLocation} </div>
+                            <div className="flex items-center text-neutral-600 mt-1"> <Calendar className="h-4 w-4 mr-2" /> {ride.departureDate} {ride.departureTime && <><Clock className="h-4 w-4 mx-2" /> {ride.departureTime}</>} </div>
                         </div>
+                        
+                        <SeatIndicator availableSeats={ride.freeSeats} />
+
+                        <div className="flex flex-col items-end space-y-2">
+                          <span className="text-xl font-bold text-gray-800">${ride.price}</span>
+                          <span className="bg-green-500/20 text-green-600 text-xs font-medium px-2 py-1 rounded-full">{t('active')}</span>
+                        </div>
+                      </div>
                     </div>
                 ))
             ) : (
-                <div className="text-center py-10">
-                    <h2 className="text-xl font-bold">{t('noLines')}</h2>
-                    <p className="text-neutral-600 mt-2">{t('postRidePrompt')}</p>
+                <div className="text-center p-8 bg-white rounded-2xl shadow">
+                  <p className="text-gray-600 mb-2">{t('noLines')}</p>
+                  <p className="text-sm text-gray-500">{t('postRidePrompt')}</p>
                 </div>
             )}
         </div>
@@ -1208,6 +1215,21 @@ const AppContent = () => {
             })}
           </div>
         </footer>
+      )}
+      {isEditModalOpen && editingRide && (
+        <PostRideForm
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingRide(null);
+          }}
+          onPostSuccess={() => {
+            setIsEditModalOpen(false);
+            setEditingRide(null);
+          }}
+          onAddRide={handleSaveEditedRide}
+          initialValues={editingRide}
+          isEditing={true}
+        />
       )}
     </div>
   );
