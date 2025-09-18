@@ -1131,13 +1131,12 @@ const RideDetailModal = ({
                                 </span>
                             </div>}
                     </div>
-                    <div className="flex justify-between items-center text-sm text-neutral-600">
+                    <div className="flex justify-between items-center text-sm text-neutral-600 mt-2">
                         <div className="flex items-center"><Mail className="h-5 w-5 mr-2" /><span>{ride.mailService === 'yes' ? t('yesCarryMail') : t('noCarryMail')}</span></div>
                         <div className="flex items-center">{ride.departureType === 'fixed' ? <Clock className="h-5 w-5 mr-2" /> : <Users className="h-5 w-5 mr-2" />}<span>{ride.departureType === 'fixed' ? t('fixedDeparture') : t('whenFills')}</span></div>
                     </div>
-                    <div className="flex items-center text-sm text-neutral-600"><div className="flex items-center"><Car className="h-5 w-5 mr-2" /><span>{ride.carType}</span></div></div>
-
-                    <div className="border-t border-neutral-200/50"></div>
+                    <div className="flex items-center text-sm text-neutral-600 mt-2"><div className="flex items-center"><Car className="h-5 w-5 mr-2" /><span>{ride.carType}</span></div></div>
+                    <div className="border-t border-neutral-200/50 my-4"></div>
                     <div>
                         <h3 className="text-md font-semibold text-gray-800 mb-2">{t('passengers')}</h3>
                         <div className="space-y-2">
@@ -1561,6 +1560,33 @@ const ConfirmationModal = ({
             </div>
         </div>;
 };
+
+const NewRideOptionsModal = ({ isOpen, onClose, onStartNewRide, onChooseFromArchive }) => {
+  const { t } = useLanguage();
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 font-sans">
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
+        <h2 className="text-xl font-bold text-gray-800 mb-6">{t('newRide')}</h2>
+        <div className="space-y-4">
+          <button onClick={onStartNewRide} className="w-full py-3 rounded-xl text-lg font-semibold transition-colors bg-green-500 hover:bg-green-600 text-white shadow-lg flex items-center justify-center">
+            <Plus className="h-5 w-5 mr-2" />
+            {t('postNewRide')}
+          </button>
+          <button onClick={onChooseFromArchive} className="w-full py-3 rounded-xl text-lg font-semibold transition-colors bg-neutral-200 hover:bg-neutral-300 text-gray-800 shadow-lg flex items-center justify-center">
+            <ArchiveIcon className="h-5 w-5 mr-2" />
+            {t('archive')}
+          </button>
+        </div>
+        <button onClick={onClose} className="mt-6 text-sm text-neutral-500 hover:text-gray-800">
+            {t('cancel')}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const AppContent = () => {
   const {
     t,
@@ -1596,6 +1622,7 @@ const AppContent = () => {
   const [showArchiveConfirmModal, setShowArchiveConfirmModal] = useState(false);
   const [actionToConfirm, setActionToConfirm] = useState(null);
   const [repostRideData, setRepostRideData] = useState(null);
+  const [showNewRideOptionsModal, setShowNewRideOptionsModal] = useState(false);
   useEffect(() => {
     const fetchMyRides = async () => {
       if (typeof window !== 'undefined' && !localStorage.getItem('username')) return;
@@ -1659,9 +1686,18 @@ const AppContent = () => {
     if (activeRide) {
       setShowActiveRideErrorModal(true);
     } else {
-      setShowPostRide(true);
+      setShowNewRideOptionsModal(true);
       setHeaderTitle(t('newRide'));
     }
+  };
+  const handleStartNewRide = () => {
+    setShowNewRideOptionsModal(false);
+    setShowPostRide(true);
+  };
+  const handleChooseFromArchive = () => {
+    setShowNewRideOptionsModal(false);
+    setActiveTab('history');
+    setHistoryView('archive');
   };
   const handleConfirmPost = newRideData => {
     setRideDataToPost(newRideData);
@@ -1792,7 +1828,9 @@ const AppContent = () => {
     setOpenProfileEdit(true);
   };
   const handleBack = () => {
-    if (showPostRide) {
+    if (showNewRideOptionsModal) {
+      setShowNewRideOptionsModal(false);
+    } else if (showPostRide) {
       setShowPostRide(false);
     } else if (showMessages) {
       setShowMessages(false);
@@ -1973,7 +2011,7 @@ const AppContent = () => {
                   <h2 className="text-sm text-neutral-600">{t('totalEarnings')}</h2>
                   <p className="text-2xl font-extrabold text-gray-800 mt-2">$0.00</p>
               </div>
-              <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105" onClick={handleNewRideClick}>
+              <div onClick={handleNewRideClick} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105">
                   <div className="w-12 h-12 bg-neutral-100/50 rounded-full flex items-center justify-center border-2 border-neutral-200/50 shadow-md"><Plus className="h-6 w-6 text-gray-800" /></div>
                   <span className="text-xs text-neutral-600 mt-2">{t('newRide')}</span>
               </div>
@@ -2084,7 +2122,7 @@ const AppContent = () => {
       {selectedPassenger && <div className="fixed bg-white rounded-xl shadow-2xl z-50 p-2 space-y-1" style={{
       top: popoverPosition.top,
       left: popoverPosition.left
-    }} onClick={() => setSelectedPassenger(null)}>
+    }} onClick={() => selectedPassenger && setSelectedPassenger(null)}>
               <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-neutral-100 rounded-lg"><Phone className="h-4 w-4 mr-2" />{t('call')}</button>
               <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-neutral-100 rounded-lg"><Send className="h-4 w-4 mr-2" />{t('message')}</button>
               <div className="border-t border-neutral-200 my-1"></div>
@@ -2093,7 +2131,7 @@ const AppContent = () => {
       <header className="bg-white/80 backdrop-blur-sm p-3 border-b border-white/20 flex items-center justify-between z-20 shadow-lg relative rounded-b-2xl">
           <div className="w-1/3 flex justify-start">
             {/* The back button is now shown if any state is active that isn't the main dashboard */}
-            {activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal || showCarTypeModal || isEditModalOpen || showHistoryDetailModal || showPostConfirmationModal || showArchiveConfirmModal || showFinishRideModal || showActiveRideErrorModal ? <button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-black/10 transition-colors">
+            {activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal || showCarTypeModal || isEditModalOpen || showHistoryDetailModal || showPostConfirmationModal || showArchiveConfirmModal || showFinishRideModal || showActiveRideErrorModal || showNewRideOptionsModal ? <button onClick={handleBack} className="p-2 rounded-full text-neutral-800 hover:bg-black/10 transition-colors">
                 <ChevronLeft className="h-6 w-6" />
               </button> : <span className="text-sm font-semibold text-gray-700 ml-2">{userData.phone}</span>}
           </div>
@@ -2101,7 +2139,7 @@ const AppContent = () => {
             <h1 className="text-xl font-bold text-gray-800">{headerTitle}</h1>
           </div>
           <div className="w-1/3 flex justify-end">
-             {activeTab === "dashboard" && !showPostRide && !showMessages && !showStatsModal && <button onClick={() => setActiveTab('profile')} className="flex items-center gap-2 p-2 rounded-full hover:bg-black/10 transition-colors">
+             {activeTab === "dashboard" && !showPostRide && !showMessages && !showStatsModal && !showNewRideOptionsModal && <button onClick={() => setActiveTab('profile')} className="flex items-center gap-2 p-2 rounded-full hover:bg-black/10 transition-colors">
                     <span className="text-sm font-semibold text-gray-700">{userData.fullName}</span>
                     <User className="h-5 w-5 text-gray-700" />
                 </button>}
@@ -2169,6 +2207,7 @@ const AppContent = () => {
       setShowPostRide(true);
     }} rideData={rideDataToPost} userData={userData} />}
     {showArchiveConfirmModal && <ArchiveConfirmModal isOpen={showArchiveConfirmModal} onClose={() => setShowArchiveConfirmModal(false)} onConfirm={editingRide.status === 'upcoming' ? handleArchiveRide : handleStopRide} rideStatus={editingRide.status} />}
+    {showNewRideOptionsModal && <NewRideOptionsModal isOpen={showNewRideOptionsModal} onClose={() => setShowNewRideOptionsModal(false)} onStartNewRide={handleStartNewRide} onChooseFromArchive={handleChooseFromArchive} />}
     </div>;
 };
 const HistoryArchivePage = ({
