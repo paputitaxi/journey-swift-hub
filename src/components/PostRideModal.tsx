@@ -29,8 +29,10 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
   const [mailOption, setMailOption] = useState<string | null>(null);
   const [ridePrice, setRidePrice] = useState("");
   const [mailPrice, setMailPrice] = useState("");
-  const [departureType, setDepartureType] = useState<"time" | "sitToGo" | null>(null);
+  const [departureType, setDepartureType] = useState<"fixed" | "seat_fill" | null>(null);
   const [departureTime, setDepartureTime] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [totalSeats, setTotalSeats] = useState("4");
   const [showDepartureSelector, setShowDepartureSelector] = useState(false);
   const [showDestinationSelector, setShowDestinationSelector] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -62,7 +64,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
   };
 
   const handlePost = async () => {
-    if (!date || !mailOption || !departureType) return;
+    if (!date || !mailOption || !departureType || !phoneNumber) return;
 
     setIsLoading(true);
     try {
@@ -80,16 +82,20 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
         return;
       }
 
+      const seats = parseInt(totalSeats);
       const rideData: any = {
-        username: finalUsername,
-        departure_location: departure,
-        destination_location: destination,
+        driver_username: finalUsername,
+        from_location: departure,
+        to_location: destination,
         departure_date: format(date, 'yyyy-MM-dd'),
-        departure_time: departureType === 'time' ? departureTime : null,
+        departure_time: departureType === 'fixed' ? departureTime : null,
         departure_type: departureType,
-        mail_option: mailOption,
-        ride_price: ridePrice ? parseFloat(ridePrice) : null,
-        mail_price: mailPrice ? parseFloat(mailPrice) : null,
+        total_seats: seats,
+        available_seats: seats,
+        ride_price: ridePrice ? parseFloat(ridePrice) : 0,
+        has_mail_service: mailOption === 'yes' || mailOption === 'mailOnly',
+        mail_price: (mailOption === 'yes' || mailOption === 'mailOnly') && mailPrice ? parseFloat(mailPrice) : null,
+        phone_number: phoneNumber,
         status: 'active',
       };
 
@@ -126,6 +132,8 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
       setMailPrice("");
       setDepartureType(null);
       setDepartureTime("");
+      setPhoneNumber("");
+      setTotalSeats("4");
     } catch (error) {
       console.error('Error posting ride:', error);
       toast({
@@ -355,9 +363,9 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
               
               <div className="space-y-3">
                 <button
-                  onClick={() => setDepartureType("time")}
+                  onClick={() => setDepartureType("fixed")}
                   className={`w-full p-4 text-left border rounded-lg transition-colors ${
-                    departureType === "time" ? "border-primary bg-primary/10" : "hover:bg-muted/50"
+                    departureType === "fixed" ? "border-primary bg-primary/10" : "hover:bg-muted/50"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -370,9 +378,9 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
                 </button>
 
                 <button
-                  onClick={() => setDepartureType("sitToGo")}
+                  onClick={() => setDepartureType("seat_fill")}
                   className={`w-full p-4 text-left border rounded-lg transition-colors ${
-                    departureType === "sitToGo" ? "border-primary bg-primary/10" : "hover:bg-muted/50"
+                    departureType === "seat_fill" ? "border-primary bg-primary/10" : "hover:bg-muted/50"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -385,7 +393,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
                 </button>
               </div>
 
-              {departureType === "time" && (
+              {departureType === "fixed" && (
                 <div className="mt-4">
                   <Label htmlFor="time">Departure Time</Label>
                   <Input
@@ -397,6 +405,32 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
                   />
                 </div>
               )}
+
+              <div className="mt-4 space-y-4">
+                <div>
+                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <Input
+                    id="phoneNumber"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="Enter your phone number"
+                    className="mt-2 h-12"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="totalSeats">Number of Seats (1-4)</Label>
+                  <Input
+                    id="totalSeats"
+                    type="number"
+                    min="1"
+                    max="4"
+                    value={totalSeats}
+                    onChange={(e) => setTotalSeats(e.target.value)}
+                    className="mt-2 h-12"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-4">
@@ -405,7 +439,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
               </Button>
               <Button 
                 onClick={handlePost}
-                disabled={!departureType || (departureType === "time" && !departureTime) || isLoading}
+                disabled={!departureType || (departureType === "fixed" && !departureTime) || !phoneNumber || isLoading}
                 variant="hero"
                 size="xl"
                 className="flex-1"
