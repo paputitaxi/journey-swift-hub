@@ -1715,14 +1715,16 @@ const AppContent = () => {
         from_location: rideDataToPost.fromLocation,
         to_location: rideDataToPost.toLocation,
         departure_date: rideDataToPost.departureDate,
-        departure_time: rideDataToPost.departureStartTime,
+        departure_time: rideDataToPost.departureType === 'fixed' && rideDataToPost.departureStartTime
+          ? `${rideDataToPost.departureStartTime}${rideDataToPost.departureStartTime.length === 5 ? ':00' : ''}`
+          : null,
         departure_type: rideDataToPost.departureType === 'fixed' ? 'fixed' : rideDataToPost.departureType === 'when_fills' ? 'seat_fill' : rideDataToPost.departureType,
         has_mail_service: rideDataToPost.mailService === 'yes' || rideDataToPost.mailService === 'mailOnly',
         ride_price: parseFloat(rideDataToPost.price) || 0,
         mail_price: (rideDataToPost.mailService === 'yes' || rideDataToPost.mailService === 'mailOnly') && rideDataToPost.mailPrice ? parseFloat(rideDataToPost.mailPrice) : null,
         total_seats: parseInt(rideDataToPost.freeSeats) || 4,
         available_seats: parseInt(rideDataToPost.freeSeats) || 4,
-        phone_number: localStorage.getItem('userPhone') || '998901234567',
+        phone_number: rideDataToPost.contactNumber || localStorage.getItem('userPhone') || '998901234567',
         status: 'active'
       };
       console.log('[DriverDashboard] Insert payload', payload);
