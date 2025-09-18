@@ -897,11 +897,20 @@ const App = () => {
     <div className="min-h-screen flex flex-col bg-[#F8F8F8] font-sans antialiased">
       <CustomScrollbarStyles />
 
+      {!selectedRide && (
+        <header className="flex-shrink-0 bg-white p-4 flex items-center justify-between shadow-sm z-20">
+          <span className="font-semibold text-gray-800">+998 90 123 45 67</span>
+          <button onClick={() => setActiveTab('profile')} className="p-2 rounded-full hover:bg-gray-100">
+            <User size={24} className="text-gray-700" />
+          </button>
+        </header>
+      )}
+
       <main className="flex-grow overflow-hidden flex flex-col">
         {renderContent()}
       </main>
 
-      {!showSearchResults && (
+      {!selectedRide && !showSearchResults && activeTab === 'search' && (
         <div className="fixed bottom-20 left-0 right-0 p-4 bg-transparent z-40">
           <button 
             className={`w-full py-3 rounded-lg font-semibold transition duration-300 shadow-xl transform hover:scale-105 ${
@@ -917,28 +926,24 @@ const App = () => {
         </div>
       )}
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white p-2.5 z-50 border-t border-neutral-200">
-        <div className="bg-neutral-100 rounded-full flex items-center p-1 max-w-sm mx-auto">
-          <button
-            className={`flex-1 py-2 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === 'search' ? 'bg-white shadow text-gray-800' : 'text-neutral-500'}`}
-            onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setActiveFilter(null); setActiveSort(null); setSelectedRide(null); setSeatsNeeded(null); }}>
-              <Search size={20} />
-              <span>{t.search}</span>
-          </button>
-          <button
-            className={`flex-1 py-2 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === 'history' ? 'bg-white shadow text-gray-800' : 'text-neutral-500'}`}
-            onClick={() => setActiveTab('history')}>
-              <History size={20} />
-              <span>{t.history}</span>
-          </button>
-          <button
-            className={`flex-1 py-2 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === 'profile' ? 'bg-white shadow text-gray-800' : 'text-neutral-500'}`}
-            onClick={() => setActiveTab('profile')}>
-              <User size={20} />
-              <span>{t.profile}</span>
-          </button>
-        </div>
-      </nav>
+      {!selectedRide && (
+        <nav className="fixed bottom-0 left-0 right-0 bg-white p-2.5 z-50 border-t border-neutral-200">
+          <div className="bg-neutral-100 rounded-full flex items-center p-1 max-w-sm mx-auto">
+            <button
+              className={`flex-1 py-2 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === 'search' ? 'bg-white shadow text-gray-800' : 'text-neutral-500'}`}
+              onClick={() => { setActiveTab('search'); setShowSearchResults(false); setPickupLocation(''); setDestinationLocation(''); setPickupDate(''); setActiveFilter(null); setActiveSort(null); setSelectedRide(null); setSeatsNeeded(null); }}>
+                <Search size={20} />
+                <span>{t.search}</span>
+            </button>
+            <button
+              className={`flex-1 py-2 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === 'history' ? 'bg-white shadow text-gray-800' : 'text-neutral-500'}`}
+              onClick={() => setActiveTab('history')}>
+                <History size={20} />
+                <span>{t.history}</span>
+            </button>
+          </div>
+        </nav>
+      )}
       <CalendarModal 
         isOpen={showCalendar}
         onClose={() => setShowCalendar(false)}
@@ -1093,4 +1098,6 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
 };
 
 export default App;
+
+
 
