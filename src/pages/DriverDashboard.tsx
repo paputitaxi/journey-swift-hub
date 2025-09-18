@@ -1475,7 +1475,7 @@ const ProfilePage = ({
             <div className="bg-white/80 backdrop-blur-sm p-2 rounded-2xl shadow-lg border border-white/20">
                 <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('settings')}</h3>
                 <SettingsItem icon={Languages} label={t('language')} value={t(language === 'en' ? 'english' : language === 'uz' ? 'uzbek' : 'russian')} action={() => handleOpenSettings(t('language'), <LanguageSelectionContent currentLanguage={language} onSelectLanguage={setLanguage} />)} />
-                <SettingsItem icon={UserPlus} label={t('switchAccount')} action={() => console.log("Switching to rider account...")} />
+                <SettingsItem icon={UserPlus} label={t('switchAccount')} value="" action={() => console.log("Switching to rider account...")} />
             </div>
         </div>;
 };
