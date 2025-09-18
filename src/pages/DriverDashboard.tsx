@@ -1627,12 +1627,14 @@ const AppContent = () => {
     const fetchMyRides = async () => {
       if (typeof window !== 'undefined' && !localStorage.getItem('username')) return;
       const username = localStorage.getItem('username');
+      console.log('[DriverDashboard] Fetching rides for', username);
       const {
         data,
         error
       } = await supabase.from('rides').select('*').eq('driver_username', username).order('created_at', {
         ascending: false
       });
+      console.log('[DriverDashboard] Fetch result', { data, error });
       if (error) {
         console.error('Error fetching my rides:', error);
       } else {
@@ -1708,10 +1710,7 @@ const AppContent = () => {
     if (!rideDataToPost) return;
     try {
       setShowPostConfirmationModal(false);
-      const {
-        data: insertedRide,
-        error
-      } = await supabase.from('rides').insert({
+      const payload = {
         driver_username: localStorage.getItem('username') || 'driver',
         from_location: rideDataToPost.fromLocation,
         to_location: rideDataToPost.toLocation,
@@ -1723,12 +1722,18 @@ const AppContent = () => {
         mail_price: (rideDataToPost.mailService === 'yes' || rideDataToPost.mailService === 'mailOnly') && rideDataToPost.mailPrice ? parseFloat(rideDataToPost.mailPrice) : null,
         total_seats: parseInt(rideDataToPost.freeSeats) || 4,
         available_seats: parseInt(rideDataToPost.freeSeats) || 4,
-        phone_number: localStorage.getItem('userPhone') || '998901234567', // Default phone if not set
+        phone_number: localStorage.getItem('userPhone') || '998901234567',
         status: 'active'
-      }).select().single();
+      };
+      console.log('[DriverDashboard] Insert payload', payload);
+      const { data: insertedRide, error } = await supabase.from('rides').insert(payload).select().single();
+      console.log('[DriverDashboard] Insert result', { insertedRide, error });
       if (error) {
-        throw error;
+        console.error('Insert ride error', error);
+        alert(`Error posting ride: ${error.message}`);
+        return;
       }
+      console.log('[DriverDashboard] Insert succeeded with id', insertedRide?.id);
       const bookedSeatsCount = 4 - rideDataToPost.freeSeats;
       const mockPassengers = Array.from({
         length: bookedSeatsCount
