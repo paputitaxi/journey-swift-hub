@@ -67,52 +67,55 @@ export type Database = {
           available_seats: number
           created_at: string
           departure_date: string
-          departure_location: string
           departure_time: string | null
           departure_type: string
-          destination_location: string
+          driver_username: string
+          from_location: string
+          has_mail_service: boolean
           id: string
-          mail_option: string
           mail_price: number | null
-          ride_price: number | null
+          phone_number: string
+          ride_price: number
           status: string
+          to_location: string
           total_seats: number
           updated_at: string
-          username: string
         }
         Insert: {
-          available_seats?: number
+          available_seats: number
           created_at?: string
           departure_date: string
-          departure_location: string
           departure_time?: string | null
           departure_type: string
-          destination_location: string
+          driver_username: string
+          from_location: string
+          has_mail_service?: boolean
           id?: string
-          mail_option: string
           mail_price?: number | null
-          ride_price?: number | null
+          phone_number: string
+          ride_price: number
           status?: string
-          total_seats?: number
+          to_location: string
+          total_seats: number
           updated_at?: string
-          username?: string
         }
         Update: {
           available_seats?: number
           created_at?: string
           departure_date?: string
-          departure_location?: string
           departure_time?: string | null
           departure_type?: string
-          destination_location?: string
+          driver_username?: string
+          from_location?: string
+          has_mail_service?: boolean
           id?: string
-          mail_option?: string
           mail_price?: number | null
-          ride_price?: number | null
+          phone_number?: string
+          ride_price?: number
           status?: string
+          to_location?: string
           total_seats?: number
           updated_at?: string
-          username?: string
         }
         Relationships: []
       }
