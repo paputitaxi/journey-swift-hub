@@ -1127,7 +1127,7 @@ const RideDetailModal = ({
                             <div className="flex items-center text-lg font-bold text-gray-800"><MapPin className="h-5 w-5 mr-2 text-lime-500" />{ride.fromLocation}</div>
                             <div className="flex items-center text-lg font-bold text-gray-800 mt-1"><MapPin className="h-5 w-5 mr-2 text-red-500" />{ride.toLocation}</div>
                         </div>
-                        <span className="text-3xl font-bold text-gray-800">${ride.price}</span>
+                        <span className="text-3xl font-bold text-gray-800">{ride.price}$</span>
                     </div>
                     <div className="border-t border-gray-200"></div>
                     <div className="flex justify-between items-center text-sm text-gray-500">
@@ -1491,11 +1491,11 @@ const ConfirmationModal = ({
                 </div>
                 <div className="p-4 space-y-4 text-gray-600">
                     <h3 className="text-lg font-bold text-gray-800">{rideData.fromLocation} → {rideData.toLocation}</h3>
-                    <p><strong>{t('price')}:</strong> ${rideData.price}</p>
+                    <p><strong>{t('price')}:</strong> {rideData.price}$</p>
                     <p><strong>{t('departureDate')}:</strong> {rideData.departureDate}</p>
                     {rideData.departureType === 'fixed' && <p><strong>{t('fixedDeparture')}:</strong> {rideData.departureStartTime} - {rideData.departureEndTime}</p>}
                     <p><strong>{t('freeSeats')}:</strong> {rideData.freeSeats}</p>
-                    {rideData.mailService === 'yes' && <p><strong>{t('mailService')}:</strong> ${rideData.mailPrice}</p>}
+                    {rideData.mailService === 'yes' && <p><strong>{t('mailService')}:</strong> {rideData.mailPrice}$</p>}
                     <div className="border-t border-gray-200 pt-4">
                         <p className="text-sm text-gray-500 mb-2">{t('confirmPhone')}</p>
                         <p className="text-lg font-bold text-gray-800">{userData.phone}</p>
@@ -1618,13 +1618,13 @@ const AppContent = () => {
       setShowActiveRideErrorModal(true);
     } else {
       setShowNewRideOptionsModal(true);
-      setHeaderTitle(t('newRide'));
     }
   };
   
   const handleStartNewRide = () => {
     setShowNewRideOptionsModal(false);
     setShowPostRide(true);
+    setHeaderTitle(t('postNewRide'));
   };
 
   const handleChooseFromArchive = () => {
@@ -1756,6 +1756,10 @@ const AppContent = () => {
     setRepostRideData(ride);
     setShowPostRide(true);
   };
+  
+  const totalEarnings = myRides
+    .filter(ride => ride.status === 'completed')
+    .reduce((sum, ride) => sum + (parseFloat(ride.price) || 0), 0);
 
   const renderActiveRideContent = () => {
     if (isSearchingForClients) {
@@ -1772,7 +1776,7 @@ const AppContent = () => {
                     <div className="flex items-center text-lg font-bold text-gray-800"><MapPin className="h-5 w-5 mr-2 text-lime-500" />{activeRide.fromLocation}</div>
                     <div className="flex items-center text-lg font-bold text-gray-800 mt-1"><MapPin className="h-5 w-5 mr-2 text-red-500" />{activeRide.toLocation}</div>
                 </div>
-                <span className="text-3xl font-bold text-gray-800">${activeRide.price}</span>
+                <span className="text-3xl font-bold text-gray-800">{activeRide.price}$</span>
             </div>
             <div className="border-t border-gray-200 my-4"></div>
             <div className="flex justify-between items-center text-sm text-gray-500">
@@ -1822,7 +1826,7 @@ const AppContent = () => {
           <div className="grid grid-cols-3 gap-4">
               <div onClick={() => setShowStatsModal(true)} className="bg-white/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-gray-200/50 text-center flex flex-col justify-center cursor-pointer">
                   <h2 className="text-sm text-gray-500">{t('totalEarnings')}</h2>
-                  <p className="text-2xl font-extrabold text-gray-800 mt-2">$120.00</p>
+                  <p className="text-2xl font-extrabold text-gray-800 mt-2">{totalEarnings.toFixed(2)}$</p>
               </div>
               <div onClick={handleNewRideClick} className="bg-white/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-gray-200/50 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105">
                   <div className="w-12 h-12 bg-gray-100/50 rounded-full flex items-center justify-center border-2 border-gray-200 shadow-md"><Plus className="h-6 w-6 text-gray-700" /></div>
@@ -1860,7 +1864,7 @@ const AppContent = () => {
                                       <p className="text-sm text-gray-500 mt-1">{ride.departureDate}</p>
                                   </div>
                                   <div className="text-right">
-                                      <p className="font-bold text-lg text-lime-600">+${ride.price}</p>
+                                      <p className="font-bold text-lg text-lime-600">+{ride.price}$</p>
                                       <p className="text-xs text-gray-400">Completed</p>
                                   </div>
                               </div>
@@ -1909,17 +1913,17 @@ const AppContent = () => {
               <button onClick={() => handleRemovePassenger(selectedPassenger.id)} className="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="h-4 w-4 mr-2" />{t('removePassenger')}</button>
           </div>}
       <header className="bg-white/70 backdrop-blur-lg p-3 border-b border-gray-200 flex items-center justify-between z-20 shadow-lg relative rounded-b-2xl">
-          <div className="w-1/3 flex justify-start">
+          <div className="flex-1 flex justify-start">
             {activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal || showCarTypeModal || isEditModalOpen || showHistoryDetailModal || showPostConfirmationModal || showArchiveConfirmModal || showFinishRideModal || showActiveRideErrorModal || showNewRideOptionsModal ? <button onClick={handleBack} className="p-2 rounded-full text-gray-600 hover:bg-gray-100/50 transition-colors">
                 <ChevronLeft className="h-6 w-6" />
               </button> : <button onClick={()=>setActiveTab("profile")} className="text-sm font-semibold text-gray-600 ml-2 hover:text-gray-900 transition-colors">{userData.phone}</button>}
           </div>
-          <div className="w-1/3 text-center">
-            <h1 className="text-xl font-bold text-gray-800">{headerTitle}</h1>
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <h1 className="text-xl font-bold text-gray-800 whitespace-nowrap">{headerTitle}</h1>
           </div>
-          <div className="w-1/3 flex justify-end">
+          <div className="flex-1 flex justify-end">
              {activeTab === "dashboard" && !showPostRide && !showMessages && !showStatsModal && !showNewRideOptionsModal && <button onClick={() => setActiveTab('profile')} className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100/50 transition-colors">
-                    <span className="text-sm font-semibold text-gray-600">{userData.fullName}</span>
+                    <span className="text-sm font-semibold text-gray-600 mr-2">{userData.fullName}</span>
                     <User className="h-5 w-5 text-gray-600" />
                 </button>}
           </div>
@@ -2040,7 +2044,7 @@ const StatsModal = ({
                 <div className="space-y-3">
                     {recentTrips.map(trip => <div key={trip.id} className="flex justify-between items-center p-3 bg-gray-100/50 rounded-xl">
                             <div><p className="font-medium text-gray-700">{trip.from} - {trip.to}</p></div>
-                            <p className="font-bold text-lime-600">+${trip.earnings}</p>
+                            <p className="font-bold text-lime-600">+{trip.earnings}$</p>
                         </div>)}
                 </div>
             </div>
