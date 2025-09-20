@@ -428,8 +428,8 @@ const useLanguage = () => useContext(LanguageContext);
 const CustomScrollbarStyles = () => <style>{`
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #4f4f5e; border-radius: 10px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #6c6c82; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #9ca3af; }
     .animate-spin-slow { animation: spin 2s linear infinite; }
 
     .radar-emitter {
@@ -445,7 +445,7 @@ const CustomScrollbarStyles = () => <style>{`
         width: 100%;
         height: 100%;
         border-radius: 50%;
-        background-color: rgba(163, 230, 53, 0.5); /* Updated to lime */
+        background-color: rgba(34, 197, 94, 0.5); 
         animation: radar-wave-animation 2s infinite;
         opacity: 0;
     }
@@ -466,7 +466,7 @@ const CustomScrollbarStyles = () => <style>{`
         width: 100%;
         height: 100%;
         border-radius: 50%;
-        background-color: rgba(163, 230, 53, 0.5); /* Updated to lime */
+        background-color: rgba(34, 197, 94, 0.5);
         animation: radar-wave-animation 2s infinite;
         opacity: 0;
     }
@@ -621,15 +621,15 @@ const MessageDashboard = ({
 
   const renderList = () => <div className="flex-grow overflow-y-auto custom-scrollbar">
       {filteredChats.length > 0 ? <div className="space-y-1">
-          {filteredChats.map(chat => <button key={chat.id} onClick={() => setSelectedChat(chat)} className="w-full flex items-center p-3 hover:bg-slate-700/50 cursor-pointer transition-colors text-left rounded-lg">
+          {filteredChats.map(chat => <button key={chat.id} onClick={() => setSelectedChat(chat)} className="w-full flex items-center p-3 hover:bg-gray-100/50 cursor-pointer transition-colors text-left rounded-lg">
               {chat.avatar}
               <div className="ml-3 flex-grow">
-                <p className="font-medium text-slate-100">{chat.name}</p>
-                <p className="text-sm text-slate-400 truncate">{chat.lastMessage}</p>
+                <p className="font-medium text-gray-800">{chat.name}</p>
+                <p className="text-sm text-gray-500 truncate">{chat.lastMessage}</p>
               </div>
-              <span className="text-xs text-slate-500">{chat.time}</span>
+              <span className="text-xs text-gray-400">{chat.time}</span>
             </button>)}
-        </div> : <p className="text-slate-500 text-center mt-10">{t('noMessages')}</p>}
+        </div> : <p className="text-gray-500 text-center mt-10">{t('noMessages')}</p>}
     </div>;
 
   const renderChat = () => {
@@ -637,14 +637,14 @@ const MessageDashboard = ({
     return <div className="flex flex-col h-full">
         <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
           {msgs.map(m => <div key={m.id} className={`flex ${m.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.sender === 'me' ? 'bg-lime-400 text-slate-900' : 'bg-slate-700 text-slate-100'}`}>
+              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.sender === 'me' ? 'bg-lime-400 text-slate-900' : 'bg-gray-200 text-gray-800'}`}>
                 <p className="whitespace-pre-wrap">{m.text}</p>
                 <div className="text-[10px] opacity-70 mt-1 text-right">{m.time}</div>
               </div>
             </div>)}
         </div>
-        <form onSubmit={sendMessage} className="p-3 border-t border-slate-700 bg-slate-800/80 backdrop-blur-sm flex items-center gap-2">
-          <input value={draft} onChange={e => setDraft(e.target.value)} placeholder={t('typeMessage')} className="flex-1 p-2 rounded-lg bg-slate-700 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-lime-400" />
+        <form onSubmit={sendMessage} className="p-3 border-t border-gray-200 bg-white/80 backdrop-blur-sm flex items-center gap-2">
+          <input value={draft} onChange={e => setDraft(e.target.value)} placeholder={t('typeMessage')} className="flex-1 p-2 rounded-lg bg-gray-100 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-400" />
           <button type="submit" className="p-2 rounded-lg bg-lime-400 text-slate-900 hover:bg-lime-500 transition-colors">
             <Send className="h-5 w-5" />
           </button>
@@ -652,37 +652,37 @@ const MessageDashboard = ({
       </div>;
   };
 
-  return <div className="flex flex-col h-full bg-slate-800/80 backdrop-blur-xl rounded-3xl overflow-hidden border border-slate-700">
-      <div className="bg-slate-900/80 backdrop-blur-sm p-3 border-b border-slate-700 flex items-center justify-between gap-2">
+  return <div className="flex flex-col h-full bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden border border-gray-200">
+      <div className="bg-white/80 backdrop-blur-sm p-3 border-b border-gray-200 flex items-center justify-between gap-2">
         {selectedChat ? <>
-            <button onClick={() => setSelectedChat(null)} className="text-slate-300 hover:text-white">
+            <button onClick={() => setSelectedChat(null)} className="text-gray-600 hover:text-gray-900">
               <ChevronLeft className="h-6 w-6" />
             </button>
-            <h2 className="text-lg font-semibold text-slate-100 flex-1 truncate">{selectedChat.name}</h2>
+            <h2 className="text-lg font-semibold text-gray-800 flex-1 truncate">{selectedChat.name}</h2>
             <div className="w-6 h-6"></div>
           </> : isSearching ? <>
             <div className="relative flex-1">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-              <input type="text" placeholder={`${t('search')}...`} className="w-full bg-slate-700/80 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-lime-400 text-slate-100" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} autoFocus />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input type="text" placeholder={`${t('search')}...`} className="w-full bg-gray-100/80 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-lime-400 text-gray-800" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} autoFocus />
             </div>
             <button onClick={() => {
           setIsSearching(false);
           setSearchQuery('');
-        }} className="text-sm font-semibold text-slate-300 hover:text-white">
+        }} className="text-sm font-semibold text-gray-600 hover:text-gray-900">
               {t('cancel')}
             </button>
           </> : <>
-            <a href="https://t.me/nevalela" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full text-slate-300 hover:bg-slate-700/50 hover:text-white transition-colors">
+            <a href="https://t.me/nevalela" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full text-gray-600 hover:bg-gray-100/50 hover:text-gray-900 transition-colors">
                 <LifeBuoy className="h-6 w-6" />
             </a>
-            <h2 className="text-lg font-semibold text-slate-100 flex-1 text-center">Chats</h2>
-            <button onClick={() => setIsSearching(true)} className="p-2 rounded-full text-slate-300 hover:bg-slate-700/50 hover:text-white transition-colors">
+            <h2 className="text-lg font-semibold text-gray-800 flex-1 text-center">Chats</h2>
+            <button onClick={() => setIsSearching(true)} className="p-2 rounded-full text-gray-600 hover:bg-gray-100/50 hover:text-gray-900 transition-colors">
                 <Search className="h-6 w-6" />
             </button>
           </>}
       </div>
 
-      {!selectedChat && <div className="flex justify-around bg-slate-900/80 backdrop-blur-sm p-2 border-b border-slate-700">
+      {!selectedChat && <div className="flex justify-around bg-white/80 backdrop-blur-sm p-2 border-b border-gray-200">
           {messageNavItems.map(item => {
         const Icon = item.icon;
         const isActive = activeMessageTab === item.id;
@@ -690,7 +690,7 @@ const MessageDashboard = ({
           setActiveMessageTab(item.id);
           setSearchQuery("");
           setIsSearching(false);
-        }} className={`flex-1 flex flex-col items-center py-2 transition-colors relative ${isActive ? "text-white" : "text-slate-400 hover:text-slate-200"}`}>
+        }} className={`flex-1 flex flex-col items-center py-2 transition-colors relative ${isActive ? "text-gray-900" : "text-gray-500 hover:text-gray-800"}`}>
                 <Icon className="h-5 w-5 mb-1" />
                 <span className="text-xs">{item.label}</span>
                 {isActive && <div className="absolute bottom-0 h-0.5 w-full bg-lime-400 rounded-full"></div>}
@@ -758,11 +758,11 @@ const CarTypeModal = ({
     t
   } = useLanguage();
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
-            <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-md h-auto max-h-[80vh] flex flex-col">
-                <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-slate-100">{t('selectCar')}</h2>
-                    <button onClick={onClose} className="p-1 rounded-full text-slate-300 hover:bg-slate-700">
+  return <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-auto max-h-[80vh] flex flex-col">
+                <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">{t('selectCar')}</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-gray-600 hover:bg-gray-100">
                         <X className="h-6 w-6" />
                     </button>
                 </div>
@@ -770,9 +770,9 @@ const CarTypeModal = ({
                     {uzbekistanCars.map((car, index) => <button key={index} onClick={() => {
           onSelectCar(car);
           onClose();
-        }} className={`w-full p-3 rounded-lg text-left transition-colors flex justify-between items-center text-slate-200 ${currentCar === car ? 'bg-lime-400/20 text-lime-300 font-semibold' : 'hover:bg-slate-700'}`}>
+        }} className={`w-full p-3 rounded-lg text-left transition-colors flex justify-between items-center text-gray-700 ${currentCar === car ? 'bg-lime-100 text-lime-800 font-semibold' : 'hover:bg-gray-100'}`}>
                             {car}
-                            {currentCar === car && <CheckCircle className="h-5 w-5 text-lime-400" />}
+                            {currentCar === car && <CheckCircle className="h-5 w-5 text-lime-500" />}
                         </button>)}
                 </div>
             </div>
@@ -799,32 +799,32 @@ const LocationSelectModal = ({
     cities: regionData.cities.filter(city => city.toLowerCase().includes(searchTerm.toLowerCase()))
   })).filter(regionData => regionData.cities.length > 0 || regionData.region.toLowerCase().includes(searchTerm.toLowerCase()));
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
-      <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-md h-[80vh] flex flex-col">
-        <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-slate-100">{title}</h2>
-          <button onClick={handleClose} className="p-1 rounded-full text-slate-300 hover:bg-slate-700 transition-colors">
+  return <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[80vh] flex flex-col">
+        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+          <button onClick={handleClose} className="p-1 rounded-full text-gray-600 hover:bg-gray-100 transition-colors">
             <X className="h-6 w-6" />
           </button>
         </div>
-        <div className="p-4 border-b border-slate-700">
+        <div className="p-4 border-b border-gray-200">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
-            <input type="text" placeholder={t('searchCity')} className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-700 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-lime-400" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <input type="text" placeholder={t('searchCity')} className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-400" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
         </div>
         <div className="flex-grow overflow-y-auto p-4 space-y-2 custom-scrollbar">
           {filteredLocations.length > 0 ? filteredLocations.map((regionData, regionIndex) => <div key={`${regionData.region}-${regionIndex}`}>
-                <h3 className="w-full text-left p-3 font-semibold text-slate-200 select-none">
+                <h3 className="w-full text-left p-3 font-semibold text-gray-800 select-none">
                   {regionData.region}
                 </h3>
                 {regionData.cities.map((city, cityIndex) => <button key={`${regionData.region}-${city}-${cityIndex}`} onClick={() => {
             onSelect(city);
             handleClose();
-          }} className="w-full text-left pl-6 py-2 text-slate-400 hover:bg-slate-700 hover:text-lime-300 rounded-lg text-sm transition-colors">
+          }} className="w-full text-left pl-6 py-2 text-gray-600 hover:bg-gray-50 hover:text-lime-600 rounded-lg text-sm transition-colors">
                     {city}
                   </button>)}
-              </div>) : <p className="text-slate-500 text-center mt-10">{t('noLocations')}</p>}
+              </div>) : <p className="text-gray-500 text-center mt-10">{t('noLocations')}</p>}
         </div>
       </div>
     </div>;
@@ -899,15 +899,15 @@ const PostRideForm = ({
     const dates = Array.from({
       length: daysInMonth
     }, (_, i) => i + 1);
-    return <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
-        <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-md flex flex-col">
-          <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-slate-100">{t('selectDepDate')}</h2>
-            <button onClick={onClose} className="p-1 rounded-full text-slate-300 hover:bg-slate-700 transition-colors"> <X className="h-6 w-6" /> </button>
+    return <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+        <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
+          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-gray-800">{t('selectDepDate')}</h2>
+            <button onClick={onClose} className="p-1 rounded-full text-gray-600 hover:bg-gray-100 transition-colors"> <X className="h-6 w-6" /> </button>
           </div>
           <div className="p-4 flex-grow overflow-y-auto custom-scrollbar">
-            <div className="text-center text-slate-100 text-lg font-medium mb-4">{currentMonth}</div>
-            <div className="grid grid-cols-7 gap-2 text-center text-slate-400 text-sm mb-2">
+            <div className="text-center text-gray-800 text-lg font-medium mb-4">{currentMonth}</div>
+            <div className="grid grid-cols-7 gap-2 text-center text-gray-500 text-sm mb-2">
               <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
             </div>
             <div className="grid grid-cols-7 gap-2">
@@ -925,7 +925,7 @@ const PostRideForm = ({
                   onSelectDate(dateString);
                   onClose();
                 }
-              }} className={`p-2 rounded-full text-slate-100 text-sm font-medium ${isToday ? 'bg-slate-700 border border-slate-600' : 'hover:bg-slate-700'} ${isPast ? 'text-slate-600 cursor-not-allowed' : ''}`} disabled={isPast}>
+              }} className={`p-2 rounded-full text-gray-800 text-sm font-medium ${isToday ? 'bg-gray-100 border border-gray-300' : 'hover:bg-gray-100'} ${isPast ? 'text-gray-400 cursor-not-allowed' : ''}`} disabled={isPast}>
                     {day}
                   </button>;
             })}
@@ -935,139 +935,139 @@ const PostRideForm = ({
       </div>;
   };
 
-  return <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-40 p-4 font-sans">
-      <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-md h-[90vh] flex flex-col">
-        <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-slate-100">{isEditing ? t('editRide') : t('postNewRide')}</h2>
-          <button onClick={onClose} className="p-1 rounded-full text-slate-300 hover:bg-slate-700 transition-colors"> <X className="h-6 w-6" /> </button>
+  return <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-40 p-4 font-sans">
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-md h-[90vh] flex flex-col">
+        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-800">{isEditing ? t('editRide') : t('postNewRide')}</h2>
+          <button onClick={onClose} className="p-1 rounded-full text-gray-600 hover:bg-gray-100 transition-colors"> <X className="h-6 w-6" /> </button>
         </div>
         <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-4 space-y-6 custom-scrollbar">
           <div>
-            <div onClick={() => setShowFromModal(true)} className={`w-full p-3 bg-slate-700/50 text-slate-100 rounded-xl flex items-center justify-between cursor-pointer border-2 ${submissionAttempted && !fromLocation ? 'border-red-500/50' : fromLocation ? 'border-lime-400/50' : 'border-transparent'}`}>
+            <div onClick={() => setShowFromModal(true)} className={`w-full p-3 bg-gray-100 text-gray-800 rounded-xl flex items-center justify-between cursor-pointer border-2 ${submissionAttempted && !fromLocation ? 'border-red-500/50' : fromLocation ? 'border-lime-400/50' : 'border-transparent'}`}>
               {fromLocation || t('fromWhere')}
-              <MapPin className="h-5 w-5 text-slate-400" />
+              <MapPin className="h-5 w-5 text-gray-400" />
             </div>
             <LocationSelectModal title={t('selectOrigin')} isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setFromLocation} />
           </div>
           <div>
-            <div onClick={() => setShowToModal(true)} className={`w-full p-3 bg-slate-700/50 text-slate-100 rounded-xl flex items-center justify-between cursor-pointer border-2 ${submissionAttempted && !toLocation ? 'border-red-500/50' : toLocation ? 'border-lime-400/50' : 'border-transparent'}`}>
+            <div onClick={() => setShowToModal(true)} className={`w-full p-3 bg-gray-100 text-gray-800 rounded-xl flex items-center justify-between cursor-pointer border-2 ${submissionAttempted && !toLocation ? 'border-red-500/50' : toLocation ? 'border-lime-400/50' : 'border-transparent'}`}>
               {toLocation || t('toWhere')}
-              <MapPin className="h-5 w-5 text-slate-400" />
+              <MapPin className="h-5 w-5 text-gray-400" />
             </div>
             <LocationSelectModal title={t('selectDestination')} isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setToLocation} />
           </div>
           <div>
-            <div onClick={() => setShowDateModal(true)} className={`w-full p-3 bg-slate-700/50 text-slate-100 rounded-xl flex items-center justify-between cursor-pointer border-2 ${submissionAttempted && !departureDate ? 'border-red-500/50' : departureDate ? 'border-lime-400/50' : 'border-transparent'}`}>
+            <div onClick={() => setShowDateModal(true)} className={`w-full p-3 bg-gray-100 text-gray-800 rounded-xl flex items-center justify-between cursor-pointer border-2 ${submissionAttempted && !departureDate ? 'border-red-500/50' : departureDate ? 'border-lime-400/50' : 'border-transparent'}`}>
               {departureDate || t('departureDate')}
-              <Calendar className="h-5 w-5 text-slate-400" />
+              <Calendar className="h-5 w-5 text-gray-400" />
             </div>
             <DatePickerModal isOpen={showDateModal} onClose={() => setShowDateModal(false)} onSelectDate={setDepartureDate} />
           </div>
           <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">{t('mailService')}</label>
+            <label className="block text-gray-700 text-sm font-medium mb-2">{t('mailService')}</label>
             <div className="space-y-3">
-              <button type="button" onClick={() => setMailService("yes")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors border-2 ${mailService === "yes" ? "bg-lime-400/20 border-lime-400/50" : submissionAttempted && !mailService ? 'border-red-500/50' : 'border-slate-700 bg-slate-700/50 hover:bg-slate-700'}`}>
+              <button type="button" onClick={() => setMailService("yes")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors border-2 ${mailService === "yes" ? "bg-lime-100 border-lime-300" : submissionAttempted && !mailService ? 'border-red-500/50' : 'border-gray-200 bg-gray-100 hover:bg-gray-200'}`}>
                 <div className="text-left">
-                  <p className="font-medium text-slate-100">{t('yesCarryMail')}</p>
-                  <p className="text-sm text-slate-400">{t('mailDescYes')}</p>
+                  <p className="font-medium text-gray-800">{t('yesCarryMail')}</p>
+                  <p className="text-sm text-gray-500">{t('mailDescYes')}</p>
                 </div>
-                {mailService === "yes" && <CheckCircle className="h-6 w-6 text-lime-400" />}
+                {mailService === "yes" && <CheckCircle className="h-6 w-6 text-lime-500" />}
               </button>
               {mailService === "yes" && <div className="mt-3">
-                    <label className="block text-slate-300 text-sm font-medium mb-2">{t('mailPriceLabel')}</label>
+                    <label className="block text-gray-700 text-sm font-medium mb-2">{t('mailPriceLabel')}</label>
                     <div className="relative">
-                        <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder={t('enterMailPrice')} className={`w-full p-3 pl-10 bg-slate-700 rounded-xl text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-lime-400 ${submissionAttempted && mailService === 'yes' && !mailPrice ? 'border-2 border-red-500/50' : 'border-2 border-transparent'}`} value={mailPrice} onChange={e => {
+                        <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder={t('enterMailPrice')} className={`w-full p-3 pl-10 bg-gray-100 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-400 ${submissionAttempted && mailService === 'yes' && !mailPrice ? 'border-2 border-red-500/50' : 'border-2 border-transparent'}`} value={mailPrice} onChange={e => {
                   const value = e.target.value;
                   if (/^[0-9]*$/.test(value)) {
                     setMailPrice(value);
                   }
                 }} />
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
                     </div>
                 </div>}
-              <button type="button" onClick={() => setMailService("no")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors border-2 ${mailService === "no" ? "bg-lime-400/20 border-lime-400/50" : submissionAttempted && !mailService ? 'border-red-500/50' : 'border-slate-700 bg-slate-700/50 hover:bg-slate-700'}`}>
+              <button type="button" onClick={() => setMailService("no")} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors border-2 ${mailService === "no" ? "bg-lime-100 border-lime-300" : submissionAttempted && !mailService ? 'border-red-500/50' : 'border-gray-200 bg-gray-100 hover:bg-gray-200'}`}>
                 <div className="text-left">
-                  <p className="font-medium text-slate-100">{t('noCarryMail')}</p>
-                  <p className="text-sm text-slate-400">{t('mailDescNo')}</p>
+                  <p className="font-medium text-gray-800">{t('noCarryMail')}</p>
+                  <p className="text-sm text-gray-500">{t('mailDescNo')}</p>
                 </div>
-                {mailService === "no" && <CheckCircle className="h-6 w-6 text-lime-400" />}
+                {mailService === "no" && <CheckCircle className="h-6 w-6 text-lime-500" />}
               </button>
             </div>
           </div>
 
           <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">{t('freeSeats')}</label>
+            <label className="block text-gray-700 text-sm font-medium mb-2">{t('freeSeats')}</label>
             <div className="flex justify-around space-x-2">
               {[1, 2, 3, 4].map(seats => <button key={seats} type="button" onClick={() => setFreeSeats(seats)} className={`flex-1 p-3 rounded-xl text-lg font-semibold transition-colors border-2
-                    ${freeSeats === seats ? "bg-lime-400/20 border-lime-400/50 text-slate-100" : submissionAttempted && freeSeats === null ? 'border-red-500/50' : 'border-slate-700 bg-slate-700/50 hover:bg-slate-700 text-slate-400'}`}>
+                    ${freeSeats === seats ? "bg-lime-100 border-lime-300 text-gray-800" : submissionAttempted && freeSeats === null ? 'border-red-500/50' : 'border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-500'}`}>
                   {seats}
                 </button>)}
             </div>
           </div>
 
           <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">{t('departureType')}</label>
+            <label className="block text-gray-700 text-sm font-medium mb-2">{t('departureType')}</label>
             <div className="space-y-3">
               <button type="button" onClick={() => {
               setDepartureType("fixed");
-            }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors border-2 ${departureType === "fixed" ? "bg-lime-400/20 border-lime-400/50" : submissionAttempted && !departureType ? 'border-red-500/50' : 'border-slate-700 bg-slate-700/50 hover:bg-slate-700'}`}>
+            }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors border-2 ${departureType === "fixed" ? "bg-lime-100 border-lime-300" : submissionAttempted && !departureType ? 'border-red-500/50' : 'border-gray-200 bg-gray-100 hover:bg-gray-200'}`}>
                 <div className="flex items-center">
-                  <Clock className="h-6 w-6 mr-3 text-lime-400" />
+                  <Clock className="h-6 w-6 mr-3 text-lime-500" />
                   <div className="text-left">
-                    <p className="font-medium text-slate-100">{t('fixedDeparture')}</p>
-                    <p className="text-sm text-slate-400">{t('fixedDepartureDesc')}</p>
+                    <p className="font-medium text-gray-800">{t('fixedDeparture')}</p>
+                    <p className="text-sm text-gray-500">{t('fixedDepartureDesc')}</p>
                   </div>
                 </div>
-                {departureType === "fixed" && <CheckCircle className="h-6 w-6 text-lime-400" />}
+                {departureType === "fixed" && <CheckCircle className="h-6 w-6 text-lime-500" />}
               </button>
-              {departureType === "fixed" && <div className={`w-full p-3 bg-slate-700/50 rounded-xl flex items-center justify-between border-2 mt-2 gap-2 ${submissionAttempted && (!departureStartTime || !departureEndTime) ? 'border-red-500/50' : 'border-slate-700'}`}>
-                    <span className="text-sm text-slate-400">{t('from')}</span>
-                    <input type="time" value={departureStartTime} onChange={e => setDepartureStartTime(e.target.value)} className="bg-transparent text-slate-100 placeholder-slate-500 focus:outline-none text-center" />
-                    <span className="text-sm text-slate-400">{t('to')}</span>
-                    <input type="time" value={departureEndTime} onChange={e => setDepartureEndTime(e.target.value)} className="bg-transparent text-slate-100 placeholder-slate-500 focus:outline-none text-center" />
-                    <Clock className="h-5 w-5 text-slate-400 ml-2" />
+              {departureType === "fixed" && <div className={`w-full p-3 bg-gray-100/50 rounded-xl flex items-center justify-between border-2 mt-2 gap-2 ${submissionAttempted && (!departureStartTime || !departureEndTime) ? 'border-red-500/50' : 'border-gray-200'}`}>
+                    <span className="text-sm text-gray-500">{t('from')}</span>
+                    <input type="time" value={departureStartTime} onChange={e => setDepartureStartTime(e.target.value)} className="bg-transparent text-gray-800 placeholder-gray-500 focus:outline-none text-center" />
+                    <span className="text-sm text-gray-500">{t('to')}</span>
+                    <input type="time" value={departureEndTime} onChange={e => setDepartureEndTime(e.target.value)} className="bg-transparent text-gray-800 placeholder-gray-500 focus:outline-none text-center" />
+                    <Clock className="h-5 w-5 text-gray-400 ml-2" />
                 </div>}
               <button type="button" onClick={() => {
               setDepartureType("when_fills");
               setDepartureStartTime("");
               setDepartureEndTime("");
-            }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors border-2 ${departureType === "when_fills" ? "bg-lime-400/20 border-lime-400/50" : submissionAttempted && !departureType ? 'border-red-500/50' : 'border-slate-700 bg-slate-700/50 hover:bg-slate-700'}`}>
+            }} className={`w-full p-4 rounded-xl flex items-center justify-between transition-colors border-2 ${departureType === "when_fills" ? "bg-lime-100 border-lime-300" : submissionAttempted && !departureType ? 'border-red-500/50' : 'border-gray-200 bg-gray-100 hover:bg-gray-200'}`}>
                 <div className="flex items-center">
-                  <Users className="h-6 w-6 mr-3 text-lime-400" />
+                  <Users className="h-6 w-6 mr-3 text-lime-500" />
                   <div className="text-left">
-                    <p className="font-medium text-slate-100">{t('whenFills')}</p>
-                    <p className="text-sm text-slate-400">{t('whenFillsDesc')}</p>
+                    <p className="font-medium text-gray-800">{t('whenFills')}</p>
+                    <p className="text-sm text-gray-500">{t('whenFillsDesc')}</p>
                   </div>
                 </div>
-                {departureType === "when_fills" && <CheckCircle className="h-6 w-6 text-lime-400" />}
+                {departureType === "when_fills" && <CheckCircle className="h-6 w-6 text-lime-500" />}
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">{t('price')}</label>
+            <label className="block text-gray-700 text-sm font-medium mb-2">{t('price')}</label>
             <div className="relative">
-              <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder={t('enterPrice')} className={`w-full p-3 pl-10 bg-slate-700 rounded-xl text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-lime-400 ${submissionAttempted && !price ? 'border-2 border-red-500/50' : 'border-2 border-transparent'}`} value={price} onChange={e => {
+              <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder={t('enterPrice')} className={`w-full p-3 pl-10 bg-gray-100 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-400 ${submissionAttempted && !price ? 'border-2 border-red-500/50' : 'border-2 border-transparent'}`} value={price} onChange={e => {
               const value = e.target.value;
               if (/^[0-9]*$/.test(value)) {
                 setPrice(value);
               }
             }} />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
             </div>
           </div>
           <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">{t('yourNumber')}</label>
+            <label className="block text-gray-700 text-sm font-medium mb-2">{t('yourNumber')}</label>
             <div className="relative">
-              <input type="text" placeholder={t('phone')} className={`w-full p-3 pl-10 bg-slate-700 rounded-xl text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-lime-400 ${submissionAttempted && !contactNumber ? 'border-2 border-red-500/50' : 'border-2 border-transparent'}`} value={contactNumber} onChange={e => setContactNumber(e.target.value)} />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Phone className="h-5 w-5" /></span>
+              <input type="text" placeholder={t('phone')} className={`w-full p-3 pl-10 bg-gray-100 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-400 ${submissionAttempted && !contactNumber ? 'border-2 border-red-500/50' : 'border-2 border-transparent'}`} value={contactNumber} onChange={e => setContactNumber(e.target.value)} />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Phone className="h-5 w-5" /></span>
             </div>
           </div>
           <button type="submit" className={`w-full py-3 rounded-xl text-lg font-semibold transition-colors flex items-center justify-center shadow-lg
-            ${isFormValid ? "bg-lime-400 hover:bg-lime-500 text-slate-900" : "bg-slate-600 text-slate-400 cursor-not-allowed"}`}>
+            ${isFormValid ? "bg-lime-400 hover:bg-lime-500 text-slate-900" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}>
              {isEditing ? t('updateRide') : t('postRide')}
           </button>
           {isEditing && <div className="flex gap-2 mt-4">
-              {initialValues.status === 'upcoming' && <button type="button" onClick={onArchiveRide} className="w-full py-3 rounded-xl text-lg font-semibold transition-colors flex items-center justify-center shadow-lg bg-slate-600 hover:bg-slate-700 text-white">
+              {initialValues.status === 'upcoming' && <button type="button" onClick={onArchiveRide} className="w-full py-3 rounded-xl text-lg font-semibold transition-colors flex items-center justify-center shadow-lg bg-gray-500 hover:bg-gray-600 text-white">
                   <Trash2 className="h-5 w-5 mr-2" />
                   {t('archiveRide')}
                 </button>}
@@ -1106,31 +1106,31 @@ const RideDetailModal = ({
     setSelectedPassenger(passenger);
   };
   if (!isOpen || !ride) return null;
-  return <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans" onClick={() => setSelectedPassenger(null)}>
-            {selectedPassenger && <div className="fixed bg-slate-700 rounded-xl shadow-2xl z-[51] p-2 space-y-1 border border-slate-600" style={{
+  return <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans" onClick={() => setSelectedPassenger(null)}>
+            {selectedPassenger && <div className="fixed bg-white rounded-xl shadow-2xl z-[51] p-2 space-y-1 border border-gray-200" style={{
       top: popoverPosition.top,
       left: popoverPosition.left
     }}>
-                  <button className="w-full flex items-center px-3 py-2 text-sm text-slate-200 hover:bg-slate-600 rounded-lg"><Phone className="h-4 w-4 mr-2" />{t('call')}</button>
-                  <button className="w-full flex items-center px-3 py-2 text-sm text-slate-200 hover:bg-slate-600 rounded-lg"><Send className="h-4 w-4 mr-2" />{t('message')}</button>
+                  <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"><Phone className="h-4 w-4 mr-2" />{t('call')}</button>
+                  <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"><Send className="h-4 w-4 mr-2" />{t('message')}</button>
               </div>}
-            <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-md flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
-                <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-slate-100">{t('rideDetails')}</h2>
-                    <button onClick={onClose} className="p-1 rounded-full text-slate-300 hover:bg-slate-700">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+                <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">{t('rideDetails')}</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-gray-600 hover:bg-gray-100">
                         <X className="h-6 w-6" />
                     </button>
                 </div>
                 <div className="p-4 space-y-4 overflow-y-auto custom-scrollbar">
                     <div className="flex justify-between items-start">
                         <div>
-                            <div className="flex items-center text-lg font-bold text-slate-100"><MapPin className="h-5 w-5 mr-2 text-lime-400" />{ride.fromLocation}</div>
-                            <div className="flex items-center text-lg font-bold text-slate-100 mt-1"><MapPin className="h-5 w-5 mr-2 text-red-400" />{ride.toLocation}</div>
+                            <div className="flex items-center text-lg font-bold text-gray-800"><MapPin className="h-5 w-5 mr-2 text-lime-500" />{ride.fromLocation}</div>
+                            <div className="flex items-center text-lg font-bold text-gray-800 mt-1"><MapPin className="h-5 w-5 mr-2 text-red-500" />{ride.toLocation}</div>
                         </div>
-                        <span className="text-3xl font-bold text-slate-100">${ride.price}</span>
+                        <span className="text-3xl font-bold text-gray-800">${ride.price}</span>
                     </div>
-                    <div className="border-t border-slate-700"></div>
-                    <div className="flex justify-between items-center text-sm text-slate-400">
+                    <div className="border-t border-gray-200"></div>
+                    <div className="flex justify-between items-center text-sm text-gray-500">
                         <div className="flex items-center"><Calendar className="h-5 w-5 mr-2" /><span>{ride.departureDate}</span></div>
                         {ride.departureStartTime && <div className="flex items-center">
                                 <Clock className="h-5 w-5 mr-2" />
@@ -1140,25 +1140,25 @@ const RideDetailModal = ({
                                 </span>
                             </div>}
                     </div>
-                    <div className="flex justify-between items-center text-sm text-slate-400 mt-2">
+                    <div className="flex justify-between items-center text-sm text-gray-500 mt-2">
                         <div className="flex items-center"><Mail className="h-5 w-5 mr-2" /><span>{ride.mailService === 'yes' ? t('yesCarryMail') : t('noCarryMail')}</span></div>
                         <div className="flex items-center">{ride.departureType === 'fixed' ? <Clock className="h-5 w-5 mr-2" /> : <Users className="h-5 w-5 mr-2" />}<span>{ride.departureType === 'fixed' ? t('fixedDeparture') : t('whenFills')}</span></div>
                     </div>
-                    <div className="flex items-center text-sm text-slate-400 mt-2"><div className="flex items-center"><Car className="h-5 w-5 mr-2" /><span>{ride.carType}</span></div></div>
-                    <div className="border-t border-slate-700 my-4"></div>
+                    <div className="flex items-center text-sm text-gray-500 mt-2"><div className="flex items-center"><Car className="h-5 w-5 mr-2" /><span>{ride.carType}</span></div></div>
+                    <div className="border-t border-gray-200 my-4"></div>
                     <div>
-                        <h3 className="text-md font-semibold text-slate-100 mb-2">{t('passengers')}</h3>
+                        <h3 className="text-md font-semibold text-gray-800 mb-2">{t('passengers')}</h3>
                         <div className="space-y-2">
-                            {ride.passengers && ride.passengers.length > 0 ? ride.passengers.map(p => <button key={p.id} onClick={e => handlePassengerClick(p, e)} className="w-full flex items-center p-2 bg-slate-700/50 rounded-lg text-left hover:bg-slate-700 transition-colors">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${p.gender === 'male' ? 'bg-blue-400/30' : 'bg-lime-400/30'}`}>
-                                            {p.gender === 'male' ? <User className="h-5 w-5 text-blue-300" /> : <UserRound className="h-5 w-5 text-lime-300" />}
+                            {ride.passengers && ride.passengers.length > 0 ? ride.passengers.map(p => <button key={p.id} onClick={e => handlePassengerClick(p, e)} className="w-full flex items-center p-2 bg-gray-100/50 rounded-lg text-left hover:bg-gray-200 transition-colors">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${p.gender === 'male' ? 'bg-blue-100' : 'bg-lime-100'}`}>
+                                            {p.gender === 'male' ? <User className="h-5 w-5 text-blue-600" /> : <UserRound className="h-5 w-5 text-lime-600" />}
                                         </div>
-                                        <span className="text-sm font-medium text-slate-300">{p.name}</span>
-                                    </button>) : <p className="text-sm text-slate-500">No passengers on this ride.</p>}
+                                        <span className="text-sm font-medium text-gray-700">{p.name}</span>
+                                    </button>) : <p className="text-sm text-gray-500">No passengers on this ride.</p>}
                         </div>
                     </div>
                 </div>
-                {ride.status === 'archived' && <div className="p-4 border-t border-slate-700">
+                {ride.status === 'archived' && <div className="p-4 border-t border-gray-200">
                         <button onClick={() => onRepost(ride)} className="w-full py-3 rounded-xl text-lg font-semibold transition-colors flex items-center justify-center shadow-lg bg-lime-400 hover:bg-lime-500 text-slate-900">
                             <Sparkles className="h-5 w-5 mr-2" />
                             {t('repostRide')}
@@ -1198,24 +1198,24 @@ const EditProfileModal = ({
     onClose();
   };
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
-            <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-md flex flex-col">
-                <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-slate-100">{t('editProfile')}</h2>
-                    <button onClick={onClose} className="p-1 rounded-full text-slate-300 hover:bg-slate-700"> <X className="h-6 w-6" /> </button>
+  return <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
+                <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">{t('editProfile')}</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-gray-600 hover:bg-gray-100"> <X className="h-6 w-6" /> </button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-1">{t('fullName')}</label>
-                        <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full p-2 bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-slate-100" />
+                        <label className="block text-sm font-medium text-gray-600 mb-1">{t('fullName')}</label>
+                        <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-gray-800" />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-1">{t('username')}</label>
-                        <input type="text" name="username" value={formData.username} onChange={handleChange} className="w-full p-2 bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-slate-100" />
+                        <label className="block text-sm font-medium text-gray-600 mb-1">{t('username')}</label>
+                        <input type="text" name="username" value={formData.username} onChange={handleChange} className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-gray-800" />
                     </div>
                      <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-1">{t('phone')}</label>
-                        <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="w-full p-2 bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-slate-100" />
+                        <label className="block text-sm font-medium text-gray-600 mb-1">{t('phone')}</label>
+                        <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-gray-800" />
                     </div>
                     <div className="flex justify-end pt-4">
                         <button type="submit" className="px-4 py-2 bg-lime-400 text-slate-900 font-semibold rounded-lg hover:bg-lime-500 transition-colors">{t('saveChanges')}</button>
@@ -1255,18 +1255,18 @@ const EditCarModal = ({
     onClose();
   };
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
-            <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-md flex flex-col">
-                <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-slate-100">{t('editVehicle')}</h2>
-                    <button onClick={onClose} className="p-1 rounded-full text-slate-300 hover:bg-slate-700"> <X className="h-6 w-6" /> </button>
+  return <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col">
+                <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">{t('editVehicle')}</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-gray-600 hover:bg-gray-100"> <X className="h-6 w-6" /> </button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
-                    <input type="text" name="brand" placeholder="Brand" value={formData.brand} onChange={handleChange} className="w-full p-2 bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-slate-100" />
-                    <input type="text" name="model" placeholder="Model" value={formData.model} onChange={handleChange} className="w-full p-2 bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-slate-100" />
-                    <input type="number" name="year" placeholder="Year" value={formData.year} onChange={handleChange} className="w-full p-2 bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-slate-100" />
-                    <input type="text" name="color" placeholder="Color" value={formData.color} onChange={handleChange} className="w-full p-2 bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-slate-100" />
-                    <input type="text" name="plate" placeholder={t('licensePlate')} value={formData.plate} onChange={handleChange} className="w-full p-2 bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-slate-100" />
+                    <input type="text" name="brand" placeholder="Brand" value={formData.brand} onChange={handleChange} className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-gray-800" />
+                    <input type="text" name="model" placeholder="Model" value={formData.model} onChange={handleChange} className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-gray-800" />
+                    <input type="number" name="year" placeholder="Year" value={formData.year} onChange={handleChange} className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-gray-800" />
+                    <input type="text" name="color" placeholder="Color" value={formData.color} onChange={handleChange} className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-gray-800" />
+                    <input type="text" name="plate" placeholder={t('licensePlate')} value={formData.plate} onChange={handleChange} className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400 text-gray-800" />
                     <div className="flex justify-end pt-4">
                         <button type="submit" className="px-4 py-2 bg-lime-400 text-slate-900 font-semibold rounded-lg hover:bg-lime-500 transition-colors">{t('saveChanges')}</button>
                     </div>
@@ -1283,14 +1283,14 @@ const SettingsModal = ({
   children
 }) => {
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
-            <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-md flex flex-col h-auto max-h-[80vh]">
-                <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-slate-100">{title}</h2>
-                    <button onClick={onClose} className="p-1 rounded-full text-slate-300 hover:bg-slate-700"> <X className="h-6 w-6" /> </button>
+  return <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-md flex flex-col h-auto max-h-[80vh]">
+                <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-gray-600 hover:bg-gray-100"> <X className="h-6 w-6" /> </button>
                 </div>
                 <div className="p-4 flex-grow overflow-y-auto custom-scrollbar">
-                    {children || <p className="text-slate-500">Settings content goes here.</p>}
+                    {children || <p className="text-gray-500">Settings content goes here.</p>}
                 </div>
             </div>
         </div>;
@@ -1332,24 +1332,24 @@ const ProfilePage = ({
     value
   }) => <div className="flex items-center justify-between py-3">
             <div className="flex items-center">
-                <Icon className="h-5 w-5 text-slate-400 mr-3" />
-                <span className="text-sm text-slate-400">{label}</span>
+                <Icon className="h-5 w-5 text-gray-500 mr-3" />
+                <span className="text-sm text-gray-500">{label}</span>
             </div>
-            <span className="text-sm font-medium text-slate-100">{value}</span>
+            <span className="text-sm font-medium text-gray-800">{value}</span>
         </div>;
   const SettingsItem = ({
     icon: Icon,
     label,
     action = () => {},
     value
-  }) => <button onClick={action} className="w-full flex items-center justify-between py-3 text-left hover:bg-slate-700/50 rounded-lg px-2 transition-colors">
+  }) => <button onClick={action} className="w-full flex items-center justify-between py-3 text-left hover:bg-gray-100/50 rounded-lg px-2 transition-colors">
             <div className="flex items-center">
-                <Icon className="h-5 w-5 text-slate-400 mr-3" />
-                <span className="text-sm font-medium text-slate-200">{label}</span>
+                <Icon className="h-5 w-5 text-gray-500 mr-3" />
+                <span className="text-sm font-medium text-gray-700">{label}</span>
             </div>
             <div className="flex items-center">
-                {value && <span className="text-sm text-slate-400 mr-2">{value}</span>}
-                <ChevronRight className="h-5 w-5 text-slate-500" />
+                {value && <span className="text-sm text-gray-500 mr-2">{value}</span>}
+                <ChevronRight className="h-5 w-5 text-gray-400" />
             </div>
         </button>;
   
@@ -1371,13 +1371,13 @@ const ProfilePage = ({
                 {languages.map(lang => <button key={lang.key} onClick={() => {
         onSelectLanguage(lang.key);
         setShowSettingsModal(false);
-      }} className={`w-full p-3 rounded-lg text-left transition-colors flex justify-between items-center text-slate-200 ${currentLanguage === lang.key ? 'bg-lime-400/20 text-lime-300 font-semibold' : 'hover:bg-slate-700'}`}>
+      }} className={`w-full p-3 rounded-lg text-left transition-colors flex justify-between items-center text-gray-700 ${currentLanguage === lang.key ? 'bg-lime-100 text-lime-800 font-semibold' : 'hover:bg-gray-100'}`}>
                         {lang.name}
-                        {currentLanguage === lang.key && <CheckCircle className="h-5 w-5 text-lime-400" />}
+                        {currentLanguage === lang.key && <CheckCircle className="h-5 w-5 text-lime-500" />}
                     </button>)}
             </div>;
   };
-  return <div className="p-4 space-y-6 text-slate-100 font-sans pb-20">
+  return <div className="p-4 space-y-6 text-gray-800 font-sans pb-20">
             <EditProfileModal user={user} isOpen={showEditProfile} onClose={() => setShowEditProfile(false)} onSave={onUpdateUser} />
             <EditCarModal car={user.car} isOpen={showEditCar} onClose={() => setShowEditCar(false)} onSave={onUpdateCar} />
             <SettingsModal title={settingsModalTitle} isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)}>
@@ -1387,13 +1387,13 @@ const ProfilePage = ({
             <div className="flex flex-col items-center space-y-3">
                 <div className="relative">
                     <Avatar src={user.profilePicture} size="w-24 h-24" initials="JD" bgColor="bg-lime-400" />
-                    <button onClick={() => setShowEditProfile(true)} className="absolute bottom-0 right-0 bg-slate-700/80 backdrop-blur-sm p-1.5 rounded-full shadow-md hover:bg-slate-600 transition-colors border border-slate-600">
-                        <Edit2 className="h-4 w-4 text-slate-100" />
+                    <button onClick={() => setShowEditProfile(true)} className="absolute bottom-0 right-0 bg-white/80 backdrop-blur-sm p-1.5 rounded-full shadow-md hover:bg-gray-100 transition-colors border border-gray-200">
+                        <Edit2 className="h-4 w-4 text-gray-800" />
                     </button>
                 </div>
                 <h2 className="text-2xl font-bold">{user.fullName}</h2>
-                <p className="text-sm text-slate-400 font-medium -mt-2">{t('driverLabel')}</p>
-                <div className="flex items-center space-x-4 text-sm text-slate-300">
+                <p className="text-sm text-gray-500 font-medium -mt-2">{t('driverLabel')}</p>
+                <div className="flex items-center space-x-4 text-sm text-gray-600">
                     <div className="flex items-center">
                         <Star className="h-4 w-4 text-yellow-400 mr-1" />
                         <span className="font-semibold">{user.rating}</span> ({user.reviews} {t('reviews')})
@@ -1403,23 +1403,23 @@ const ProfilePage = ({
                 </div>
             </div>
 
-            <div className="bg-slate-800/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-slate-700">
+            <div className="bg-white/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-gray-200/50">
                 <InfoItem icon={User} label={t('username')} value={`@${user.username}`} />
                 <InfoItem icon={Phone} label={t('phone')} value={user.phone} />
             </div>
 
-            <div className="bg-slate-800/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-slate-700">
+            <div className="bg-white/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-gray-200/50">
                 <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-sm font-semibold text-slate-200">{t('driverDetails')}</h3>
-                    <button onClick={() => setShowEditCar(true)} className="p-1.5 rounded-full hover:bg-slate-700/50 transition-colors">
-                        <Edit2 className="h-4 w-4 text-slate-300" />
+                    <h3 className="text-sm font-semibold text-gray-700">{t('driverDetails')}</h3>
+                    <button onClick={() => setShowEditCar(true)} className="p-1.5 rounded-full hover:bg-gray-100/50 transition-colors">
+                        <Edit2 className="h-4 w-4 text-gray-600" />
                     </button>
                 </div>
                 <InfoItem icon={Car} label={t('vehicle')} value={`${user.car.brand} ${user.car.model} (${user.car.year})`} />
             </div>
 
-            <div className="bg-slate-800/60 backdrop-blur-xl p-2 rounded-2xl shadow-lg border border-slate-700">
-                <h3 className="text-sm font-semibold mb-1 text-slate-200 px-2 pt-2">{t('settings')}</h3>
+            <div className="bg-white/60 backdrop-blur-xl p-2 rounded-2xl shadow-lg border border-gray-200/50">
+                <h3 className="text-sm font-semibold mb-1 text-gray-700 px-2 pt-2">{t('settings')}</h3>
                 <SettingsItem icon={Languages} label={t('language')} value={t(language === 'en' ? 'english' : language === 'uz' ? 'uzbek' : 'russian')} action={() => handleOpenSettings(t('language'), <LanguageSelectionContent currentLanguage={language} onSelectLanguage={setLanguage} />)} />
                 <SettingsItem icon={UserPlus} label={t('switchAccount')} value="" action={() => alert('Switching accounts is not implemented in this preview.')} />
             </div>
@@ -1458,12 +1458,12 @@ const ArchiveConfirmModal = ({
   const isUpcoming = rideStatus === 'upcoming';
   const title = isUpcoming ? t('archiveRide') : t('stopRide');
   const message = isUpcoming ? t('confirmArchiveRide') : `${t('youLoseClients')} ${t('confirmStopRide')}`;
-  return <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
-      <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
-        <h2 className="text-xl font-bold text-slate-100 mb-2">{title}</h2>
-        <p className="text-slate-400 mb-6">{message}</p>
+  return <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
+        <h2 className="text-xl font-bold text-gray-800 mb-2">{title}</h2>
+        <p className="text-gray-600 mb-6">{message}</p>
         <div className="flex justify-center gap-4">
-          <button onClick={onClose} className="flex-1 py-2 px-4 bg-slate-600 text-slate-100 font-semibold rounded-xl hover:bg-slate-700 transition-colors">{t('cancel')}</button>
+          <button onClick={onClose} className="flex-1 py-2 px-4 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition-colors">{t('cancel')}</button>
           <button onClick={onConfirm} className="flex-1 py-2 px-4 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-colors">{isUpcoming ? 'Yes, archive' : 'Yes, stop'}</button>
         </div>
       </div>
@@ -1483,26 +1483,26 @@ const ConfirmationModal = ({
     t
   } = useLanguage();
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
-            <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-sm flex flex-col">
-                <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-slate-100">{t('confirmRidePost')}</h2>
-                    <button onClick={onClose} className="p-1 rounded-full text-slate-300 hover:bg-slate-700"><X className="h-6 w-6" /></button>
+  return <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm flex flex-col">
+                <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">{t('confirmRidePost')}</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-gray-600 hover:bg-gray-100"><X className="h-6 w-6" /></button>
                 </div>
-                <div className="p-4 space-y-4 text-slate-300">
-                    <h3 className="text-lg font-bold text-slate-100">{rideData.fromLocation} → {rideData.toLocation}</h3>
+                <div className="p-4 space-y-4 text-gray-600">
+                    <h3 className="text-lg font-bold text-gray-800">{rideData.fromLocation} → {rideData.toLocation}</h3>
                     <p><strong>{t('price')}:</strong> ${rideData.price}</p>
                     <p><strong>{t('departureDate')}:</strong> {rideData.departureDate}</p>
                     {rideData.departureType === 'fixed' && <p><strong>{t('fixedDeparture')}:</strong> {rideData.departureStartTime} - {rideData.departureEndTime}</p>}
                     <p><strong>{t('freeSeats')}:</strong> {rideData.freeSeats}</p>
                     {rideData.mailService === 'yes' && <p><strong>{t('mailService')}:</strong> ${rideData.mailPrice}</p>}
-                    <div className="border-t border-slate-700 pt-4">
-                        <p className="text-sm text-slate-400 mb-2">{t('confirmPhone')}</p>
-                        <p className="text-lg font-bold text-slate-100">{userData.phone}</p>
+                    <div className="border-t border-gray-200 pt-4">
+                        <p className="text-sm text-gray-500 mb-2">{t('confirmPhone')}</p>
+                        <p className="text-lg font-bold text-gray-800">{userData.phone}</p>
                     </div>
                 </div>
                 <div className="p-4 flex justify-center gap-4 mt-6">
-                    <button onClick={onEdit} className="flex-1 py-2 px-4 bg-slate-600 text-slate-100 font-semibold rounded-xl hover:bg-slate-700 transition-colors">
+                    <button onClick={onEdit} className="flex-1 py-2 px-4 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition-colors">
                         {t('noEdit')}
                     </button>
                     <button onClick={onConfirm} className="flex-1 py-2 px-4 bg-lime-500 text-slate-900 font-semibold rounded-xl hover:bg-lime-600 transition-colors">
@@ -1519,20 +1519,20 @@ const NewRideOptionsModal = ({ isOpen, onClose, onStartNewRide, onChooseFromArch
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
-      <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
-        <h2 className="text-xl font-bold text-slate-100 mb-6">{t('newRide')}</h2>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
+        <h2 className="text-xl font-bold text-gray-800 mb-6">{t('newRide')}</h2>
         <div className="space-y-4">
           <button onClick={onStartNewRide} className="w-full py-3 rounded-xl text-lg font-semibold transition-colors bg-lime-500 hover:bg-lime-600 text-slate-900 shadow-lg flex items-center justify-center">
             <Plus className="h-5 w-5 mr-2" />
             {t('postNewRide')}
           </button>
-          <button onClick={onChooseFromArchive} className="w-full py-3 rounded-xl text-lg font-semibold transition-colors bg-slate-600 hover:bg-slate-700 text-slate-100 shadow-lg flex items-center justify-center">
+          <button onClick={onChooseFromArchive} className="w-full py-3 rounded-xl text-lg font-semibold transition-colors bg-gray-200 hover:bg-gray-300 text-gray-800 shadow-lg flex items-center justify-center">
             <ArchiveIcon className="h-5 w-5 mr-2" />
             {t('archive')}
           </button>
         </div>
-        <button onClick={onClose} className="mt-6 text-sm text-slate-400 hover:text-slate-200">
+        <button onClick={onClose} className="mt-6 text-sm text-gray-500 hover:text-gray-800">
             {t('cancel')}
         </button>
       </div>
@@ -1547,7 +1547,7 @@ const AppContent = () => {
     language
   } = useLanguage();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [headerTitle, setHeaderTitle] = useState(t('ride'));
+  const [headerTitle, setHeaderTitle] = useState('');
   const [historyView, setHistoryView] = useState('history');
   const [showPostRide, setShowPostRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
@@ -1704,7 +1704,7 @@ const AppContent = () => {
   };
 
   const handleBack = () => {
-    const modalSetters = [setShowNewRideOptionsModal, setShowPostRide, setShowMessages, setShowEditRide, setShowStatsModal, setIsEditModalOpen, setShowHistoryDetailModal, setShowCarTypeModal, setShowFinishRideModal, setShowActiveRideErrorModal, setShowPostConfirmationModal, setShowArchiveConfirmModal];
+    const modalSetters = [setShowNewRideOptionsModal, setShowPostRide, setShowMessages, setShowStatsModal, setIsEditModalOpen, setShowHistoryDetailModal, setShowCarTypeModal, setShowFinishRideModal, setShowActiveRideErrorModal, setShowPostConfirmationModal, setShowArchiveConfirmModal];
     let isModalOpen = false;
     modalSetters.forEach(setter => {
       setter(prev => {
@@ -1716,11 +1716,11 @@ const AppContent = () => {
     if (!isModalOpen) {
       setActiveTab("dashboard");
     }
-    setHeaderTitle(t('ride'));
+    setHeaderTitle('');
   };
 
   useEffect(() => {
-    let title = t('ride');
+    let title = ''; // Default for dashboard
     if (showStatsModal) title = t('stats');
     else if (activeTab === 'history') title = historyView === 'history' ? t('history') : t('archive');
     else if (activeTab === 'profile') title = t('profile');
@@ -1761,7 +1761,7 @@ const AppContent = () => {
     if (isSearchingForClients) {
       return <div className="flex flex-col items-center justify-center p-8 space-y-4">
                   <div className="radar-emitter"><div className="radar-wave"></div><div className="radar-wave"></div></div>
-                  <p className="text-lime-400 font-semibold animate-pulse">{t('searchingForClients')}</p>
+                  <p className="text-lime-500 font-semibold animate-pulse">{t('searchingForClients')}</p>
               </div>;
     }
     if (activeRide) {
@@ -1769,47 +1769,47 @@ const AppContent = () => {
         <div className="p-4">
             <div className="flex justify-between items-start">
                 <div>
-                    <div className="flex items-center text-lg font-bold text-slate-100"><MapPin className="h-5 w-5 mr-2 text-lime-400" />{activeRide.fromLocation}</div>
-                    <div className="flex items-center text-lg font-bold text-slate-100 mt-1"><MapPin className="h-5 w-5 mr-2 text-red-400" />{activeRide.toLocation}</div>
+                    <div className="flex items-center text-lg font-bold text-gray-800"><MapPin className="h-5 w-5 mr-2 text-lime-500" />{activeRide.fromLocation}</div>
+                    <div className="flex items-center text-lg font-bold text-gray-800 mt-1"><MapPin className="h-5 w-5 mr-2 text-red-500" />{activeRide.toLocation}</div>
                 </div>
-                <span className="text-3xl font-bold text-slate-100">${activeRide.price}</span>
+                <span className="text-3xl font-bold text-gray-800">${activeRide.price}</span>
             </div>
-            <div className="border-t border-slate-700 my-4"></div>
-            <div className="flex justify-between items-center text-sm text-slate-400">
+            <div className="border-t border-gray-200 my-4"></div>
+            <div className="flex justify-between items-center text-sm text-gray-500">
                 <div className="flex items-center"><Calendar className="h-5 w-5 mr-2" /><span>{activeRide.departureDate}</span></div>
                 {activeRide.departureStartTime && <div className="flex items-center">
                         <Clock className="h-5 w-5 mr-2" />
                         <span>{activeRide.departureStartTime}{activeRide.departureEndTime && ` - ${activeRide.departureEndTime}`}</span>
                     </div>}
             </div>
-            <div className="flex justify-between items-center text-sm text-slate-400 mt-2">
+            <div className="flex justify-between items-center text-sm text-gray-500 mt-2">
                 <div className="flex items-center"><Mail className="h-5 w-5 mr-2" /><span>{activeRide.mailService === 'yes' ? t('yesCarryMail') : t('noCarryMail')}</span></div>
                 <div className="flex items-center">{activeRide.departureType === 'fixed' ? <Clock className="h-5 w-5 mr-2" /> : <Users className="h-5 w-5 mr-2" />}<span>{activeRide.departureType === 'fixed' ? t('fixedDeparture') : t('whenFills')}</span></div>
             </div>
-            <div className="flex items-center text-sm text-slate-400 mt-2"><div className="flex items-center"><Car className="h-5 w-5 mr-2" /><span>{activeRide.carType}</span></div></div>
-            <div className="border-t border-slate-700 my-4"></div>
+            <div className="flex items-center text-sm text-gray-500 mt-2"><div className="flex items-center"><Car className="h-5 w-5 mr-2" /><span>{activeRide.carType}</span></div></div>
+            <div className="border-t border-gray-200 my-4"></div>
             <div>
-                <p className="text-sm font-medium text-slate-200 mb-2">{t('passengers')}</p>
+                <p className="text-sm font-medium text-gray-700 mb-2">{t('passengers')}</p>
                 <div className="flex space-x-2">
-                    {activeRide.passengers.map(p => <div key={p.id} onClick={e => handlePassengerClick(p, e)} className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${p.gender === 'male' ? 'bg-blue-400/30' : 'bg-lime-400/30'}`}>{p.gender === 'male' ? <User className="h-6 w-6 text-blue-300" /> : <UserRound className="h-6 w-6 text-lime-300" />}</div>)}
-                    {Array.from({ length: activeRide.freeSeats }).map((_, index) => <div key={index} className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-700/50 relative">
-                        {isRideInProgress ? <User className="h-6 w-6 text-slate-500" /> : <div className="radar-emitter-small"><div className="radar-wave"></div><div className="radar-wave"></div></div>}
+                    {activeRide.passengers.map(p => <div key={p.id} onClick={e => handlePassengerClick(p, e)} className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${p.gender === 'male' ? 'bg-blue-100' : 'bg-lime-100'}`}>{p.gender === 'male' ? <User className="h-6 w-6 text-blue-600" /> : <UserRound className="h-6 w-6 text-lime-600" />}</div>)}
+                    {Array.from({ length: activeRide.freeSeats }).map((_, index) => <div key={index} className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 relative">
+                        {isRideInProgress ? <User className="h-6 w-6 text-gray-400" /> : <div className="radar-emitter-small"><div className="radar-wave"></div><div className="radar-wave"></div></div>}
                       </div>)}
                 </div>
             </div>
         </div>
-        <div className="border-t border-slate-700 p-4 flex gap-2">
+        <div className="border-t border-gray-200 p-4 flex gap-2">
             {isRideInProgress ? <button onClick={handleFinishRideClick} className="w-full py-2 px-4 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-colors flex items-center justify-center">
                   <CheckCircle className="h-5 w-5 mr-2" />
                   {t('finishRide')}
                </button> : <>
-                <button onClick={() => handleEditRideClick(activeRide)} className="w-full py-2 px-4 bg-slate-600 text-slate-100 font-semibold rounded-xl hover:bg-slate-700 transition-colors flex items-center justify-center"><Edit2 className="h-5 w-5 mr-2" />{t('editRide')}</button>
+                <button onClick={() => handleEditRideClick(activeRide)} className="w-full py-2 px-4 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition-colors flex items-center justify-center"><Edit2 className="h-5 w-5 mr-2" />{t('editRide')}</button>
                 <button onClick={() => setShowConfirmationModal(true)} className="w-full py-2 px-4 bg-lime-500 text-slate-900 font-semibold rounded-xl hover:bg-lime-600 transition-colors flex items-center justify-center"><Navigation className="h-5 w-5 mr-2" />{t('letsGo')}</button>
               </>}
         </div>
       </>;
     }
-    return <p className="text-slate-500 text-center py-8">{t('noActiveRide')}</p>;
+    return <p className="text-gray-500 text-center py-8">{t('noActiveRide')}</p>;
   };
   const renderContent = () => {
     if (showMessages) return <MessageDashboard onClose={() => setShowMessages(false)} />;
@@ -1820,74 +1820,74 @@ const AppContent = () => {
       case "dashboard":
         return <div className="p-4 space-y-4 font-sans">
           <div className="grid grid-cols-3 gap-4">
-              <div onClick={() => setShowStatsModal(true)} className="bg-slate-800/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-slate-700 text-center flex flex-col justify-center cursor-pointer">
-                  <h2 className="text-sm text-slate-400">{t('totalEarnings')}</h2>
-                  <p className="text-2xl font-extrabold text-slate-100 mt-2">$120.00</p>
+              <div onClick={() => setShowStatsModal(true)} className="bg-white/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-gray-200/50 text-center flex flex-col justify-center cursor-pointer">
+                  <h2 className="text-sm text-gray-500">{t('totalEarnings')}</h2>
+                  <p className="text-2xl font-extrabold text-gray-800 mt-2">$120.00</p>
               </div>
-              <div onClick={handleNewRideClick} className="bg-slate-800/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-slate-700 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105">
-                  <div className="w-12 h-12 bg-slate-700/50 rounded-full flex items-center justify-center border-2 border-slate-600 shadow-md"><Plus className="h-6 w-6 text-slate-200" /></div>
-                  <span className="text-xs text-slate-400 mt-2">{t('newRide')}</span>
+              <div onClick={handleNewRideClick} className="bg-white/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-gray-200/50 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105">
+                  <div className="w-12 h-12 bg-gray-100/50 rounded-full flex items-center justify-center border-2 border-gray-200 shadow-md"><Plus className="h-6 w-6 text-gray-700" /></div>
+                  <span className="text-xs text-gray-500 mt-2">{t('newRide')}</span>
               </div>
-              <div onClick={() => setShowCarTypeModal(true)} className="bg-slate-800/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-slate-700 text-center flex flex-col items-center justify-center cursor-pointer">
-                  <Car className="h-6 w-6 text-slate-200" />
-                  <h2 className="text-sm text-slate-400 mt-2">{t('carType')}</h2>
-                  <p className="text-xs font-semibold text-slate-100 truncate">{selectedCar}</p>
+              <div onClick={() => setShowCarTypeModal(true)} className="bg-white/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-gray-200/50 text-center flex flex-col items-center justify-center cursor-pointer">
+                  <Car className="h-6 w-6 text-gray-700" />
+                  <h2 className="text-sm text-gray-500 mt-2">{t('carType')}</h2>
+                  <p className="text-xs font-semibold text-gray-800 truncate">{selectedCar}</p>
               </div>
           </div>
           <div>
-              <h3 className="flex items-center text-sm font-semibold mb-2 text-slate-100"><Calendar className="h-4 w-4 mr-2" />{t('yourActivity')}</h3>
-              <div className={`w-full bg-slate-800/60 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-lg text-left overflow-hidden`}>{renderActiveRideContent()}</div>
+              <h3 className="flex items-center text-sm font-semibold mb-2 text-gray-800"><Calendar className="h-4 w-4 mr-2" />{t('yourActivity')}</h3>
+              <div className={`w-full bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-lg text-left overflow-hidden`}>{renderActiveRideContent()}</div>
           </div>
         </div>;
       case "history":
         return <div className="flex flex-col h-full">
             <div className="p-4 pb-0">
-              <div className="bg-slate-900/80 p-1 rounded-xl flex border border-slate-700">
-                <button onClick={() => setHistoryView('history')} className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${historyView === 'history' ? 'bg-slate-700/50 text-slate-100 shadow-sm' : 'text-slate-400 hover:text-slate-100'}`}>
+              <div className="bg-gray-100/80 p-1 rounded-xl flex border border-gray-200/50">
+                <button onClick={() => setHistoryView('history')} className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${historyView === 'history' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>
                   {t('history')}
                 </button>
-                <button onClick={() => setHistoryView('archive')} className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${historyView === 'archive' ? 'bg-slate-700/50 text-slate-100 shadow-sm' : 'text-slate-400 hover:text-slate-100'}`}>
+                <button onClick={() => setHistoryView('archive')} className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${historyView === 'archive' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>
                   {t('archive')}
                 </button>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto">
               {historyView === 'history' ? <div className="p-4 space-y-4 pb-20">
-                  {completedRides.length > 0 ? completedRides.map(ride => <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-slate-800/60 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-lg hover:border-slate-600 transition-all duration-200">
+                  {completedRides.length > 0 ? completedRides.map(ride => <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-lg hover:border-gray-300 transition-all duration-200">
                               <div className="flex justify-between items-center">
                                   <div>
-                                      <p className="font-semibold text-slate-100">{ride.fromLocation} → {ride.toLocation}</p>
-                                      <p className="text-sm text-slate-400 mt-1">{ride.departureDate}</p>
+                                      <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                                      <p className="text-sm text-gray-500 mt-1">{ride.departureDate}</p>
                                   </div>
                                   <div className="text-right">
-                                      <p className="font-bold text-lg text-lime-400">+${ride.price}</p>
-                                      <p className="text-xs text-slate-500">Completed</p>
+                                      <p className="font-bold text-lg text-lime-600">+${ride.price}</p>
+                                      <p className="text-xs text-gray-400">Completed</p>
                                   </div>
                               </div>
                           </button>) : <div className="p-4 text-center">
-                          <div className="mt-8 bg-slate-800/60 backdrop-blur-xl p-8 rounded-2xl shadow border border-slate-700">
-                              <History className="h-12 w-12 mx-auto text-slate-500" />
-                              <p className="text-slate-400 mt-4 mb-2">{t('noCompletedRides')}</p>
+                          <div className="mt-8 bg-white/60 backdrop-blur-xl p-8 rounded-2xl shadow border border-gray-200/50">
+                              <History className="h-12 w-12 mx-auto text-gray-400" />
+                              <p className="text-gray-500 mt-4 mb-2">{t('noCompletedRides')}</p>
                           </div>
                       </div>}
                 </div> : <div className="p-4 space-y-4 pb-20">
-                  {archivedRides.length > 0 ? archivedRides.map(ride => <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-slate-800/60 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-lg hover:border-slate-600 transition-all duration-200">
+                  {archivedRides.length > 0 ? archivedRides.map(ride => <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-lg hover:border-gray-300 transition-all duration-200">
                               <div className="flex justify-between items-center">
                                   <div>
-                                      <p className="font-semibold text-slate-100">{ride.fromLocation} → {ride.toLocation}</p>
-                                      <p className="text-sm text-slate-400 mt-1">{ride.departureDate}</p>
+                                      <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                                      <p className="text-sm text-gray-500 mt-1">{ride.departureDate}</p>
                                   </div>
                                   <div className="text-right">
-                                      <p className="font-bold text-lg text-red-400">Archived</p>
-                                      <p className="text-xs text-slate-500">
+                                      <p className="font-bold text-lg text-red-500">Archived</p>
+                                      <p className="text-xs text-gray-400">
                                           {ride.status === 'cancelled' ? 'Cancelled' : 'Archived'}
                                       </p>
                                   </div>
                               </div>
                           </button>) : <div className="p-4 text-center">
-                          <div className="mt-8 bg-slate-800/60 backdrop-blur-xl p-8 rounded-2xl shadow border border-slate-700">
-                              <ArchiveIcon className="h-12 w-12 mx-auto text-slate-500" />
-                              <p className="text-slate-400 mt-4 mb-2">No archived rides.</p>
+                          <div className="mt-8 bg-white/60 backdrop-blur-xl p-8 rounded-2xl shadow border border-gray-200/50">
+                              <ArchiveIcon className="h-12 w-12 mx-auto text-gray-400" />
+                              <p className="text-gray-500 mt-4 mb-2">No archived rides.</p>
                           </div>
                       </div>}
                 </div>}
@@ -1900,78 +1900,70 @@ const AppContent = () => {
     }
   };
 
-  return <div className="h-screen text-slate-100 flex flex-col font-sans bg-slate-900" style={{
-    backgroundImage: `radial-gradient(at 27% 37%, hsla(215, 98%, 61%, 0.1) 0px, transparent 0%), 
-                      radial-gradient(at 97% 21%, hsla(125, 98%, 72%, 0.1) 0px, transparent 50%),
-                      radial-gradient(at 52% 99%, hsla(355, 98%, 76%, 0.1) 0px, transparent 50%),
-                      radial-gradient(at 10% 29%, hsla(256, 96%, 68%, 0.1) 0px, transparent 50%),
-                      radial-gradient(at 97% 96%, hsla(38, 60%, 74%, 0.1) 0px, transparent 50%),
-                      radial-gradient(at 33% 50%, hsla(222, 67%, 73%, 0.1) 0px, transparent 50%),
-                      radial-gradient(at 79% 53%, hsla(343, 68%, 79%, 0.1) 0px, transparent 50%)`
-    }}>
+  return <div className="h-screen text-gray-800 flex flex-col font-sans bg-gray-50">
       <CustomScrollbarStyles />
-      {selectedPassenger && <div className="fixed bg-slate-700 border border-slate-600 rounded-xl shadow-2xl z-50 p-2 space-y-1" style={{ top: popoverPosition.top, left: popoverPosition.left }} onClick={() => selectedPassenger && setSelectedPassenger(null)}>
-              <button className="w-full flex items-center px-3 py-2 text-sm text-slate-200 hover:bg-slate-600 rounded-lg"><Phone className="h-4 w-4 mr-2" />{t('call')}</button>
-              <button className="w-full flex items-center px-3 py-2 text-sm text-slate-200 hover:bg-slate-600 rounded-lg"><Send className="h-4 w-4 mr-2" />{t('message')}</button>
-              <div className="border-t border-slate-600 my-1"></div>
-              <button onClick={() => handleRemovePassenger(selectedPassenger.id)} className="w-full flex items-center px-3 py-2 text-sm text-red-400 hover:bg-red-400/10 rounded-lg"><Trash2 className="h-4 w-4 mr-2" />{t('removePassenger')}</button>
+      {selectedPassenger && <div className="fixed bg-white border border-gray-200 rounded-xl shadow-2xl z-50 p-2 space-y-1" style={{ top: popoverPosition.top, left: popoverPosition.left }} onClick={() => selectedPassenger && setSelectedPassenger(null)}>
+              <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"><Phone className="h-4 w-4 mr-2" />{t('call')}</button>
+              <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"><Send className="h-4 w-4 mr-2" />{t('message')}</button>
+              <div className="border-t border-gray-200 my-1"></div>
+              <button onClick={() => handleRemovePassenger(selectedPassenger.id)} className="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="h-4 w-4 mr-2" />{t('removePassenger')}</button>
           </div>}
-      <header className="bg-slate-900/70 backdrop-blur-lg p-3 border-b border-slate-700 flex items-center justify-between z-20 shadow-lg relative rounded-b-2xl">
+      <header className="bg-white/70 backdrop-blur-lg p-3 border-b border-gray-200 flex items-center justify-between z-20 shadow-lg relative rounded-b-2xl">
           <div className="w-1/3 flex justify-start">
-            {activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal || showCarTypeModal || isEditModalOpen || showHistoryDetailModal || showPostConfirmationModal || showArchiveConfirmModal || showFinishRideModal || showActiveRideErrorModal || showNewRideOptionsModal ? <button onClick={handleBack} className="p-2 rounded-full text-slate-300 hover:bg-slate-700/50 transition-colors">
+            {activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal || showCarTypeModal || isEditModalOpen || showHistoryDetailModal || showPostConfirmationModal || showArchiveConfirmModal || showFinishRideModal || showActiveRideErrorModal || showNewRideOptionsModal ? <button onClick={handleBack} className="p-2 rounded-full text-gray-600 hover:bg-gray-100/50 transition-colors">
                 <ChevronLeft className="h-6 w-6" />
-              </button> : <button onClick={()=>setActiveTab("profile")} className="text-sm font-semibold text-slate-300 ml-2 hover:text-white transition-colors">{userData.phone}</button>}
+              </button> : <button onClick={()=>setActiveTab("profile")} className="text-sm font-semibold text-gray-600 ml-2 hover:text-gray-900 transition-colors">{userData.phone}</button>}
           </div>
           <div className="w-1/3 text-center">
-            <h1 className="text-xl font-bold text-slate-100">{headerTitle}</h1>
+            <h1 className="text-xl font-bold text-gray-800">{headerTitle}</h1>
           </div>
           <div className="w-1/3 flex justify-end">
-             {activeTab === "dashboard" && !showPostRide && !showMessages && !showStatsModal && !showNewRideOptionsModal && <button onClick={() => setActiveTab('profile')} className="flex items-center gap-2 p-2 rounded-full hover:bg-slate-700/50 transition-colors">
-                    <span className="text-sm font-semibold text-slate-300">{userData.fullName}</span>
-                    <User className="h-5 w-5 text-slate-300" />
+             {activeTab === "dashboard" && !showPostRide && !showMessages && !showStatsModal && !showNewRideOptionsModal && <button onClick={() => setActiveTab('profile')} className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100/50 transition-colors">
+                    <span className="text-sm font-semibold text-gray-600">{userData.fullName}</span>
+                    <User className="h-5 w-5 text-gray-600" />
                 </button>}
           </div>
       </header>
       <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative" onClick={() => selectedPassenger && setSelectedPassenger(null)}>
         {renderContent()}
       </main>
-      {!(showMessages || showPostRide || isEditModalOpen || showStatsModal || showHistoryDetailModal) && <footer className="fixed bottom-0 left-0 right-0 bg-slate-900/70 backdrop-blur-lg border-t border-slate-700 shadow-lg z-10">
+      {!(showMessages || showPostRide || isEditModalOpen || showStatsModal || showHistoryDetailModal) && <footer className="fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-lg border-t border-gray-200 shadow-lg z-10">
           <div className="flex justify-around py-2">
             {bottomNavItems.map(item => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return <button key={item.id} onClick={() => {
             setActiveTab(item.id);
-          }} className={`flex-1 flex flex-col items-center py-2 transition-colors ${isActive ? "text-lime-300" : "text-slate-400 hover:text-slate-200"}`}><Icon className={`h-6 w-6 mb-1`} /><span className="text-xs">{item.label}</span></button>;
+          }} className={`flex-1 flex flex-col items-center py-2 transition-colors ${isActive ? "text-lime-600" : "text-gray-500 hover:text-gray-800"}`}><Icon className={`h-6 w-6 mb-1`} /><span className="text-xs">{item.label}</span></button>;
         })}
           </div>
         </footer>}
-      {showPostRide && <PostRideForm onClose={() => { setShowPostRide(false); setRepostRideData(null); setHeaderTitle(t('ride')); }} onConfirmPost={handleConfirmPost} initialValues={repostRideData} isEditing={false} onStopRide={()=>{}} onArchiveRide={()=>{}} userPhone={userData.phone} />}
+      {showPostRide && <PostRideForm onClose={() => { setShowPostRide(false); setRepostRideData(null); setHeaderTitle(''); }} onConfirmPost={handleConfirmPost} initialValues={repostRideData} isEditing={false} onStopRide={()=>{}} onArchiveRide={()=>{}} userPhone={userData.phone} />}
       {isEditModalOpen && editingRide && <PostRideForm onClose={() => { setIsEditModalOpen(false); setEditingRide(null); }} onConfirmPost={handleSaveEditedRide} onStopRide={() => { setEditingRide(activeRide); setShowArchiveConfirmModal(true); }} onArchiveRide={() => { setEditingRide(activeRide); setShowArchiveConfirmModal(true); }} initialValues={editingRide} isEditing={true} userPhone={userData.phone} />}
       <CarTypeModal isOpen={showCarTypeModal} onClose={() => setShowCarTypeModal(false)} onSelectCar={setSelectedCar} currentCar={selectedCar} />
-      {showConfirmationModal && <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
-          <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
-              <h2 className="text-xl font-bold text-slate-100 mb-2">{t('letsGo')}</h2>
-              <p className="text-slate-400 mb-6">{t('areYouSure')}</p>
+      {showConfirmationModal && <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+          <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">{t('letsGo')}</h2>
+              <p className="text-gray-600 mb-6">{t('areYouSure')}</p>
               <div className="flex justify-center gap-4">
-                  <button onClick={() => setShowConfirmationModal(false)} className="flex-1 py-2 px-4 bg-slate-600 text-slate-100 font-semibold rounded-xl hover:bg-slate-700 transition-colors">{t('cancel')}</button>
+                  <button onClick={() => setShowConfirmationModal(false)} className="flex-1 py-2 px-4 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition-colors">{t('cancel')}</button>
                   <button onClick={handleStartRide} className="flex-1 py-2 px-4 bg-lime-500 text-slate-900 font-semibold rounded-xl hover:bg-lime-600 transition-colors">{t('okay')}</button>
               </div>
           </div>
         </div>}
-      {showActiveRideErrorModal && <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
-          <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
-              <h2 className="text-xl font-bold text-slate-100 mb-2">{t('activeRideErrorTitle')}</h2>
-              <p className="text-slate-400 mb-6">{t('activeRideWarning')}</p>
+      {showActiveRideErrorModal && <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+          <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">{t('activeRideErrorTitle')}</h2>
+              <p className="text-gray-600 mb-6">{t('activeRideWarning')}</p>
               <button onClick={() => setShowActiveRideErrorModal(false)} className="w-full py-2 px-4 bg-lime-500 text-slate-900 font-semibold rounded-xl hover:bg-lime-600 transition-colors">{t('okay')}</button>
           </div>
         </div>}
-      {showFinishRideModal && <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
-          <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
-              <h2 className="text-xl font-bold text-slate-100 mb-2">{t('finishRide')}</h2>
-              <p className="text-slate-400 mb-6">{t('areYouSureFinish')}</p>
+      {showFinishRideModal && <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+          <div className="bg-white rounded-3xl shadow-lg w-full max-w-sm p-6 text-center">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">{t('finishRide')}</h2>
+              <p className="text-gray-600 mb-6">{t('areYouSureFinish')}</p>
               <div className="flex justify-center gap-4">
-                  <button onClick={() => setShowFinishRideModal(false)} className="flex-1 py-2 px-4 bg-slate-600 text-slate-100 font-semibold rounded-xl hover:bg-slate-700 transition-colors">{t('cancel')}</button>
+                  <button onClick={() => setShowFinishRideModal(false)} className="flex-1 py-2 px-4 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition-colors">{t('cancel')}</button>
                   <button onClick={confirmFinishRide} className="flex-1 py-2 px-4 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-colors">{t('yesFinish')}</button>
               </div>
           </div>
@@ -2029,26 +2021,26 @@ const StatsModal = ({
     earnings: 45
   }];
   return <div className="p-4 space-y-6">
-            <div className="bg-slate-800/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-slate-700">
-                <h3 className="text-lg font-semibold mb-4 text-slate-100">{t('dailyEarnings')}</h3>
+            <div className="bg-white/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-gray-200/50">
+                <h3 className="text-lg font-semibold mb-4 text-gray-800">{t('dailyEarnings')}</h3>
                 <div style={{ width: '100%', height: 300 }}>
                     <ResponsiveContainer>
                         <BarChart data={dailyEarningsData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.1} />
-                            <XAxis dataKey="day" tick={{ fill: '#94a3b8' }} />
-                            <YAxis tick={{ fill: '#94a3b8' }}/>
-                            <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#e2e8f0' }} />
-                            <Bar dataKey="earnings" fill="#a3e635" />
+                            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+                            <XAxis dataKey="day" tick={{ fill: '#6b7280' }} />
+                            <YAxis tick={{ fill: '#6b7280' }}/>
+                            <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', color: '#1f2937' }} />
+                            <Bar dataKey="earnings" fill="#84cc16" />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
             </div>
-            <div className="bg-slate-800/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-slate-700">
-                <h3 className="text-lg font-semibold mb-4 text-slate-100">{t('recentTrips')}</h3>
+            <div className="bg-white/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-gray-200/50">
+                <h3 className="text-lg font-semibold mb-4 text-gray-800">{t('recentTrips')}</h3>
                 <div className="space-y-3">
-                    {recentTrips.map(trip => <div key={trip.id} className="flex justify-between items-center p-3 bg-slate-700/50 rounded-xl">
-                            <div><p className="font-medium text-slate-200">{trip.from} - {trip.to}</p></div>
-                            <p className="font-bold text-lime-400">+${trip.earnings}</p>
+                    {recentTrips.map(trip => <div key={trip.id} className="flex justify-between items-center p-3 bg-gray-100/50 rounded-xl">
+                            <div><p className="font-medium text-gray-700">{trip.from} - {trip.to}</p></div>
+                            <p className="font-bold text-lime-600">+${trip.earnings}</p>
                         </div>)}
                 </div>
             </div>
