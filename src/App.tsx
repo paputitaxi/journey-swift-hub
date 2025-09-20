@@ -1,7 +1,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
@@ -12,9 +11,6 @@ import Welcome from "./pages/Welcome";
 import DriverDashboard from "./pages/DriverDashboard";
 import RiderDashboard from "./pages/RiderDashboard";
 import ChatWidget from "./components/ChatWidget";
-import ProtectedRoute from "./components/ProtectedRoute";
-
-const queryClient = new QueryClient();
 
 const AppContent = () => {
   const { language, setLanguage } = useLanguage();
@@ -55,17 +51,15 @@ const App = () => {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
-        <ThemeProvider defaultTheme="telegram" storageKey="rideshare-theme">
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <AppContent />
-          </TooltipProvider>
-        </ThemeProvider>
-      </LanguageProvider>
-    </QueryClientProvider>
+    <LanguageProvider>
+      <ThemeProvider defaultTheme="telegram" storageKey="rideshare-theme">
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AppContent />
+        </TooltipProvider>
+      </ThemeProvider>
+    </LanguageProvider>
   );
 };
 
