@@ -1825,8 +1825,8 @@ const AppContent = () => {
         return <div className="p-4 space-y-4 font-sans">
           <div className="grid grid-cols-3 gap-4">
               <div onClick={() => setShowStatsModal(true)} className="bg-white/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-gray-200/50 text-center flex flex-col justify-center cursor-pointer">
-                  <h2 className="text-sm text-gray-500">{t('totalEarnings')}</h2>
-                  <p className="text-2xl font-extrabold text-gray-800 mt-2">{totalEarnings.toFixed(2)}$</p>
+                  <h2 className="text-xs text-gray-500">{t('totalEarnings')}</h2>
+                  <p className="text-xl font-bold text-gray-800 mt-1">{totalEarnings.toFixed(2)}$</p>
               </div>
               <div onClick={handleNewRideClick} className="bg-white/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-gray-200/50 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105">
                   <div className="w-12 h-12 bg-gray-100/50 rounded-full flex items-center justify-center border-2 border-gray-200 shadow-md"><Plus className="h-6 w-6 text-gray-700" /></div>
