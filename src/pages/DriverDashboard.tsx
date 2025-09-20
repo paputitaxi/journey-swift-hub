@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Plus, User, MapPin, Calendar, Clock, Shield, Navigation, MessageCircle, Users, Hash, Store, Search, X, CheckCircle, ArrowLeft, Send, Loader2, XCircle, Fuel, Radar, LocateFixed, Car, Sparkles, Newspaper, TrendingUp, Mail, Phone, Settings, LogOut, Edit2, ChevronLeft, ChevronRight, Star, ShieldCheck, CreditCard, Bell, Languages, Lock, Trash2, History, FileText, MinusCircle, PlusCircle, UserPlus, UserRound, LifeBuoy, Archive as ArchiveIcon } from "lucide-react";
-import supabase from '../lib/supabaseClient';
+import { supabase } from "@/integrations/supabase/client";
 const useToast = () => {
   return {
     toast: ({
