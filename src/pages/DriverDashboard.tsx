@@ -1986,11 +1986,16 @@ const AppContent = () => {
     }
     return null;
   };
+  const renderContent = () => {
+    const completedRides = myRides.filter(r => r.status === 'completed');
+    switch (activeTab) {
+      case "dashboard":
+        return (
           <div>
               <h3 className="flex items-center text-sm font-semibold mb-2 text-black drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]"><Calendar className="h-4 w-4 mr-2" />{t('yourActivity')}</h3>
               <div className={`w-full bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg text-left overflow-hidden`}>{renderActiveRideContent()}</div>
           </div>
-        </div>;
+        );
       case "history":
         return <div className="flex flex-col h-full">
             <div className="p-4 pb-0">
