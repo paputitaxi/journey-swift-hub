@@ -1,29 +1,7 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Plus, User, MapPin, Calendar, Clock, Shield, Navigation, MessageCircle, Users, Hash, Store, Search, X, CheckCircle, ArrowLeft, Send, Loader2, XCircle, Fuel, Radar, LocateFixed, Car, Sparkles, Newspaper, TrendingUp, Mail, Phone, Settings, LogOut, Edit2, ChevronLeft, ChevronRight, Star, ShieldCheck, CreditCard, Bell, Languages, Lock, Trash2, History, FileText, MinusCircle, PlusCircle, UserPlus, UserRound, LifeBuoy, Archive as ArchiveIcon } from "lucide-react";
-const supabase = {
-  from: table => ({
-    select: (columns = '*') => ({
-      eq: (column, value) => ({
-        order: (column, options) => Promise.resolve({
-          data: [],
-          error: null
-        })
-      })
-    }),
-    insert: data => ({
-      select: () => ({
-        single: () => Promise.resolve({
-          data: {
-            id: Date.now(),
-            ...data
-          },
-          error: null
-        })
-      })
-    })
-  })
-};
+import { supabase } from "@/integrations/supabase/client";
 const useToast = () => {
   return {
     toast: ({
@@ -1939,134 +1917,291 @@ const AppContent = () => {
   };
   const renderActiveRideContent = () => {
     if (isSearchingForClients) {
-      return <div className="flex flex-col items-center justify-center p-8 space-y-4">
-                  <div className="radar-emitter"><div className="radar-wave"></div><div className="radar-wave"></div></div>
-                  <p className="text-green-600 font-semibold animate-pulse">{t('searchingForClients')}</p>
-              </div>;
+      return (
+        <div className="flex flex-col items-center justify-center p-8 space-y-4">
+          <div className="radar-emitter">
+            <div className="radar-wave"></div>
+            <div className="radar-wave"></div>
+          </div>
+          <p className="text-green-600 font-semibold animate-pulse">{t('searchingForClients')}</p>
+        </div>
+      );
     }
+
     if (activeRide) {
-      return <>
-                  <div className="p-4">
-                      <div className="flex justify-between items-start">
-                          <div>
-                              <div className="flex items-center text-lg font-bold text-gray-800"><MapPin className="h-5 w-5 mr-2 text-green-600" />{activeRide.fromLocation}</div>
-                              <div className="flex items-center text-lg font-bold text-gray-800 mt-1"><MapPin className="h-5 w-5 mr-2 text-red-600" />{activeRide.toLocation}</div>
-                          </div>
-                          <span className="text-3xl font-bold text-gray-800">${activeRide.price}</span>
-                      </div>
-                      <div className="border-t border-neutral-200/50 my-4"></div>
-                      <div className="flex justify-between items-center text-sm text-neutral-600">
-                          <div className="flex items-center"><Calendar className="h-5 w-5 mr-2" /><span>{activeRide.departureDate}</span></div>
-                          {activeRide.departureStartTime && <div className="flex items-center">
-                                  <Clock className="h-5 w-5 mr-2" />
-                                  <span>
-                                      {activeRide.departureStartTime}
-                                      {activeRide.departureEndTime && ` - ${activeRide.departureEndTime}`}
-                                  </span>
-                              </div>}
-                      </div>
-                      <div className="flex justify-between items-center text-sm text-neutral-600 mt-2">
-                          <div className="flex items-center"><Mail className="h-5 w-5 mr-2" /><span>{activeRide.mailService === 'yes' ? t('yesCarryMail') : t('noCarryMail')}</span></div>
-                          <div className="flex items-center">{activeRide.departureType === 'fixed' ? <Clock className="h-5 w-5 mr-2" /> : <Users className="h-5 w-5 mr-2" />}<span>{activeRide.departureType === 'fixed' ? t('fixedDeparture') : t('whenFills')}</span></div>
-                      </div>
-                      <div className="flex items-center text-sm text-neutral-600 mt-2"><div className="flex items-center"><Car className="h-5 w-5 mr-2" /><span>{activeRide.carType}</span></div></div>
-                      <div className="border-t border-neutral-200/50 my-4"></div>
-                      <div>
-                          <p className="text-sm font-medium text-neutral-800 mb-2">{t('passengers')}</p>
-                          <div className="flex space-x-2">
-                              {activeRide.passengers.map(p => <div key={p.id} onClick={e => handlePassengerClick(p, e)} className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${p.gender === 'male' ? 'bg-blue-200' : 'bg-green-200'}`}>{p.gender === 'male' ? <User className="h-6 w-6 text-blue-800" /> : <UserRound className="h-6 w-6 text-green-800" />}</div>)}
-                              {Array.from({
-                length: activeRide.freeSeats
-              }).map((_, index) => <div key={index} className="w-10 h-10 rounded-full flex items-center justify-center bg-green-100/50 relative">
-                                  {isRideInProgress ? <User className="h-6 w-6 text-green-300" /> : <div className="radar-emitter-small"><div className="radar-wave"></div><div className="radar-wave"></div></div>}
-                                </div>)}
-                          </div>
-                      </div>
-                  </div>
-                  <div className="border-t border-neutral-200/50 p-4 flex gap-2">
-                      {isRideInProgress ? <button onClick={handleFinishRideClick} className="w-full py-2 px-4 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-colors flex items-center justify-center">
-                            <CheckCircle className="h-5 w-5 mr-2" />
-                            {t('finishRide')}
-                         </button> : <>
-                          <button onClick={() => handleEditRideClick(activeRide)} className="w-full py-2 px-4 bg-neutral-200 text-neutral-800 font-semibold rounded-xl hover:bg-neutral-300 transition-colors flex items-center justify-center"><Edit2 className="h-5 w-5 mr-2" />{t('editRide')}</button>
-                          <button onClick={() => setShowConfirmationModal(true)} className="w-full py-2 px-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center"><Navigation className="h-5 w-5 mr-2" />{t('letsGo')}</button>
-                        </>}
-                  </div>
-              <div onClick={handleNewRideClick} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105">
-                  <div className="w-12 h-12 bg-neutral-100/50 rounded-full flex items-center justify-center border-2 border-neutral-200/50 shadow-md"><Plus className="h-6 w-6 text-gray-800" /></div>
-                  <span className="text-xs text-neutral-600 mt-2">{t('newRide')}</span>
+      return (
+        <>
+          <div className="p-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="flex items-center text-lg font-bold text-gray-800">
+                  <MapPin className="h-5 w-5 mr-2 text-green-600" />
+                  {activeRide.fromLocation}
+                </div>
+                <div className="flex items-center text-lg font-bold text-gray-800 mt-1">
+                  <MapPin className="h-5 w-5 mr-2 text-red-600" />
+                  {activeRide.toLocation}
+                </div>
               </div>
-              <div onClick={() => setShowCarTypeModal(true)} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 text-center flex flex-col items-center justify-center cursor-pointer">
-                  <Car className="h-6 w-6 text-gray-800" />
-                  <h2 className="text-sm text-neutral-600 mt-2">{t('carType')}</h2>
-                  <p className="text-xs font-semibold text-gray-800 truncate">{selectedCar}</p>
+              <span className="text-3xl font-bold text-gray-800">${activeRide.price}</span>
+            </div>
+
+            <div className="border-t border-neutral-200/50 my-4"></div>
+
+            <div className="flex justify-between items-center text-sm text-neutral-600">
+              <div className="flex items-center">
+                <Calendar className="h-5 w-5 mr-2" />
+                <span>{activeRide.departureDate}</span>
               </div>
+              {activeRide.departureStartTime && (
+                <div className="flex items-center">
+                  <Clock className="h-5 w-5 mr-2" />
+                  <span>
+                    {activeRide.departureStartTime}
+                    {activeRide.departureEndTime && ` - ${activeRide.departureEndTime}`}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-between items-center text-sm text-neutral-600 mt-2">
+              <div className="flex items-center">
+                <Mail className="h-5 w-5 mr-2" />
+                <span>{activeRide.mailService === 'yes' ? t('yesCarryMail') : t('noCarryMail')}</span>
+              </div>
+              <div className="flex items-center">
+                {activeRide.departureType === 'fixed' ? (
+                  <Clock className="h-5 w-5 mr-2" />
+                ) : (
+                  <Users className="h-5 w-5 mr-2" />
+                )}
+                <span>
+                  {activeRide.departureType === 'fixed' ? t('fixedDeparture') : t('whenFills')}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center text-sm text-neutral-600 mt-2">
+              <div className="flex items-center">
+                <Car className="h-5 w-5 mr-2" />
+                <span>{activeRide.carType}</span>
+              </div>
+            </div>
+
+            <div className="border-t border-neutral-200/50 my-4"></div>
+
+            <div>
+              <p className="text-sm font-medium text-neutral-800 mb-2">{t('passengers')}</p>
+              <div className="flex space-x-2">
+                {activeRide.passengers.map(p => (
+                  <div
+                    key={p.id}
+                    onClick={e => handlePassengerClick(p, e)}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${p.gender === 'male' ? 'bg-blue-200' : 'bg-green-200'}`}
+                  >
+                    {p.gender === 'male' ? (
+                      <User className="h-6 w-6 text-blue-800" />
+                    ) : (
+                      <UserRound className="h-6 w-6 text-green-800" />
+                    )}
+                  </div>
+                ))}
+                {Array.from({ length: activeRide.freeSeats }).map((_, index) => (
+                  <div key={index} className="w-10 h-10 rounded-full flex items-center justify-center bg-green-100/50 relative">
+                    {isRideInProgress ? (
+                      <User className="h-6 w-6 text-green-300" />
+                    ) : (
+                      <div className="radar-emitter-small">
+                        <div className="radar-wave"></div>
+                        <div className="radar-wave"></div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 className="flex items-center text-sm font-semibold mb-2 text-black drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]"><Calendar className="h-4 w-4 mr-2" />{t('yourActivity')}</h3>
-            <div className={`w-full bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg text-left overflow-hidden`}>{renderActiveRideContent()}</div>
+
+          <div className="border-t border-neutral-200/50 p-4 flex gap-2">
+            {isRideInProgress ? (
+              <button
+                onClick={handleFinishRideClick}
+                className="w-full py-2 px-4 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-colors flex items-center justify-center"
+              >
+                <CheckCircle className="h-5 w-5 mr-2" />
+                {t('finishRide')}
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => handleEditRideClick(activeRide)}
+                  className="w-full py-2 px-4 bg-neutral-200 text-neutral-800 font-semibold rounded-xl hover:bg-neutral-300 transition-colors flex items-center justify-center"
+                >
+                  <Edit2 className="h-5 w-5 mr-2" />
+                  {t('editRide')}
+                </button>
+                <button
+                  onClick={() => setShowConfirmationModal(true)}
+                  className="w-full py-2 px-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center"
+                >
+                  <Navigation className="h-5 w-5 mr-2" />
+                  {t('letsGo')}
+                </button>
+              </>
+            )}
           </div>
-        </div>;
+        </>
+      );
+    }
+
+    return (
+      <div className="p-8 text-center">
+        <p className="text-neutral-600">{t('noActiveRide')}</p>
+      </div>
+    );
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return (
+          <div className="flex flex-col h-full">
+            <div className="grid grid-cols-3 gap-4 p-4">
+              <div
+                onClick={handleNewRideClick}
+                className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105"
+              >
+                <div className="w-12 h-12 bg-neutral-100/50 rounded-full flex items-center justify-center border-2 border-neutral-200/50 shadow-md">
+                  <Plus className="h-6 w-6 text-gray-800" />
+                </div>
+                <span className="text-xs text-neutral-600 mt-2">{t('newRide')}</span>
+              </div>
+
+              <div
+                onClick={() => setShowCarTypeModal(true)}
+                className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 text-center flex flex-col items-center justify-center cursor-pointer"
+              >
+                <Car className="h-6 w-6 text-gray-800" />
+                <h2 className="text-sm text-neutral-600 mt-2">{t('carType')}</h2>
+                <p className="text-xs font-semibold text-gray-800 truncate">{selectedCar}</p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="flex items-center text-sm font-semibold mb-2 text-black drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]">
+                <Calendar className="h-4 w-4 mr-2" />
+                {t('yourActivity')}
+              </h3>
+              <div className={`w-full bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg text-left overflow-hidden`}>
+                {renderActiveRideContent()}
+              </div>
+            </div>
+          </div>
+        );
+
       case "history":
-        return <div className="flex flex-col h-full">
+        return (
+          <div className="flex flex-col h-full">
             <div className="p-4 pb-0">
               <div className="bg-muted/50 p-1 rounded-xl flex">
-                <button onClick={() => setHistoryView('history')} className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${historyView === 'history' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+                <button
+                  onClick={() => setHistoryView('history')}
+                  className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${historyView === 'history' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                >
                   {t('history')}
                 </button>
-                <button onClick={() => setHistoryView('archive')} className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${historyView === 'archive' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+                <button
+                  onClick={() => setHistoryView('archive')}
+                  className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${historyView === 'archive' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                >
                   {t('archive')}
                 </button>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              {historyView === 'history' ? <div className="p-4 space-y-4 pb-20">
-                  {completedRides.length > 0 ? completedRides.map(ride => <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
-                              <div className="flex justify-between items-center">
-                                  <div>
-                                      <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
-                                      <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
-                                  </div>
-                                  <div className="text-right">
-                                      <p className="font-bold text-lg text-green-600">+${ride.price}</p>
-                                      <p className="text-xs text-neutral-500">Completed</p>
-                                  </div>
-                              </div>
-                          </button>) : <div className="p-4 text-center">
-                          <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
-                              <History className="h-12 w-12 mx-auto text-neutral-400" />
-                              <p className="text-gray-600 mt-4 mb-2">{t('noCompletedRides')}</p>
+              {historyView === 'history' ? (
+                <div className="p-4 space-y-4 pb-20">
+                  {myRides.filter(r => r.status === 'completed').length > 0 ? (
+                    myRides.filter(r => r.status === 'completed').map(ride => (
+                      <button
+                        key={ride.id}
+                        onClick={() => handleHistoryRideClick(ride)}
+                        className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200"
+                      >
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                            <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
                           </div>
-                      </div>}
-                </div> : <div className="p-4 space-y-4 pb-20">
-                  {archivedRides.length > 0 ? archivedRides.map(ride => <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
-                              <div className="flex justify-between items-center">
-                                  <div>
-                                      <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
-                                      <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
-                                  </div>
-                                  <div className="text-right">
-                                      <p className="font-bold text-lg text-red-600">Archived</p>
-                                      <p className="text-xs text-neutral-500">
-                                          {ride.status === 'cancelled' ? 'Cancelled' : 'Archived'}
-                                      </p>
-                                  </div>
-                              </div>
-                          </button>) : <div className="p-4 text-center">
-                          <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
-                              <ArchiveIcon className="h-12 w-12 mx-auto text-neutral-400" />
-                              <p className="text-gray-600 mt-4 mb-2">No archived rides.</p>
+                          <div className="text-right">
+                            <p className="font-bold text-lg text-green-600">+${ride.price}</p>
+                            <p className="text-xs text-neutral-500">Completed</p>
                           </div>
-                      </div>}
-                </div>}
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center">
+                      <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
+                        <History className="h-12 w-12 mx-auto text-neutral-400" />
+                        <p className="text-gray-600 mt-4 mb-2">{t('noCompletedRides')}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4 space-y-4 pb-20">
+                  {archivedRides.length > 0 ? (
+                    archivedRides.map(ride => (
+                      <button
+                        key={ride.id}
+                        onClick={() => handleHistoryRideClick(ride)}
+                        className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200"
+                      >
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                            <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-lg text-red-600">Archived</p>
+                            <p className="text-xs text-neutral-500">
+                              {ride.status === 'cancelled' ? 'Cancelled' : 'Archived'}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center">
+                      <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
+                        <ArchiveIcon className="h-12 w-12 mx-auto text-neutral-400" />
+                        <p className="text-gray-600 mt-4 mb-2">No archived rides.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          </div>;
+          </div>
+        );
+
       case "profile":
-        return <ProfilePage user={{
-          ...userData,
-          language
-        }} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} myRides={myRides} openOnMount={openProfileEdit} onMountHandled={() => setOpenProfileEdit(false)} />;
+        return (
+          <ProfilePage
+            user={{
+              ...userData,
+              language,
+            }}
+            onUpdateUser={handleUpdateUser}
+            onUpdateCar={handleUpdateCar}
+            myRides={myRides}
+            openOnMount={openProfileEdit}
+            onMountHandled={() => setOpenProfileEdit(false)}
+          />
+        );
+
       default:
         return null;
     }
