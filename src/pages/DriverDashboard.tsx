@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from "react";
+import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Plus, User, MapPin, Calendar, Clock, Shield, Navigation, MessageCircle, Users, Hash, Store, Search, X, CheckCircle, ArrowLeft, Send, Loader2, XCircle, Fuel, Radar, LocateFixed, Car, Sparkles, Newspaper, TrendingUp, Mail, Phone, Settings, LogOut, Edit2, ChevronLeft, ChevronRight, Star, ShieldCheck, CreditCard, Bell, Languages, Lock, Trash2, History, FileText, MinusCircle, PlusCircle, UserPlus, UserRound, LifeBuoy, Archive as ArchiveIcon } from "lucide-react";
 const supabase = {
@@ -1351,6 +1352,7 @@ const ProfilePage = ({
   openOnMount,
   onMountHandled
 }) => {
+  const navigate = useNavigate();
   const {
     t,
     language,
@@ -1475,7 +1477,7 @@ const ProfilePage = ({
             <div className="bg-white/80 backdrop-blur-sm p-2 rounded-2xl shadow-lg border border-white/20">
                 <h3 className="text-sm font-semibold mb-1 text-neutral-800 px-2 pt-2">{t('settings')}</h3>
                 <SettingsItem icon={Languages} label={t('language')} value={t(language === 'en' ? 'english' : language === 'uz' ? 'uzbek' : 'russian')} action={() => handleOpenSettings(t('language'), <LanguageSelectionContent currentLanguage={language} onSelectLanguage={setLanguage} />)} />
-                <SettingsItem icon={UserPlus} label={t('switchAccount')} value="" action={() => console.log("Switching to rider account...")} />
+                <SettingsItem icon={UserPlus} label={t('switchAccount')} value="" action={() => navigate('/rider-dashboard')} />
             </div>
         </div>;
 };
@@ -1588,6 +1590,7 @@ const NewRideOptionsModal = ({ isOpen, onClose, onStartNewRide, onChooseFromArch
 };
 
 const AppContent = () => {
+  const navigate = useNavigate();
   const {
     t,
     language

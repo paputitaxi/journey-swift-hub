@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info, Car, MessageCircle, Send, Plus, Minus, Globe } from 'lucide-react';
 
 const translations = {
@@ -527,6 +528,7 @@ const LanguageSelectModal = ({ isOpen, onClose, onSelect, currentLanguage, t }) 
 
 // Main App component
 const App = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('search');
   const [pickupLocation, setPickupLocation] = useState('');
   const [destinationLocation, setDestinationLocation] = useState('');
@@ -867,7 +869,7 @@ const App = () => {
             </div>
 
             <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-                <button className="w-full text-left p-4 flex items-center hover:bg-gray-50 transition-colors">
+                <button onClick={() => navigate('/driver-dashboard')} className="w-full text-left p-4 flex items-center hover:bg-gray-50 transition-colors">
                     <Car size={22} className="text-gray-600 mr-4"/>
                     <span className="flex-grow font-semibold text-gray-700">{t.goToDriverAccount}</span>
                     <ChevronRight size={20} className="text-gray-400"/>
