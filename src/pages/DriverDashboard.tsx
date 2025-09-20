@@ -1,7 +1,29 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Plus, User, MapPin, Calendar, Clock, Shield, Navigation, MessageCircle, Users, Hash, Store, Search, X, CheckCircle, ArrowLeft, Send, Loader2, XCircle, Fuel, Radar, LocateFixed, Car, Sparkles, Newspaper, TrendingUp, Mail, Phone, Settings, LogOut, Edit2, ChevronLeft, ChevronRight, Star, ShieldCheck, CreditCard, Bell, Languages, Lock, Trash2, History, FileText, MinusCircle, PlusCircle, UserPlus, UserRound, LifeBuoy, Archive as ArchiveIcon } from "lucide-react";
-import supabase from '../lib/supabaseClient';
+const supabase = {
+  from: table => ({
+    select: (columns = '*') => ({
+      eq: (column, value) => ({
+        order: (column, options) => Promise.resolve({
+          data: [],
+          error: null
+        })
+      })
+    }),
+    insert: data => ({
+      select: () => ({
+        single: () => Promise.resolve({
+          data: {
+            id: Date.now(),
+            ...data
+          },
+          error: null
+        })
+      })
+    })
+  })
+};
 const useToast = () => {
   return {
     toast: ({
@@ -1693,16 +1715,14 @@ const AppContent = () => {
         from_location: rideDataToPost.fromLocation,
         to_location: rideDataToPost.toLocation,
         departure_date: rideDataToPost.departureDate,
-        departure_time: rideDataToPost.departureType === 'fixed' && rideDataToPost.departureStartTime
-          ? `${rideDataToPost.departureStartTime}${rideDataToPost.departureStartTime.length === 5 ? ':00' : ''}`
-          : null,
+        departure_time: rideDataToPost.departureStartTime,
         departure_type: rideDataToPost.departureType === 'fixed' ? 'fixed' : rideDataToPost.departureType === 'when_fills' ? 'seat_fill' : rideDataToPost.departureType,
         has_mail_service: rideDataToPost.mailService === 'yes' || rideDataToPost.mailService === 'mailOnly',
         ride_price: parseFloat(rideDataToPost.price) || 0,
         mail_price: (rideDataToPost.mailService === 'yes' || rideDataToPost.mailService === 'mailOnly') && rideDataToPost.mailPrice ? parseFloat(rideDataToPost.mailPrice) : null,
         total_seats: parseInt(rideDataToPost.freeSeats) || 4,
         available_seats: parseInt(rideDataToPost.freeSeats) || 4,
-        phone_number: rideDataToPost.contactNumber || localStorage.getItem('userPhone') || '998901234567',
+        phone_number: localStorage.getItem('userPhone') || '998901234567',
         status: 'active'
       };
       console.log('[DriverDashboard] Insert payload', payload);
@@ -1972,29 +1992,15 @@ const AppContent = () => {
                           <button onClick={() => setShowConfirmationModal(true)} className="w-full py-2 px-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center"><Navigation className="h-5 w-5 mr-2" />{t('letsGo')}</button>
                         </>}
                   </div>
-              </>;
-    }
-    return <div className="p-4 text-center">
-      <p className="text-neutral-500">{t('noActiveRide')}</p>
-    </div>;
-  };
-
-  const completedRides = myRides.filter(r => r.status === 'completed');
-  
-  const renderContent = () => {
-    switch (activeTab) {
-      case "dashboard":
-        return <div className="p-4 space-y-4">
-          <div className="flex gap-4">
-            <div onClick={handleNewRideClick} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105">
-              <div className="w-12 h-12 bg-neutral-100/50 rounded-full flex items-center justify-center border-2 border-neutral-200/50 shadow-md"><Plus className="h-6 w-6 text-gray-800" /></div>
-              <span className="text-xs text-neutral-600 mt-2">{t('newRide')}</span>
-            </div>
-            <div onClick={() => setShowCarTypeModal(true)} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 text-center flex flex-col items-center justify-center cursor-pointer">
-              <Car className="h-6 w-6 text-gray-800" />
-              <h2 className="text-sm text-neutral-600 mt-2">{t('carType')}</h2>
-              <p className="text-xs font-semibold text-gray-800 truncate">{selectedCar}</p>
-            </div>
+              <div onClick={handleNewRideClick} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105">
+                  <div className="w-12 h-12 bg-neutral-100/50 rounded-full flex items-center justify-center border-2 border-neutral-200/50 shadow-md"><Plus className="h-6 w-6 text-gray-800" /></div>
+                  <span className="text-xs text-neutral-600 mt-2">{t('newRide')}</span>
+              </div>
+              <div onClick={() => setShowCarTypeModal(true)} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 text-center flex flex-col items-center justify-center cursor-pointer">
+                  <Car className="h-6 w-6 text-gray-800" />
+                  <h2 className="text-sm text-neutral-600 mt-2">{t('carType')}</h2>
+                  <p className="text-xs font-semibold text-gray-800 truncate">{selectedCar}</p>
+              </div>
           </div>
           <div>
             <h3 className="flex items-center text-sm font-semibold mb-2 text-black drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]"><Calendar className="h-4 w-4 mr-2" />{t('yourActivity')}</h3>
