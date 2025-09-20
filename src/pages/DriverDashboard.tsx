@@ -1972,19 +1972,33 @@ const AppContent = () => {
                           <button onClick={() => setShowConfirmationModal(true)} className="w-full py-2 px-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center"><Navigation className="h-5 w-5 mr-2" />{t('letsGo')}</button>
                         </>}
                   </div>
-              <div onClick={handleNewRideClick} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105">
-                  <div className="w-12 h-12 bg-neutral-100/50 rounded-full flex items-center justify-center border-2 border-neutral-200/50 shadow-md"><Plus className="h-6 w-6 text-gray-800" /></div>
-                  <span className="text-xs text-neutral-600 mt-2">{t('newRide')}</span>
-              </div>
-              <div onClick={() => setShowCarTypeModal(true)} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 text-center flex flex-col items-center justify-center cursor-pointer">
-                  <Car className="h-6 w-6 text-gray-800" />
-                  <h2 className="text-sm text-neutral-600 mt-2">{t('carType')}</h2>
-                  <p className="text-xs font-semibold text-gray-800 truncate">{selectedCar}</p>
-              </div>
+              </>;
+    }
+    return <div className="p-4 text-center">
+      <p className="text-neutral-500">{t('noActiveRide')}</p>
+    </div>;
+  };
+
+  const completedRides = myRides.filter(r => r.status === 'completed');
+  
+  const renderContent = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return <div className="p-4 space-y-4">
+          <div className="flex gap-4">
+            <div onClick={handleNewRideClick} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-105">
+              <div className="w-12 h-12 bg-neutral-100/50 rounded-full flex items-center justify-center border-2 border-neutral-200/50 shadow-md"><Plus className="h-6 w-6 text-gray-800" /></div>
+              <span className="text-xs text-neutral-600 mt-2">{t('newRide')}</span>
+            </div>
+            <div onClick={() => setShowCarTypeModal(true)} className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-white/20 text-center flex flex-col items-center justify-center cursor-pointer">
+              <Car className="h-6 w-6 text-gray-800" />
+              <h2 className="text-sm text-neutral-600 mt-2">{t('carType')}</h2>
+              <p className="text-xs font-semibold text-gray-800 truncate">{selectedCar}</p>
+            </div>
           </div>
           <div>
-              <h3 className="flex items-center text-sm font-semibold mb-2 text-black drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]"><Calendar className="h-4 w-4 mr-2" />{t('yourActivity')}</h3>
-              <div className={`w-full bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg text-left overflow-hidden`}>{renderActiveRideContent()}</div>
+            <h3 className="flex items-center text-sm font-semibold mb-2 text-black drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]"><Calendar className="h-4 w-4 mr-2" />{t('yourActivity')}</h3>
+            <div className={`w-full bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg text-left overflow-hidden`}>{renderActiveRideContent()}</div>
           </div>
         </div>;
       case "history":
@@ -2041,28 +2055,6 @@ const AppContent = () => {
                       </div>}
                 </div>}
             </div>
-          </div>;
-      case "archive":
-        return <div className="p-4 space-y-4 pb-20">
-            {archivedRides.length > 0 ? archivedRides.map(ride => <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
-                                <p className="text-sm text-neutral-500 mt-1">{ride.departureDate}</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="font-bold text-lg text-red-600">Archived</p>
-                                <p className="text-xs text-neutral-500">
-                                    {ride.status === 'cancelled' ? 'Cancelled' : 'Archived'}
-                                </p>
-                            </div>
-                        </div>
-                    </button>) : <div className="p-4 text-center">
-                    <div className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow">
-                        <ArchiveIcon className="h-12 w-12 mx-auto text-neutral-400" />
-                        <p className="text-gray-600 mt-4 mb-2">No archived rides.</p>
-                    </div>
-                </div>}
           </div>;
       case "profile":
         return <ProfilePage user={{
