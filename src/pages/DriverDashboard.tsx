@@ -1613,6 +1613,44 @@ const NewRideOptionsModal = ({ isOpen, onClose, onStartNewRide, onChooseFromArch
   );
 };
 
+const ArchivePage = ({ archivedRides, onRideClick }) => {
+  const { t } = useLanguage();
+  return (
+    <div className="p-4 space-y-4 pb-20">
+      {archivedRides.length > 0 ? (
+        archivedRides.map(ride => (
+          <button
+            key={ride.id}
+            onClick={() => onRideClick(ride)}
+            className="w-full text-left p-4 bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-lg hover:border-gray-300 transition-all duration-200"
+          >
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                <p className="text-sm text-gray-500 mt-1">{ride.departureDate}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-bold text-lg text-red-500">Archived</p>
+                <p className="text-xs text-gray-400">
+                  {ride.status === 'cancelled' ? 'Cancelled' : 'Archived'}
+                </p>
+              </div>
+            </div>
+          </button>
+        ))
+      ) : (
+        <div className="p-4 text-center">
+          <div className="mt-8 bg-white/60 backdrop-blur-xl p-8 rounded-2xl shadow border border-gray-200/50">
+            <ArchiveIcon className="h-12 w-12 mx-auto text-gray-400" />
+            <p className="text-gray-500 mt-4 mb-2">No archived rides.</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 // Main AppContent component that manages the state of the application
 const AppContent = () => {
   const {
@@ -1621,7 +1659,6 @@ const AppContent = () => {
   } = useLanguage();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [headerTitle, setHeaderTitle] = useState('');
-  const [historyView, setHistoryView] = useState('history');
   const [showPostRide, setShowPostRide] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -1647,6 +1684,7 @@ const AppContent = () => {
   const [showNewRideOptionsModal, setShowNewRideOptionsModal] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingRide, setEditingRide] = useState(null);
+  const [showArchive, setShowArchive] = useState(false);
 
   useEffect(() => {
     // Mock data fetch
@@ -1702,8 +1740,7 @@ const AppContent = () => {
 
   const handleChooseFromArchive = () => {
     setShowNewRideOptionsModal(false);
-    setActiveTab('history');
-    setHistoryView('archive');
+    setShowArchive(true);
   };
 
   const handleConfirmPost = newRideData => {
@@ -1777,28 +1814,29 @@ const AppContent = () => {
   };
 
   const handleBack = () => {
-    const modalSetters = [setShowNewRideOptionsModal, setShowPostRide, setShowMessages, setShowStatsModal, setIsEditModalOpen, setShowHistoryDetailModal, setShowCarTypeModal, setShowFinishRideModal, setShowActiveRideErrorModal, setShowPostConfirmationModal, setShowArchiveConfirmModal];
-    let isModalOpen = false;
-    modalSetters.forEach(setter => {
-      setter(prev => {
-        if(prev) isModalOpen = true;
-        return false;
-      });
-    });
-
-    if (!isModalOpen) {
-      setActiveTab("dashboard");
-    }
-    setHeaderTitle('');
+    if(showPostRide) { setShowPostRide(false); setRepostRideData(null); }
+    else if(showMessages) { setShowMessages(false); }
+    else if(showStatsModal) { setShowStatsModal(false); }
+    else if(isEditModalOpen) { setIsEditModalOpen(false); setEditingRide(null); }
+    else if(showHistoryDetailModal) { setShowHistoryDetailModal(false); }
+    else if(showCarTypeModal) { setShowCarTypeModal(false); }
+    else if(showFinishRideModal) { setShowFinishRideModal(false); }
+    else if(showActiveRideErrorModal) { setShowActiveRideErrorModal(false); }
+    else if(showPostConfirmationModal) { setShowPostConfirmationModal(false); }
+    else if(showArchiveConfirmModal) { setShowArchiveConfirmModal(false); }
+    else if(showNewRideOptionsModal) { setShowNewRideOptionsModal(false); }
+    else if (showArchive) { setShowArchive(false); }
+    else { setActiveTab("dashboard"); }
   };
 
   useEffect(() => {
     let title = ''; // Default for dashboard
     if (showStatsModal) title = t('stats');
-    else if (activeTab === 'history') title = historyView === 'history' ? t('history') : t('archive');
+    else if (showArchive) title = t('archive');
+    else if (activeTab === 'history') title = t('history');
     else if (activeTab === 'profile') title = t('profile');
     setHeaderTitle(title);
-  }, [activeTab, historyView, language, t, showStatsModal]);
+  }, [activeTab, language, t, showStatsModal, showArchive]);
 
   const bottomNavItems = [{ id: "dashboard", label: t('ride'), icon: MapPin }, { id: "history", label: t('history'), icon: History }];
 
@@ -1891,21 +1929,32 @@ const AppContent = () => {
   const renderContent = () => {
     if (showMessages) return <MessageDashboard onClose={() => setShowMessages(false)} />;
     if (showStatsModal) return <StatsModal onClose={() => setShowStatsModal(false)} />;
+    if (showArchive) return <ArchivePage archivedRides={archivedRides} onRideClick={handleHistoryRideClick} />;
     
     const completedRides = myRides.filter(r => r.status === 'completed');
     switch (activeTab) {
       case "dashboard":
         return <div className="p-4 space-y-4 font-sans">
            <div className="space-y-4">
-                <button onClick={handleNewRideClick} className="w-full text-left p-4 bg-lime-500 text-slate-900 rounded-2xl shadow-lg hover:bg-lime-600 transition-all duration-200 flex items-center">
-                    <div className="p-3 bg-white/30 rounded-full mr-4">
-                        <Plus className="h-6 w-6" />
-                    </div>
-                    <div>
-                        <p className="font-bold text-lg">{t('postNewRide')}</p>
-                        <p className="text-sm opacity-80">{t('postRidePrompt')}</p>
-                    </div>
-                </button>
+                <div className="flex items-stretch gap-2">
+                    <button onClick={handleNewRideClick} className="flex-1 text-left p-4 bg-lime-500 text-slate-900 rounded-2xl shadow-lg hover:bg-lime-600 transition-all duration-200 flex items-center">
+                        <div className="p-3 bg-white/30 rounded-full mr-4">
+                            <Plus className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <p className="font-bold text-lg">{t('postNewRide')}</p>
+                            <p className="text-sm opacity-80">{t('postRidePrompt')}</p>
+                        </div>
+                    </button>
+                    <button 
+                        onClick={() => {
+                            setShowArchive(true);
+                        }} 
+                        className="px-4 bg-white/60 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 flex flex-col items-center justify-center cursor-pointer hover:border-gray-300 transition-all"
+                    >
+                        <ArchiveIcon className="h-8 w-8 text-gray-600" />
+                    </button>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div onClick={() => setShowStatsModal(true)} className="bg-white/60 backdrop-blur-xl p-4 rounded-2xl shadow-lg border border-gray-200/50 text-center flex flex-col justify-center cursor-pointer">
                         <h2 className="text-xs text-gray-500">{t('totalEarnings')}</h2>
@@ -1924,59 +1973,33 @@ const AppContent = () => {
           </div>
         </div>;
       case "history":
-        return <div className="flex flex-col h-full">
-            <div className="p-4 pb-0">
-              <div className="bg-gray-100/80 p-1 rounded-xl flex border border-gray-200/50">
-                <button onClick={() => setHistoryView('history')} className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${historyView === 'history' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>
-                  {t('history')}
-                </button>
-                <button onClick={() => setHistoryView('archive')} className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${historyView === 'archive' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>
-                  {t('archive')}
-                </button>
-              </div>
+        return (
+            <div className="p-4 space-y-4 pb-20">
+                {completedRides.length > 0 ? (
+                completedRides.map(ride => (
+                    <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-lg hover:border-gray-300 transition-all duration-200">
+                    <div className="flex justify-between items-center">
+                        <div>
+                        <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
+                        <p className="text-sm text-gray-500 mt-1">{ride.departureDate}</p>
+                        </div>
+                        <div className="text-right">
+                        <p className="font-bold text-lg text-lime-600">+{ride.price}$</p>
+                        <p className="text-xs text-gray-400">Completed</p>
+                        </div>
+                    </div>
+                    </button>
+                ))
+                ) : (
+                <div className="p-4 text-center">
+                    <div className="mt-8 bg-white/60 backdrop-blur-xl p-8 rounded-2xl shadow border border-gray-200/50">
+                    <History className="h-12 w-12 mx-auto text-gray-400" />
+                    <p className="text-gray-500 mt-4 mb-2">{t('noCompletedRides')}</p>
+                    </div>
+                </div>
+                )}
             </div>
-            <div className="flex-1 overflow-y-auto">
-              {historyView === 'history' ? <div className="p-4 space-y-4 pb-20">
-                  {completedRides.length > 0 ? completedRides.map(ride => <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-lg hover:border-gray-300 transition-all duration-200">
-                              <div className="flex justify-between items-center">
-                                  <div>
-                                      <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
-                                      <p className="text-sm text-gray-500 mt-1">{ride.departureDate}</p>
-                                  </div>
-                                  <div className="text-right">
-                                      <p className="font-bold text-lg text-lime-600">+{ride.price}$</p>
-                                      <p className="text-xs text-gray-400">Completed</p>
-                                  </div>
-                              </div>
-                          </button>) : <div className="p-4 text-center">
-                          <div className="mt-8 bg-white/60 backdrop-blur-xl p-8 rounded-2xl shadow border border-gray-200/50">
-                              <History className="h-12 w-12 mx-auto text-gray-400" />
-                              <p className="text-gray-500 mt-4 mb-2">{t('noCompletedRides')}</p>
-                          </div>
-                      </div>}
-                </div> : <div className="p-4 space-y-4 pb-20">
-                  {archivedRides.length > 0 ? archivedRides.map(ride => <button key={ride.id} onClick={() => handleHistoryRideClick(ride)} className="w-full text-left p-4 bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-lg hover:border-gray-300 transition-all duration-200">
-                              <div className="flex justify-between items-center">
-                                  <div>
-                                      <p className="font-semibold text-gray-800">{ride.fromLocation} → {ride.toLocation}</p>
-                                      <p className="text-sm text-gray-500 mt-1">{ride.departureDate}</p>
-                                  </div>
-                                  <div className="text-right">
-                                      <p className="font-bold text-lg text-red-500">Archived</p>
-                                      <p className="text-xs text-gray-400">
-                                          {ride.status === 'cancelled' ? 'Cancelled' : 'Archived'}
-                                      </p>
-                                  </div>
-                              </div>
-                          </button>) : <div className="p-4 text-center">
-                          <div className="mt-8 bg-white/60 backdrop-blur-xl p-8 rounded-2xl shadow border border-gray-200/50">
-                              <ArchiveIcon className="h-12 w-12 mx-auto text-gray-400" />
-                              <p className="text-gray-500 mt-4 mb-2">No archived rides.</p>
-                          </div>
-                      </div>}
-                </div>}
-            </div>
-          </div>;
+        );
       case "profile":
         return <ProfilePage user={{ ...userData, language }} onUpdateUser={handleUpdateUser} onUpdateCar={handleUpdateCar} myRides={myRides} openOnMount={openProfileEdit} onMountHandled={() => setOpenProfileEdit(false)} />;
       default:
@@ -1994,7 +2017,7 @@ const AppContent = () => {
           </div>}
       <header className="bg-white/70 backdrop-blur-lg p-3 border-b border-gray-200 flex items-center justify-between z-20 shadow-lg relative rounded-b-2xl">
           <div className="flex-1 flex justify-start">
-            {activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal || showCarTypeModal || isEditModalOpen || showHistoryDetailModal || showPostConfirmationModal || showArchiveConfirmModal || showFinishRideModal || showActiveRideErrorModal || showNewRideOptionsModal ? <button onClick={handleBack} className="p-2 rounded-full text-gray-600 hover:bg-gray-100/50 transition-colors">
+            {activeTab !== "dashboard" || showPostRide || showMessages || showStatsModal || showCarTypeModal || isEditModalOpen || showHistoryDetailModal || showPostConfirmationModal || showArchiveConfirmModal || showFinishRideModal || showActiveRideErrorModal || showNewRideOptionsModal || showArchive ? <button onClick={handleBack} className="p-2 rounded-full text-gray-600 hover:bg-gray-100/50 transition-colors">
                 <ChevronLeft className="h-6 w-6" />
               </button> : <button onClick={()=>setActiveTab("profile")} className="text-sm font-semibold text-gray-600 ml-2 hover:text-gray-900 transition-colors">{userData.phone}</button>}
           </div>
@@ -2002,7 +2025,7 @@ const AppContent = () => {
             <h1 className="text-xl font-bold text-gray-800 whitespace-nowrap">{headerTitle}</h1>
           </div>
           <div className="flex-1 flex justify-end">
-             {activeTab === "dashboard" && !showPostRide && !showMessages && !showStatsModal && !showNewRideOptionsModal && <button onClick={() => setActiveTab('profile')} className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100/50 transition-colors">
+             {activeTab === "dashboard" && !showPostRide && !showMessages && !showStatsModal && !showNewRideOptionsModal && !showArchive && <button onClick={() => setActiveTab('profile')} className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100/50 transition-colors">
                     <span className="text-sm font-semibold text-gray-600 mr-2">{userData.fullName}</span>
                     <User className="h-5 w-5 text-gray-600" />
                 </button>}
@@ -2011,7 +2034,7 @@ const AppContent = () => {
       <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative" onClick={() => selectedPassenger && setSelectedPassenger(null)}>
         {renderContent()}
       </main>
-      {!(showMessages || showPostRide || isEditModalOpen || showStatsModal || showHistoryDetailModal) && <footer className="fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-lg border-t border-gray-200 shadow-lg z-10">
+      {!(showMessages || showPostRide || isEditModalOpen || showStatsModal || showHistoryDetailModal || showArchive) && <footer className="fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-lg border-t border-gray-200 shadow-lg z-10">
           <div className="flex justify-around py-2">
             {bottomNavItems.map(item => {
           const Icon = item.icon;
