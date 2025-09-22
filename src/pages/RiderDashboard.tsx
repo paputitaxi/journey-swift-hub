@@ -1,5 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect, createContext, useContext } from 'react';
 import { History, Search, User, MapPin, Target, ChevronRight, Calendar, Users, Star, ChevronLeft, DollarSign, Wind, Bookmark, Lightbulb, X, Mail, Wifi, Snowflake, Briefcase, ChevronDown, Info, Car, MessageCircle, Send, Plus, Minus, Globe } from 'lucide-react';
 
 const translations = {
@@ -120,7 +119,7 @@ const uzbekistanLocationsData = [
   { region: "Fergana Region", cities: ["Fergana", "Margilan", "Kokand", "Quvasoy", "Quva", "Rishton", "Oltiariq", "Bag'dod", "Beshariq", "Buvayda", "Dang'ara", "Furqat", "Qo'shtepa", "Toshloq", "Uchko'prik", "Yozyovon", "So'x"] },
   { region: "Jizzakh Region", cities: ["Jizzakh", "G'allaorol", "Sharof Rashidov", "Zomin", "Paxtakor", "Do'stlik", "Forish", "Mirzacho'l", "Yangiobod", "Arnasoy", "Baxmal", "Zarbdor"] },
   { region: "Kashkadarya Region", cities: ["Karshi", "Shahrisabz", "Kitob", "G'uzor", "Nishon", "Kasbi", "Chiroqchi", "Dehqonobod", "Mirishkor", "Muborak", "Qarshi", "Yakkabog'", "Koson", "Qamashi"] },
-  { region: "Khorezm Region", cities: ["Urgench", "Khiva", "Shovot", "Hazorasp", "Bog'ot", "Yangiariq", "Yangibozor", "Urganch", "Tuproqqal'a", "Xonqa", "Qo'shko'pir"] },
+  { region: "Khorezm Region", cities: ["Urgench", "Khiva", "Shovot", "Hazorasp", "Bog'ot", "Yangiariq", "Yangibozar", "Urganch", "Tuproqqal'a", "Xonqa", "Qo'shko'pir"] },
   { region: "Namangan Region", cities: ["Namangan", "Chust", "Pop", "Kosonsoy", "Mingbuloq", "Norin", "To'raqo'rg'on", "Uchqo'rg'on", "Yangiqo'rg'on", "Chortoq"] },
   { region: "Navoiy Region", cities: ["Navoiy", "Zarafshan", "Uchquduq", "Konimex", "Nurota", "Tomdi", "Xatirchi", "Qiziltepa", "Karmana"] },
   { region: "Samarkand Region", cities: ["Samarkand", "Urgut", "Jomboy", "Ishtixon", "Kattaqo'rg'on", "Nurobod", "Oqdaryo", "Paxtachi", "Pastdarg'om", "Tayloq", "Toyloq", "Bulung'ur", "Qo'shrabot"] },
@@ -135,7 +134,7 @@ const uzbekistanLocationsData = [
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+  const options = { weekday: 'short', month: 'short', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
 };
 
@@ -143,7 +142,7 @@ const formatDate = (dateString) => {
 const formatTime = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
+  const options = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
   return date.toLocaleTimeString('en-US', options);
 };
 
@@ -528,7 +527,6 @@ const LanguageSelectModal = ({ isOpen, onClose, onSelect, currentLanguage, t }) 
 
 // Main App component
 const App = () => {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('search');
   const [pickupLocation, setPickupLocation] = useState('');
   const [destinationLocation, setDestinationLocation] = useState('');
@@ -671,10 +669,14 @@ const App = () => {
           }
           
           if (seatsNeeded) {
-            results = results.filter(ride => {
-                const availableSeats = parseInt(ride.sitsAvailable) || 0;
-                return availableSeats >= seatsNeeded;
-            });
+            if (seatsNeeded === 'mail') {
+                results = results.filter(ride => ride.serviceType === 'mail' || ride.serviceType === 'both');
+            } else {
+                results = results.filter(ride => {
+                    const availableSeats = parseInt(ride.sitsAvailable) || 0;
+                    return availableSeats >= seatsNeeded;
+                });
+            }
           }
 
           // Sorting logic
@@ -853,6 +855,12 @@ const App = () => {
                             </button>
                         ))}
                     </div>
+                    <div className="mt-4">
+                        <button onClick={() => handleSeatsNeededClick('mail')} className={`w-full p-3 rounded-xl text-md font-semibold transition-colors flex items-center justify-center space-x-2 ${seatsNeeded === 'mail' ? 'bg-green-500 text-white' : 'bg-neutral-100 text-gray-700 hover:bg-neutral-200'}`}>
+                            <Mail size={20} />
+                            <span>{t.mailDelivery}</span>
+                        </button>
+                    </div>
                 </div>
 
               </div>
@@ -869,7 +877,7 @@ const App = () => {
             </div>
 
             <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-                <button onClick={() => navigate('/driver-dashboard')} className="w-full text-left p-4 flex items-center hover:bg-gray-50 transition-colors">
+                <button onClick={() => alert("This would navigate to the driver dashboard.")} className="w-full text-left p-4 flex items-center hover:bg-gray-50 transition-colors">
                     <Car size={22} className="text-gray-600 mr-4"/>
                     <span className="flex-grow font-semibold text-gray-700">{t.goToDriverAccount}</span>
                     <ChevronRight size={20} className="text-gray-400"/>
@@ -1015,7 +1023,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
             <div className="bg-white text-gray-800 p-4 flex-shrink-0 border-b border-neutral-200">
                  <div className="flex items-center">
                     <button onClick={onBack} className="mr-3 text-gray-600 hover:text-gray-800"><ChevronLeft size={24} /></button>
-                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4" onError={(e) => ((e.target as HTMLImageElement).src = 'https://placehold.co/200x150/E2E8F0/4A5568?text=Image+Error')}/>
+                    <img src={ride.imageUrl} alt={ride.carModel} className="w-24 h-16 object-cover rounded-md mr-4" onError={(e) => (e.currentTarget.src = 'https://placehold.co/200x150/E2E8F0/4A5568?text=Image+Error')}/>
                     <div className="flex items-stretch w-full">
                         <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
                             <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-neutral-300 rounded-full"></div>
@@ -1070,7 +1078,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
                         </AccordionItem>
                          <AccordionItem icon={<User className="text-gray-600" />} title="Driver & Car" value="">
                             <div className="flex space-x-4">
-                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full" onError={(e) => ((e.target as HTMLImageElement).src = 'https://placehold.co/100x100/E2E8F0/4A5568?text=N/A')}/>
+                                <img src={ride.driverImageUrl} alt={ride.driverName} className="w-20 h-20 object-cover rounded-full" onError={(e) => (e.currentTarget.src = 'https://placehold.co/100x100/E2E8F0/4A5568?text=N/A')}/>
                                 <div>
                                     <p className="font-semibold">{ride.driverName}</p>
                                     <div className="flex items-center text-sm text-gray-600">
@@ -1100,6 +1108,5 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
 };
 
 export default App;
-
 
 
