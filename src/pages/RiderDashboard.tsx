@@ -134,16 +134,14 @@ const uzbekistanLocationsData = [
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { weekday: 'short', month: 'short', day: 'numeric' };
-  return date.toLocaleDateString('en-US', options);
+  return date.toLocaleDateString('en-US', { weekday: 'short' as const, month: 'short' as const, day: 'numeric' as const });
 };
 
 // Helper to format time for display (e.g., "11:45")
 const formatTime = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const options = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; // 24-hour format
-  return date.toLocaleTimeString('en-US', options);
+  return date.toLocaleTimeString('en-US', { hour: '2-digit' as const, minute: '2-digit' as const, hourCycle: 'h23' as const });
 };
 
 // Initial dummy data for search results
