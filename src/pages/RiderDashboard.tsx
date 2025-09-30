@@ -4318,3 +4318,5 @@ const App = () => <LanguageProvider>
 
     </LanguageProvider>;
 
+export default App;
+
