@@ -10,6 +10,7 @@ import { MapPin, Calendar as CalendarIcon, Mail, Clock, Users, DollarSign, Car }
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import LocationSelector from "./LocationSelector";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUsername } from "@/hooks/useUsername";
 interface PostRideModalProps {
@@ -121,12 +122,31 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
         status: 'active',
       };
 
-      console.log('PostRideModal - Ride data prepared:', rideData);
-      
-      // Backend functionality disabled - no database
+      console.log('PostRideModal - About to insert ride data:', rideData);
+      console.log('Mail service logic:', {
+        mailOption,
+        hasMailService: mailOption === 'yes' || mailOption === 'mailOnly',
+        mailPrice: (mailOption === 'yes' || mailOption === 'mailOnly') && mailPrice ? parseFloat(mailPrice) : null
+      });
+
+      const { data, error } = await supabase.from('rides').insert([rideData]).select();
+
+      console.log('PostRideModal - Insert response:', { data, error });
+
+      if (error) {
+        console.error('PostRideModal - Error posting ride:', error);
+        toast({
+          title: "Error",
+          description: "Failed to post ride. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('PostRideModal - Ride posted successfully:', data);
       toast({
-        title: "Demo Mode",
-        description: "Backend is disabled. Ride data logged to console.",
+        title: "Ride Posted!",
+        description: "Your ride has been posted successfully.",
       });
 
       onOpenChange(false);
