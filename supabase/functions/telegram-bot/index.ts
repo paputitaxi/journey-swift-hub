@@ -16,15 +16,78 @@ bot.command("ping", (ctx) => ctx.reply(`Pong! ${new Date()} ${Date.now()}`));
 
 const handleUpdate = webhookCallback(bot, "std/http");
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 serve(async (req) => {
   try {
-    const url = new URL(req.url);
-    if (url.searchParams.get("secret") !== Deno.env.get("FUNCTION_SECRET")) {
-      return new Response("not allowed", { status: 405 });
+    // Handle CORS preflight
+    if (req.method === 'OPTIONS') {
+      return new Response(null, { headers: corsHeaders });
     }
 
-    return await handleUpdate(req);
+    const url = new URL(req.url);
+    const functionSecret = Deno.env.get('FUNCTION_SECRET');
+
+    // If called as a Telegram webhook, require secret check
+    if (url.searchParams.has('secret')) {
+      if (!functionSecret || url.searchParams.get('secret') !== functionSecret) {
+        return new Response('not allowed', { status: 405, headers: corsHeaders });
+      }
+      const res = await handleUpdate(req);
+      const headers = new Headers(res.headers);
+      Object.entries(corsHeaders).forEach(([k, v]) => headers.set(k, v as string));
+      return new Response(await res.text(), { status: res.status, headers });
+    }
+
+    // API mode for app requests
+    if (req.method !== 'POST') {
+      return new Response('Method not allowed', { status: 405, headers: corsHeaders });
+    }
+
+    const body = await req.json().catch(() => ({}));
+    const action = body?.action as string | undefined;
+
+    if (!action) {
+      return new Response(JSON.stringify({ ok: false, description: 'Missing action' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (action === 'getMe') {
+      const me = await bot.api.getMe();
+      return new Response(JSON.stringify({ ok: true, result: me }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (action === 'sendMessage') {
+      const chatId = body?.chatId;
+      const text = body?.text ?? body?.message;
+      if (!chatId || !text) {
+        return new Response(JSON.stringify({ ok: false, description: 'chatId and text are required' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const sent = await bot.api.sendMessage(chatId, text);
+      return new Response(JSON.stringify({ ok: true, result: sent }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify({ ok: false, description: 'Unknown action' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (err) {
-    console.error(err);
+    console.error('telegram-bot error', err);
+    return new Response(JSON.stringify({ ok: false, description: 'Internal error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
