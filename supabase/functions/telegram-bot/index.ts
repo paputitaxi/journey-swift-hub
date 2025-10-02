@@ -1,93 +1,60 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
-
-console.log(`Function "telegram-bot" up and running!`);
-
-import { Bot, webhookCallback } from "https://deno.land/x/grammy@v1.8.3/mod.ts";
-
-const bot = new Bot(Deno.env.get("TELEGRAM_BOT_TOKEN") || "");
-
-bot.command("start", (ctx) => ctx.reply("Welcome! Up and running."));
-
-bot.command("ping", (ctx) => ctx.reply(`Pong! ${new Date()} ${Date.now()}`));
-
-const handleUpdate = webhookCallback(bot, "std/http");
+const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
   try {
-    // Handle CORS preflight
-    if (req.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
+    const body = await req.json();
+    // Check if this is a webhook update from Telegram with /start command
+    if (body.message && body.message.text === "/start") {
+      const chatId = body.message.chat.id;
+      await fetch(`${TELEGRAM_API}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: "jeel who how lo lo"
+        })
+      });
+      return new Response("OK", { headers: corsHeaders });
     }
-
-    const url = new URL(req.url);
-    const functionSecret = Deno.env.get('FUNCTION_SECRET');
-
-    // If called as a Telegram webhook, require secret check
-    if (url.searchParams.has('secret')) {
-      if (!functionSecret || url.searchParams.get('secret') !== functionSecret) {
-        return new Response('not allowed', { status: 405, headers: corsHeaders });
-      }
-      const res = await handleUpdate(req);
-      const headers = new Headers(res.headers);
-      Object.entries(corsHeaders).forEach(([k, v]) => headers.set(k, v as string));
-      return new Response(await res.text(), { status: res.status, headers });
-    }
-
-    // API mode for app requests
-    if (req.method !== 'POST') {
-      return new Response('Method not allowed', { status: 405, headers: corsHeaders });
-    }
-
-    const body = await req.json().catch(() => ({}));
-    const action = body?.action as string | undefined;
-
-    if (!action) {
-      return new Response(JSON.stringify({ ok: false, description: 'Missing action' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Existing API-style logic (optional, for manual API calls)
+    const { action, chatId, text } = body;
+    if (action === "sendMessage") {
+      const response = await fetch(`${TELEGRAM_API}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId, text })
+      });
+      const data = await response.json();
+      return new Response(JSON.stringify(data), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    if (action === 'getMe') {
-      const me = await bot.api.getMe();
-      return new Response(JSON.stringify({ ok: true, result: me }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    if (action === "getMe") {
+      const response = await fetch(`${TELEGRAM_API}/getMe`);
+      const data = await response.json();
+      return new Response(JSON.stringify(data), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    if (action === 'sendMessage') {
-      const chatId = body?.chatId;
-      const text = body?.text ?? body?.message;
-      if (!chatId || !text) {
-        return new Response(JSON.stringify({ ok: false, description: 'chatId and text are required' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      const sent = await bot.api.sendMessage(chatId, text);
-      return new Response(JSON.stringify({ ok: true, result: sent }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    return new Response(JSON.stringify({ ok: false, description: 'Unknown action' }), {
+    return new Response(JSON.stringify({ error: "Invalid action" }), {
       status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
-  } catch (err) {
-    console.error('telegram-bot error', err);
-    return new Response(JSON.stringify({ ok: false, description: 'Internal error' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });
