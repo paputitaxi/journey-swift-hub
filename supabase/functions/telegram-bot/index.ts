@@ -1,64 +1,30 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// Follow this setup guide to integrate the Deno language server with your editor:
+// https://deno.land/manual/getting_started/setup_your_environment
+// This enables autocomplete, go to definition, etc.
 
-const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
-const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
 
-console.log("Telegram bot function initialized");
-console.log("Token present:", !!TELEGRAM_BOT_TOKEN);
+console.log(`Function "telegram-bot" up and running!`);
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { Bot, webhookCallback } from "https://deno.land/x/grammy@v1.8.3/mod.ts";
+
+const bot = new Bot(Deno.env.get("BOT_TOKEN") || "");
+
+bot.command("start", (ctx) => ctx.reply("Welcome! Up and running."));
+
+bot.command("ping", (ctx) => ctx.reply(`Pong! ${new Date()} ${Date.now()}`));
+
+const handleUpdate = webhookCallback(bot, "std/http");
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
   try {
-    const { action, chatId, text } = await req.json();
-    console.log("Received action:", action);
-
-    if (action === "sendMessage") {
-      console.log("Sending message to chat:", chatId);
-      const response = await fetch(`${TELEGRAM_API}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: text,
-        }),
-      });
-
-      const data = await response.json();
-      console.log("Telegram API response:", data);
-      
-      return new Response(JSON.stringify(data), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const url = new URL(req.url);
+    if (url.searchParams.get("secret") !== Deno.env.get("FUNCTION_SECRET")) {
+      return new Response("not allowed", { status: 405 });
     }
 
-    if (action === "getMe") {
-      console.log("Getting bot info");
-      const response = await fetch(`${TELEGRAM_API}/getMe`);
-      const data = await response.json();
-      console.log("Bot info:", data);
-      
-      return new Response(JSON.stringify(data), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(
-      JSON.stringify({ error: "Invalid action" }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (error) {
-    console.error("Telegram bot error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return await handleUpdate(req);
+  } catch (err) {
+    console.error(err);
   }
 });
