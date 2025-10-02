@@ -15,6 +15,7 @@ const TelegramBot = () => {
   const getBotInfo = async () => {
     setLoading(true);
     try {
+      console.log("Calling telegram bot function...");
       const response = await fetch(
         "https://dskmiajizazkcfyotibk.supabase.co/functions/v1/telegram-bot",
         {
@@ -23,18 +24,28 @@ const TelegramBot = () => {
           body: JSON.stringify({ action: "getMe" }),
         }
       );
+      console.log("Response status:", response.status);
       const data = await response.json();
+      console.log("Response data:", data);
+      
       if (data.ok) {
         setBotInfo(data.result);
         toast({
           title: "Bot Connected",
           description: `Bot: @${data.result.username}`,
         });
+      } else {
+        toast({
+          title: "Bot Error",
+          description: data.description || JSON.stringify(data),
+          variant: "destructive",
+        });
       }
     } catch (error) {
+      console.error("Bot connection error:", error);
       toast({
         title: "Error",
-        description: "Failed to connect to bot",
+        description: error instanceof Error ? error.message : "Failed to connect to bot",
         variant: "destructive",
       });
     } finally {
@@ -54,6 +65,7 @@ const TelegramBot = () => {
 
     setLoading(true);
     try {
+      console.log("Sending message to chat:", chatId);
       const response = await fetch(
         "https://dskmiajizazkcfyotibk.supabase.co/functions/v1/telegram-bot",
         {
@@ -67,6 +79,7 @@ const TelegramBot = () => {
         }
       );
       const data = await response.json();
+      console.log("Send message response:", data);
       
       if (data.ok) {
         toast({
@@ -75,9 +88,10 @@ const TelegramBot = () => {
         });
         setMessage("");
       } else {
-        throw new Error(data.description || "Failed to send message");
+        throw new Error(data.description || JSON.stringify(data));
       }
     } catch (error) {
+      console.error("Send message error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to send message",

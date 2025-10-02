@@ -3,6 +3,9 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
 const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
 
+console.log("Telegram bot function initialized");
+console.log("Token present:", !!TELEGRAM_BOT_TOKEN);
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -15,8 +18,10 @@ serve(async (req) => {
 
   try {
     const { action, chatId, text } = await req.json();
+    console.log("Received action:", action);
 
     if (action === "sendMessage") {
+      console.log("Sending message to chat:", chatId);
       const response = await fetch(`${TELEGRAM_API}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,6 +32,7 @@ serve(async (req) => {
       });
 
       const data = await response.json();
+      console.log("Telegram API response:", data);
       
       return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -34,8 +40,10 @@ serve(async (req) => {
     }
 
     if (action === "getMe") {
+      console.log("Getting bot info");
       const response = await fetch(`${TELEGRAM_API}/getMe`);
       const data = await response.json();
+      console.log("Bot info:", data);
       
       return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
