@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
-const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+const TELEGRAM_BOT_TOKEN = Deno.env.get("8491288412:AAFVoMzNovV93fKx82JptjvKGwFLIrmsU0I");
+const TELEGRAM_API = `https://api.telegram.org/bot${8491288412:AAFVoMzNovV93fKx82JptjvKGwFLIrmsU0I`;
+
+console.log("Telegram bot function initialized");
+console.log("Token present:", !!TELEGRAM_BOT_TOKEN);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,46 +15,47 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
   try {
-    const body = await req.json();
-    // Check if this is a webhook update from Telegram with /start command
-    if (body.message && body.message.text === "/start") {
-      const chatId = body.message.chat.id;
-      await fetch(`${TELEGRAM_API}/sendMessage`, {
+    const { action, chatId, text } = await req.json();
+    console.log("Received action:", action);
+
+    if (action === "sendMessage") {
+      console.log("Sending message to chat:", chatId);
+      const response = await fetch(`${TELEGRAM_API}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
-          text: "jeel who how lo lo"
-        })
+          text: text,
+        }),
       });
-      return new Response("OK", { headers: corsHeaders });
-    }
-    // Existing API-style logic (optional, for manual API calls)
-    const { action, chatId, text } = body;
-    if (action === "sendMessage") {
-      const response = await fetch(`${TELEGRAM_API}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: chatId, text })
-      });
+
       const data = await response.json();
+      console.log("Telegram API response:", data);
+      
       return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
     if (action === "getMe") {
+      console.log("Getting bot info");
       const response = await fetch(`${TELEGRAM_API}/getMe`);
       const data = await response.json();
+      console.log("Bot info:", data);
+      
       return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    return new Response(JSON.stringify({ error: "Invalid action" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
+
+    return new Response(
+      JSON.stringify({ error: "Invalid action" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (error) {
+    console.error("Telegram bot error:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
