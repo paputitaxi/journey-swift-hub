@@ -426,7 +426,7 @@ const useLanguage = () => useContext(LanguageContext);
 // Retro UI Styles Component
 const RetroUIStyles = () => <style>{`
   :root {
-    --retro-main-bg: #5e5e5e;
+    --retro-main-bg: #008080; /* Teal background */
     --retro-window-bg: #f3e9d2;
     --retro-border-light: #ffffff;
     --retro-border-dark: #404040;
@@ -434,6 +434,8 @@ const RetroUIStyles = () => <style>{`
     --retro-title-yellow: #f9e79f;
     --retro-title-orange: #f5cba7;
     --retro-text: #000000;
+    --retro-pink: #ffafaf;
+    --retro-green: #afffaf;
   }
 
   body, .font-sans {
@@ -736,7 +738,7 @@ const MessageDashboard = ({
   };
 
   return <div className="retro-window flex flex-col h-full">
-      <div className="retro-title-bar orange">
+      <div className="retro-title-bar" style={{backgroundColor: 'var(--retro-title-orange)'}}>
         <span>{selectedChat ? selectedChat.name : t('chats')}</span>
          <button onClick={onClose} className="retro-title-bar-button">X</button>
       </div>
@@ -1950,20 +1952,20 @@ const AppContent = () => {
                     </button>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                    <div onClick={() => setShowStatsModal(true)} className="retro-outset-box p-4 text-center flex flex-col justify-center cursor-pointer">
+                    <div onClick={() => setShowStatsModal(true)} className="retro-outset-box p-4 text-center flex flex-col justify-center cursor-pointer" style={{backgroundColor: 'var(--retro-title-blue)'}}>
                         <h2 className="text-xs">{t('totalEarnings')}</h2>
                         <p className="text-xl font-bold mt-1">{totalEarnings.toFixed(2)}$</p>
                     </div>
-                    <div onClick={() => setShowCarTypeModal(true)} className="retro-outset-box p-4 text-center flex flex-col items-center justify-center cursor-pointer">
+                    <div onClick={() => setShowCarTypeModal(true)} className="retro-outset-box p-4 text-center flex flex-col items-center justify-center cursor-pointer" style={{backgroundColor: 'var(--retro-title-orange)'}}>
                         <Car className="h-5 w-5 mb-1" />
                         <h2 className="text-xs">{t('carType')}</h2>
                         <p className="text-xs font-semibold truncate mt-1">{selectedCar}</p>
                     </div>
                 </div>
             </div>
-          <div>
-              <h3 className="flex items-center font-bold mb-2 mt-6">{t('yourActivity')}</h3>
-              <div className="w-full retro-inset-box flex flex-col">{renderActiveRideContent()}</div>
+          <div className="retro-window">
+             <div className="retro-title-bar blue">{t('yourActivity')}</div>
+             <div className="flex flex-col">{renderActiveRideContent()}</div>
           </div>
         </div>;
       case "history":
@@ -2001,7 +2003,7 @@ const AppContent = () => {
     }
   };
 
-  return <div className="h-screen text-black flex flex-col font-sans bg-[#5e5e5e]">
+  return <div className="h-screen text-black flex flex-col font-sans" style={{backgroundColor: 'var(--retro-main-bg)'}}>
       <RetroUIStyles />
       <CustomScrollbarStyles />
       {selectedPassenger && <div className="retro-window fixed z-50 p-1 space-y-1" style={{ top: popoverPosition.top, left: popoverPosition.left }} onClick={() => selectedPassenger && setSelectedPassenger(null)}>
@@ -2010,7 +2012,7 @@ const AppContent = () => {
           <div className="border-t border-black my-1"></div>
           <button onClick={() => handleRemovePassenger(selectedPassenger.id)} className="w-full flex items-center px-3 py-1 text-sm text-red-600 hover:bg-red-200"><Trash2 className="h-4 w-4 mr-2" />{t('removePassenger')}</button>
         </div>}
-      <header className="p-2 border-b-2 border-black flex items-center justify-between z-20">
+      <header className="p-2 border-b-2 border-black flex items-center justify-between z-20" style={{backgroundColor: 'var(--retro-window-bg)'}}>
         <div className="flex-1 flex justify-start">
            { <button onClick={()=> {
             if(activeTab !== 'dashboard') setActiveTab('dashboard');
@@ -2027,7 +2029,7 @@ const AppContent = () => {
       <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative" onClick={() => selectedPassenger && setSelectedPassenger(null)}>
         {renderContent()}
       </main>
-      {!(showMessages || showPostRide || isEditModalOpen || showStatsModal || showHistoryDetailModal || showArchive) && <footer className="border-t-2 border-black z-10 p-1">
+      {!(showMessages || showPostRide || isEditModalOpen || showStatsModal || showHistoryDetailModal || showArchive) && <footer className="border-t-2 border-black z-10 p-1" style={{backgroundColor: 'var(--retro-window-bg)'}}>
           <div className="flex justify-around">
             {bottomNavItems.map(item => {
         const Icon = item.icon;
@@ -2042,7 +2044,7 @@ const AppContent = () => {
       {isEditModalOpen && editingRide && <PostRideForm onClose={() => { setIsEditModalOpen(false); setEditingRide(null); }} onConfirmPost={handleSaveEditedRide} onStopRide={() => { setEditingRide(activeRide); setShowArchiveConfirmModal(true); }} onArchiveRide={() => { setEditingRide(activeRide); setShowArchiveConfirmModal(true); }} initialValues={editingRide} isEditing={true} userPhone={userData.phone} />}
       <CarTypeModal isOpen={showCarTypeModal} onClose={() => setShowCarTypeModal(false)} onSelectCar={setSelectedCar} currentCar={selectedCar} />
       {showConfirmationModal && <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-          <div className="retro-window w-full max-w-sm p-4 text-center">
+          <div className="retro-window w-full max-w-sm p-0 text-center">
              <div className="retro-title-bar orange"><span>{t('letsGo')}</span></div>
              <div className="p-4">
                 <p className="mb-6">{t('areYouSure')}</p>
@@ -2054,7 +2056,7 @@ const AppContent = () => {
           </div>
         </div>}
       {showActiveRideErrorModal && <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-          <div className="retro-window w-full max-w-sm p-4 text-center">
+          <div className="retro-window w-full max-w-sm p-0 text-center">
               <div className="retro-title-bar orange"><span>Error</span></div>
               <div className="p-4">
                 <h2 className="text-xl font-bold mb-2">{t('activeRideErrorTitle')}</h2>
@@ -2063,8 +2065,8 @@ const AppContent = () => {
               </div>
           </div>
         </div>}
-      {showFinishRideModal && <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-          <div className="retro-window w-full max-w-sm p-4 text-center">
+      {showFinishRideModal && <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans" >
+           <div className="retro-window w-full max-w-sm p-0 text-center">
              <div className="retro-title-bar orange"><span>{t('finishRide')}</span></div>
              <div className="p-4">
                 <p className="mb-6">{t('areYouSureFinish')}</p>
