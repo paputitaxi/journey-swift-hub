@@ -36,7 +36,7 @@ const translations = {
     origin: "Origin",
     destination: "Destination",
     selectADate: "Select a date",
-    howManySeats: "How many seats?",
+    howManySeats: "How many seats, or mail?",
     continue: "Continue",
     search: "Search",
     history: "History",
@@ -65,6 +65,7 @@ const translations = {
     selectDestination: "Select Destination",
     support: "Support",
     selectLanguage: "Select Language",
+    mailOnly: "Mail Only",
   },
   uz: {
     findYourNextRide: "Keyingi Sayohatni Toping",
@@ -72,7 +73,7 @@ const translations = {
     origin: "Boshlanish",
     destination: "Manzil",
     selectADate: "Sanani tanlang",
-    howManySeats: "Nechta o'rindiq?",
+    howManySeats: "Nechta o'rindiq, yoki pochta?",
     continue: "Davom etish",
     search: "Qidirish",
     history: "Tarix",
@@ -101,6 +102,7 @@ const translations = {
     selectDestination: "Borish Manzilini Tanlang",
     support: "Yordam",
     selectLanguage: "Tilni Tanlang",
+    mailOnly: "Faqat Pochta",
   },
   ru: {
     findYourNextRide: "Найти следующую поездку",
@@ -108,7 +110,7 @@ const translations = {
     origin: "Откуда",
     destination: "Куда",
     selectADate: "Выберите дату",
-    howManySeats: "Сколько мест?",
+    howManySeats: "Сколько мест, или почта?",
     continue: "Продолжить",
     search: "Поиск",
     history: "История",
@@ -137,6 +139,7 @@ const translations = {
     selectDestination: "Выберите место назначения",
     support: "Поддержка",
     selectLanguage: "Выберите язык",
+    mailOnly: "Только почта",
   },
 };
 
@@ -736,6 +739,7 @@ const App = () => {
   const [activeFilter, setActiveFilter] = useState(null);
   const [activeSort, setActiveSort] = useState(null);
   const [seatsNeeded, setSeatsNeeded] = useState(null);
+  const [searchForMail, setSearchForMail] = useState(false);
   const [selectedRide, setSelectedRide] = useState(null);
   const [isUnreliableRider, setIsUnreliableRider] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -767,7 +771,16 @@ const App = () => {
 
   const handleFilterClick = (filterType) => setActiveFilter((prev) => (prev === filterType ? null : filterType));
   const handleSortClick = (sortType) => setActiveSort((prev) => (prev === sortType ? null : sortType));
-  const handleSeatsNeededClick = (numSeats) => setSeatsNeeded((prev) => (prev === numSeats ? null : numSeats));
+
+  const handleSeatsNeededClick = (numSeats) => {
+    setSeatsNeeded((prev) => (prev === numSeats ? null : numSeats));
+    setSearchForMail(false);
+  };
+
+  const handleMailOnlyClick = () => {
+    setSearchForMail((prev) => !prev);
+    setSeatsNeeded(null);
+  };
 
   const resetSearch = () => {
     setActiveTab("search");
@@ -779,6 +792,7 @@ const App = () => {
     setActiveSort(null);
     setSelectedRide(null);
     setSeatsNeeded(null);
+    setSearchForMail(false);
   };
 
   const renderContent = () => {
@@ -831,6 +845,9 @@ const App = () => {
         }
         if (showSearchResults) {
           let results = [...availableRides];
+          if (searchForMail) {
+            results = results.filter((ride) => ride.serviceType === "mail" || ride.serviceType === "both");
+          }
           if (activeFilter === "saved") {
             results = results.filter((ride) => false);
           } // Placeholder for saved rides
@@ -1011,6 +1028,13 @@ const App = () => {
                         {num}
                       </button>
                     ))}
+                    <button
+                      onClick={handleMailOnlyClick}
+                      className={`h-12 sm:h-14 px-4 rounded-full text-md font-semibold transition-colors flex items-center justify-center space-x-2 ${searchForMail ? "bg-green-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                    >
+                      <Mail size={20} />
+                      <span>{t.mailOnly}</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1086,9 +1110,14 @@ const App = () => {
       {!selectedRide && !showSearchResults && activeTab === "search" && (
         <div className="p-4 bg-white border-t border-gray-200">
           <button
-            className={`w-full py-3 font-semibold transition-all rounded-xl ${pickupLocation && destinationLocation && pickupDate && seatsNeeded ? "bg-green-500 text-white shadow-lg shadow-green-500/30" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
-            onClick={() => setShowSearchResults(true)}
-            disabled={!(pickupLocation && destinationLocation && pickupDate && seatsNeeded)}
+            className={`w-full py-3 font-semibold transition-all rounded-xl ${pickupLocation && destinationLocation && pickupDate && (seatsNeeded || searchForMail) ? "bg-green-500 text-white shadow-lg shadow-green-500/30" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
+            onClick={() => {
+              if (searchForMail) {
+                setActiveFilter("mail");
+              }
+              setShowSearchResults(true);
+            }}
+            disabled={!(pickupLocation && destinationLocation && pickupDate && (seatsNeeded || searchForMail))}
           >
             {t.continue}
           </button>
@@ -1137,6 +1166,18 @@ const App = () => {
         currentLanguage={language}
         onSelect={setLanguage}
         t={t}
+      />
+      <LocationSelectModal
+        title={t.selectOrigin}
+        isOpen={showFromModal}
+        onClose={() => setShowFromModal(false)}
+        onSelect={setPickupLocation}
+      />
+      <LocationSelectModal
+        title={t.selectDestination}
+        isOpen={showToModal}
+        onClose={() => setShowToModal(false)}
+        onSelect={setDestinationLocation}
       />
     </div>
   );
