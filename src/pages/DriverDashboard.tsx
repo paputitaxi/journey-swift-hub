@@ -1063,80 +1063,82 @@ const PostRideForm = ({
       </div>;
   };
 
-  return <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-40 p-4 font-sans">
-      <div className="retro-window w-full max-w-md h-[90vh] flex flex-col">
-        <div className="retro-title-bar blue">
-            <span>{isEditing ? t('editRide') : t('postNewRide')}</span>
-            <button onClick={onClose} className="retro-title-bar-button">X</button>
+  return <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 font-sans">
+      <div className="w-full max-w-md rounded-2xl bg-background text-foreground shadow-xl border overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b">
+            <h2 className="text-lg font-semibold">{isEditing ? t('editRide') : t('postNewRide')}</h2>
+            <button onClick={onClose} aria-label="Close" className="rounded-full p-1 hover:bg-muted">
+              <X className="h-5 w-5" />
+            </button>
         </div>
-        <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-4 space-y-4 custom-scrollbar">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto max-h-[70vh]">
           <div>
-            <button type="button" onClick={() => setShowFromModal(true)} className="w-full retro-button text-left flex justify-between items-center">
+            <button type="button" onClick={() => setShowFromModal(true)} className="w-full h-12 border rounded-md bg-background text-left flex justify-between items-center px-3 hover:bg-muted/50">
               <span>{fromLocation || t('fromWhere')}</span>
-              <MapPin className="h-5 w-5" />
+              <MapPin className="h-5 w-5 text-muted-foreground" />
             </button>
             <LocationSelectModal title={t('selectOrigin')} isOpen={showFromModal} onClose={() => setShowFromModal(false)} onSelect={setFromLocation} />
           </div>
           <div>
-            <button type="button" onClick={() => setShowToModal(true)} className="w-full retro-button text-left flex justify-between items-center">
+            <button type="button" onClick={() => setShowToModal(true)} className="w-full h-12 border rounded-md bg-background text-left flex justify-between items-center px-3 hover:bg-muted/50">
               <span>{toLocation || t('toWhere')}</span>
-               <MapPin className="h-5 w-5" />
+               <MapPin className="h-5 w-5 text-muted-foreground" />
             </button>
             <LocationSelectModal title={t('selectDestination')} isOpen={showToModal} onClose={() => setShowToModal(false)} onSelect={setToLocation} />
           </div>
           <div>
-            <button type="button" onClick={() => setShowDateModal(true)} className="w-full retro-button text-left flex justify-between items-center">
+            <button type="button" onClick={() => setShowDateModal(true)} className="w-full h-12 border rounded-md bg-background text-left flex justify-between items-center px-3 hover:bg-muted/50">
               <span>{departureDate || t('departureDate')}</span>
-              <Calendar className="h-5 w-5" />
+              <Calendar className="h-5 w-5 text-muted-foreground" />
             </button>
             <DatePickerModal isOpen={showDateModal} onClose={() => setShowDateModal(false)} onSelectDate={setDepartureDate} />
           </div>
           <div>
-            <label className="block font-bold mb-2">{t('mailService')}</label>
+            <label className="block text-sm font-medium mb-2">{t('mailService')}</label>
             <div className="space-y-2">
-              <button type="button" onClick={() => setMailService("yes")} className={`w-full p-2 text-left retro-button ${mailService === "yes" ? "active-nav" : ""}`}>
-                  <p className="font-bold">{t('yesCarryMail')}</p>
-                  <p className="text-sm">{t('mailDescYes')}</p>
+              <button type="button" onClick={() => setMailService("yes")} className={`w-full p-3 text-left border rounded-lg transition-colors ${mailService === "yes" ? "border-primary bg-primary/10" : "hover:bg-muted/50"}`}>
+                  <p className="font-semibold">{t('yesCarryMail')}</p>
+                  <p className="text-sm text-muted-foreground">{t('mailDescYes')}</p>
               </button>
               {mailService === "yes" && <div className="mt-2">
-                  <label className="block font-bold mb-1">{t('mailPriceLabel')}</label>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder={t('enterMailPrice')} className="w-full retro-input" value={mailPrice} onChange={e => {
+                  <label className="block text-sm font-medium mb-1">{t('mailPriceLabel')}</label>
+                  <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder={t('enterMailPrice')} className="w-full h-12 border rounded-md px-3" value={mailPrice} onChange={e => {
                       const value = e.target.value;
                       if (/^[0-9]*$/.test(value)) setMailPrice(value);
                     }} />
                 </div>}
-              <button type="button" onClick={() => setMailService("no")} className={`w-full p-2 text-left retro-button ${mailService === "no" ? "active-nav" : ""}`}>
-                  <p className="font-bold">{t('noCarryMail')}</p>
-                  <p className="text-sm">{t('mailDescNo')}</p>
+              <button type="button" onClick={() => setMailService("no")} className={`w-full p-3 text-left border rounded-lg transition-colors ${mailService === "no" ? "border-primary bg-primary/10" : "hover:bg-muted/50"}`}>
+                  <p className="font-semibold">{t('noCarryMail')}</p>
+                  <p className="text-sm text-muted-foreground">{t('mailDescNo')}</p>
               </button>
             </div>
           </div>
 
           <div>
-            <label className="block font-bold mb-2">{t('freeSeats')}</label>
-            <div className="flex justify-around space-x-2">
-              {[1, 2, 3, 4].map(seats => <button key={seats} type="button" onClick={() => setFreeSeats(seats)} className={`retro-button flex-1 p-3 text-lg font-semibold ${freeSeats === seats ? "active-nav" : ""}`}>
+            <label className="block text-sm font-medium mb-2">{t('freeSeats')}</label>
+            <div className="grid grid-cols-4 gap-3">
+              {[1, 2, 3, 4].map(seats => <button key={seats} type="button" onClick={() => setFreeSeats(seats)} className={`h-12 rounded-md border text-base font-semibold ${freeSeats === seats ? 'bg-primary/10 border-primary text-primary' : 'hover:bg-muted/50'}`}>
                   {seats}
                 </button>)}
             </div>
           </div>
 
           <div>
-            <label className="block font-bold mb-2">{t('departureType')}</label>
-            <div className="space-y-2">
-              <button type="button" onClick={() => setDepartureType("fixed")} className={`w-full p-2 text-left retro-button ${departureType === "fixed" ? "active-nav" : ""}`}>
-                 <p className="font-bold">{t('fixedDeparture')}</p>
-                 <p className="text-sm">{t('fixedDepartureDesc')}</p>
+            <label className="block text-sm font-medium mb-2">{t('departureType')}</label>
+            <div className="space-y-3">
+              <button type="button" onClick={() => setDepartureType("fixed")} className={`w-full p-3 text-left border rounded-lg transition-colors ${departureType === "fixed" ? 'border-primary bg-primary/10' : 'hover:bg-muted/50'}`}>
+                 <p className="font-semibold">{t('fixedDeparture')}</p>
+                 <p className="text-sm text-muted-foreground">{t('fixedDepartureDesc')}</p>
               </button>
-              {departureType === "fixed" && <div className="retro-inset-box flex items-center justify-between gap-2 mt-2">
-                  <span>{t('from')}</span>
-                  <input type="time" value={departureStartTime} onChange={e => setDepartureStartTime(e.target.value)} className="retro-input text-center" />
-                  <span>{t('to')}</span>
-                  <input type="time" value={departureEndTime} onChange={e => setDepartureEndTime(e.target.value)} className="retro-input text-center" />
+              {departureType === "fixed" && <div className="flex items-center justify-between gap-2 mt-2">
+                  <span className="text-sm text-muted-foreground">{t('from')}</span>
+                  <input type="time" value={departureStartTime} onChange={e => setDepartureStartTime(e.target.value)} className="h-10 border rounded-md px-3 text-center flex-1" />
+                  <span className="text-sm text-muted-foreground">{t('to')}</span>
+                  <input type="time" value={departureEndTime} onChange={e => setDepartureEndTime(e.target.value)} className="h-10 border rounded-md px-3 text-center flex-1" />
                 </div>}
-              <button type="button" onClick={() => setDepartureType("when_fills")} className={`w-full p-2 text-left retro-button ${departureType === "when_fills" ? "active-nav" : ""}`}>
-                <p className="font-bold">{t('whenFills')}</p>
-                <p className="text-sm">{t('whenFillsDesc')}</p>
+              <button type="button" onClick={() => setDepartureType("when_fills")} className={`w-full p-3 text-left border rounded-lg transition-colors ${departureType === "when_fills" ? 'border-primary bg-primary/10' : 'hover:bg-muted/50'}`}>
+                <p className="font-semibold">{t('whenFills')}</p>
+                <p className="text-sm text-muted-foreground">{t('whenFillsDesc')}</p>
               </button>
             </div>
           </div>
