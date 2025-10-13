@@ -384,23 +384,18 @@ const uzbekistanLocationsData = [
   },
 ];
 
-// Helper to format date for display (e.g., "Sat Apr 23")
 const formatDate = (dateString) => {
   if (!dateString) return "";
-  const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { weekday: "short", month: "short", day: "numeric" };
-  return date.toLocaleDateString("en-US", options);
+  const options = { weekday: "short", month: "short", day: "numeric" };
+  return new Date(dateString).toLocaleDateString("en-US", options);
 };
 
-// Helper to format time for display (e.g., "11:45")
 const formatTime = (dateString) => {
   if (!dateString) return "";
-  const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
-  return date.toLocaleTimeString("en-US", options);
+  const options = { hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
+  return new Date(dateString).toLocaleTimeString("en-US", options);
 };
 
-// Initial dummy data for search results
 const initialDummySearchResults = [
   {
     id: 1,
@@ -480,33 +475,33 @@ const initialDummySearchResults = [
 
 const CustomScrollbarStyles = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #9ca3af; }
   `}</style>
 );
 
 const PlateNumber = ({ plate }) => {
   if (!plate) return null;
   return (
-    <div className="flex items-center bg-white border-2 border-gray-800 rounded-lg p-1 space-x-2 shadow-sm font-mono w-max select-none">
-      <span className="font-bold text-xl pl-1">{plate.locationCode}</span>
-      <div className="w-px h-6 bg-gray-600"></div>
+    <div className="flex items-center bg-white border border-gray-300 rounded-lg p-1 space-x-2 font-mono w-max select-none">
+      <span className="font-bold text-lg pl-1">{plate.locationCode}</span>
+      <div className="w-px h-5 bg-gray-300"></div>
       <div className="flex items-baseline space-x-1">
-        <span className="font-bold text-xl">{plate.series}</span>
-        <span className="text-xl font-medium tracking-tighter">{plate.serialNumber}</span>
+        <span className="font-bold text-lg">{plate.series}</span>
+        <span className="text-lg font-medium tracking-tighter">{plate.serialNumber}</span>
       </div>
       <div className="flex flex-col items-center pr-1">
-        <svg width="28" height="14" viewBox="0 0 900 450" className="rounded-sm border border-gray-300">
+        <svg width="24" height="12" viewBox="0 0 900 450" className="rounded-sm">
           <rect width="900" height="450" fill="#0072CE" />
           <rect y="150" width="900" height="150" fill="#FFFFFF" />
           <rect y="300" width="900" height="150" fill="#058B37" />
           <rect y="157.5" width="900" height="15" fill="#CE1126" />
           <rect y="277.5" width="900" height="15" fill="#CE1126" />
         </svg>
-        <span className="font-bold text-xs text-gray-800">UZ</span>
+        <span className="font-bold text-[10px] text-gray-700">UZ</span>
       </div>
     </div>
   );
@@ -548,13 +543,7 @@ const CalendarView = ({ onDayClick, selectedDate }) => {
               key={day}
               onClick={() => onDayClick(date)}
               disabled={isPast}
-              className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
-                isPast
-                  ? "text-gray-400 cursor-not-allowed"
-                  : isSelected
-                    ? "bg-green-500 text-white font-semibold"
-                    : "hover:bg-gray-100"
-              }`}
+              className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isPast ? "text-gray-300 cursor-not-allowed" : isSelected ? "bg-purple-600 text-white font-semibold" : "hover:bg-gray-100"}`}
             >
               {" "}
               {day}{" "}
@@ -569,10 +558,10 @@ const CalendarView = ({ onDayClick, selectedDate }) => {
 const ModalWrapper = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 animate-fade-in">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col">
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           <button onClick={onClose} className="p-1 rounded-full text-gray-500 hover:bg-gray-100">
             <X size={20} />
           </button>
@@ -603,11 +592,11 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
     <ModalWrapper isOpen={isOpen} onClose={handleClose} title={title}>
       <div className="p-4 border-b border-gray-200">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
           <input
             type="text"
             placeholder="Search..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full pl-11 pr-4 py-2.5 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -687,13 +676,13 @@ const BookingModal = ({ isOpen, onClose, ride, onConfirmBooking }) => {
         </div>
         <div className="flex justify-between items-baseline pt-4 border-t">
           <span className="font-semibold text-lg text-gray-800">Total Price:</span>
-          <span className="font-bold text-2xl text-green-600">${totalPrice}</span>
+          <span className="font-bold text-2xl text-purple-600">${totalPrice}</span>
         </div>
       </div>
       <div className="p-4 bg-gray-50 rounded-b-2xl">
         <button
           onClick={handleConfirm}
-          className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300 shadow-lg shadow-green-500/30"
+          className="w-full bg-gray-900 text-white py-3.5 rounded-full font-semibold hover:bg-gray-800 transition duration-300"
         >
           Confirm Booking
         </button>
@@ -718,10 +707,10 @@ const LanguageSelectModal = ({ isOpen, onClose, onSelect, currentLanguage, t }) 
               onSelect(lang.code);
               onClose();
             }}
-            className={`w-full text-left p-4 rounded-lg flex justify-between items-center hover:bg-gray-100 transition-colors ${currentLanguage === lang.code ? "font-semibold text-green-600" : "text-gray-800"}`}
+            className={`w-full text-left p-4 rounded-lg flex justify-between items-center hover:bg-gray-100 transition-colors ${currentLanguage === lang.code ? "font-semibold text-purple-600" : "text-gray-800"}`}
           >
             <span>{lang.name}</span>
-            {currentLanguage === lang.code && <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>}
+            {currentLanguage === lang.code && <div className="w-2.5 h-2.5 bg-purple-600 rounded-full"></div>}
           </button>
         ))}
       </div>
@@ -776,12 +765,10 @@ const App = () => {
     setSeatsNeeded((prev) => (prev === numSeats ? null : numSeats));
     setSearchForMail(false);
   };
-
   const handleMailOnlyClick = () => {
     setSearchForMail((prev) => !prev);
     setSeatsNeeded(null);
   };
-
   const resetSearch = () => {
     setActiveTab("search");
     setShowSearchResults(false);
@@ -800,11 +787,11 @@ const App = () => {
       case "history":
         return (
           <div className="p-4 sm:p-6">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">{t.rideHistory}</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gray-900">{t.rideHistory}</h2>
             {rideHistory.length > 0 ? (
               <div className="space-y-4">
                 {rideHistory.map((ride) => (
-                  <div key={`${ride.id}-${ride.bookingDate}`} className="bg-white p-4 rounded-xl shadow-md border">
+                  <div key={`${ride.id}-${ride.bookingDate}`} className="bg-white p-4 rounded-xl shadow-soft">
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-semibold text-lg">
@@ -815,7 +802,7 @@ const App = () => {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-lg text-green-600">
+                        <p className="font-bold text-lg text-purple-600">
                           ${(ride.basePrice * ride.seatsBooked).toFixed(2)}
                         </p>
                         <p className="text-sm text-gray-600">
@@ -848,14 +835,8 @@ const App = () => {
           if (searchForMail) {
             results = results.filter((ride) => ride.serviceType === "mail" || ride.serviceType === "both");
           }
-          if (activeFilter === "saved") {
-            results = results.filter((ride) => false);
-          } // Placeholder for saved rides
           if (activeFilter === "recommended") {
             results = results.filter((ride) => ride.reliabilityStars >= 4.5);
-          }
-          if (activeFilter === "mail") {
-            results = results.filter((ride) => ride.serviceType === "mail" || ride.serviceType === "both");
           }
           if (seatsNeeded) {
             results = results.filter((ride) => (parseInt(ride.sitsAvailable) || 0) >= seatsNeeded);
@@ -869,69 +850,62 @@ const App = () => {
 
           let stickyTitle = t.allAvailableRides;
           if (activeFilter === "recommended") stickyTitle = t.recommendedForYou;
-          else if (activeFilter === "saved") stickyTitle = t.savedRides;
           else if (activeFilter === "mail") stickyTitle = t.mailDelivery;
           else if (activeSort === "by_seat") stickyTitle = t.sortedBySeat;
           else if (activeSort === "by_time") stickyTitle = t.sortedByTime;
 
           return (
             <div className="flex flex-col h-full">
-              <div className="flex-shrink-0 bg-white shadow-sm z-10 sticky top-0">
+              <div className="flex-shrink-0 bg-white/80 backdrop-blur-sm z-10 sticky top-0">
                 <div className="p-4 border-b border-gray-200">
-                  <div className="flex items-center mb-3">
+                  <div className="flex items-center mb-4">
                     <button
                       className="p-2 rounded-full hover:bg-gray-100 transition-colors -ml-2 mr-2"
                       onClick={resetSearch}
                     >
                       <ChevronLeft size={24} />
                     </button>
-                    <h2 className="text-xl font-bold text-gray-800 text-left">{t.results}</h2>
+                    <h2 className="text-xl font-bold text-gray-900 text-left">{t.results}</h2>
                   </div>
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center space-x-2 overflow-x-auto pb-2 -mb-2">
-                      <button
-                        onClick={() => handleSortClick("by_seat")}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === "by_seat" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-                      >
-                        <Users size={16} />
-                        <span>{t.bySeat}</span>
-                      </button>
-                      <button
-                        onClick={() => handleSortClick("by_time")}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === "by_time" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-                      >
-                        <History size={16} />
-                        <span>{t.byTime}</span>
-                      </button>
-                      <button
-                        onClick={() => handleFilterClick("mail")}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === "mail" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-                      >
-                        <Mail size={16} />
-                        <span>{t.withMailOption}</span>
-                      </button>
-                      <button
-                        onClick={() => handleFilterClick("recommended")}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === "recommended" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-                      >
-                        <Star size={16} />
-                        <span>{t.recommended}</span>
-                      </button>
-                    </div>
+                  <div className="flex items-center space-x-2 overflow-x-auto pb-2 -mb-2">
+                    <button
+                      onClick={() => handleSortClick("by_seat")}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === "by_seat" ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                    >
+                      <Users size={16} />
+                      <span>{t.bySeat}</span>
+                    </button>
+                    <button
+                      onClick={() => handleSortClick("by_time")}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === "by_time" ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                    >
+                      <History size={16} />
+                      <span>{t.byTime}</span>
+                    </button>
+                    <button
+                      onClick={() => handleFilterClick("mail")}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === "mail" ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                    >
+                      <Mail size={16} />
+                      <span>{t.withMailOption}</span>
+                    </button>
+                    <button
+                      onClick={() => handleFilterClick("recommended")}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === "recommended" ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                    >
+                      <Star size={16} />
+                      <span>{t.recommended}</span>
+                    </button>
                   </div>
-                </div>
-                <div className="bg-white py-2 px-4 border-b border-gray-200">
-                  <h3 className="font-semibold text-gray-800">{stickyTitle}</h3>
                 </div>
               </div>
-
               <div className="flex-grow overflow-y-auto bg-gray-50">
                 <div className="p-4 space-y-4">
                   {results.map((item) => (
                     <div
                       key={item.id}
                       onClick={() => handleCardClick(item)}
-                      className="bg-white p-4 rounded-xl shadow-lg border border-gray-200 text-left cursor-pointer hover:shadow-xl transition-shadow duration-300"
+                      className="bg-white p-4 rounded-2xl shadow-soft text-left cursor-pointer hover:shadow-elevated hover:-translate-y-1 transition-all duration-300"
                     >
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center">
@@ -947,22 +921,22 @@ const App = () => {
                           <span className="font-bold">{item.reliabilityStars.toFixed(1)}</span>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-3 my-3">
+                      <div className="flex items-center space-x-3 my-4">
                         <div className="flex items-center space-x-2">
-                          <MapPin size={18} className="text-green-500" />
+                          <MapPin size={18} className="text-purple-500" />
                           <span className="text-gray-800 font-semibold">{item.origin}</span>
                         </div>
-                        <div className="text-gray-300">→</div>
+                        <div className="text-gray-300 font-bold text-lg">→</div>
                         <div className="flex items-center space-x-2">
-                          <Target size={18} className="text-red-500" />
+                          <Target size={18} className="text-pink-500" />
                           <span className="text-gray-800 font-semibold">{item.destination}</span>
                         </div>
                       </div>
-                      <div className="text-sm text-gray-600 mb-3">
+                      <div className="text-sm text-gray-600 mb-4">
                         <span className="font-semibold">{formatDate(item.originDate)}</span> at{" "}
                         {formatTime(item.originDate)}
                       </div>
-                      <div className="flex items-center justify-between text-sm pt-3 border-t mt-3">
+                      <div className="flex items-center justify-between text-sm pt-4 border-t border-gray-100">
                         <div className="flex items-center space-x-4">
                           {(item.serviceType === "mail" || item.serviceType === "both") && (
                             <div className="flex items-center space-x-1.5 text-blue-600 font-semibold">
@@ -975,7 +949,7 @@ const App = () => {
                             <span>{item.sitsAvailable}</span>
                           </div>
                         </div>
-                        <div className="text-xl font-bold text-green-600">${item.basePrice.toFixed(2)}</div>
+                        <div className="text-xl font-bold text-purple-600">${item.basePrice.toFixed(2)}</div>
                       </div>
                     </div>
                   ))}
@@ -986,9 +960,9 @@ const App = () => {
         } else {
           return (
             <div className="p-4 sm:p-6 text-center flex flex-col justify-center flex-grow">
-              <h2 className="text-3xl font-bold mb-2 text-gray-800">{t.findYourNextRide}</h2>
-              <p className="text-md text-gray-600 mb-8">{t.selectPickupAndDestination}</p>
-              <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200 space-y-4">
+              <h2 className="text-4xl font-extrabold mb-2 text-gray-900">{t.findYourNextRide}</h2>
+              <p className="text-lg text-gray-600 mb-8">{t.selectPickupAndDestination}</p>
+              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-elevated space-y-4">
                 <button
                   onClick={() => setShowFromModal(true)}
                   className="w-full p-4 bg-gray-100 rounded-xl flex items-center justify-between hover:bg-gray-200 transition-colors"
@@ -1023,14 +997,14 @@ const App = () => {
                       <button
                         key={num}
                         onClick={() => handleSeatsNeededClick(num)}
-                        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full text-md font-semibold transition-colors flex items-center justify-center ${seatsNeeded === num ? "bg-green-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full text-lg font-bold transition-colors flex items-center justify-center ${seatsNeeded === num ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                       >
                         {num}
                       </button>
-                    ))}
+                    ))}{" "}
                     <button
                       onClick={handleMailOnlyClick}
-                      className={`h-12 sm:h-14 px-4 rounded-full text-md font-semibold transition-colors flex items-center justify-center space-x-2 ${searchForMail ? "bg-green-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      className={`h-12 sm:h-14 px-5 rounded-full text-md font-semibold transition-colors flex items-center justify-center space-x-2 ${searchForMail ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                     >
                       <Mail size={20} />
                       <span>{t.mailOnly}</span>
@@ -1045,16 +1019,32 @@ const App = () => {
         return (
           <div className="p-4 sm:p-6 h-full">
             <div className="text-center mb-8">
-              <img
-                src="https://placehold.co/100x100/E2E8F0/4A5568?text=JD"
-                alt="User"
-                className="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-lg"
-              />
-              <h2 className="text-2xl font-bold text-gray-800">John Doe</h2>
+              <div className="relative inline-block">
+                <img
+                  src="https://placehold.co/100x100/c4b5fd/4338ca?text=JD"
+                  alt="User"
+                  className="w-28 h-28 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-lg"
+                />
+                <div className="absolute bottom-2 right-2 bg-green-500 rounded-full p-1 border-2 border-white">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 text-white"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">John Doe</h2>
               <p className="text-sm text-gray-600">{t.memberSince}</p>
             </div>
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 divide-y divide-gray-200">
-              <button className="w-full text-left p-4 flex items-center hover:bg-gray-50 transition-colors rounded-t-xl">
+            <div className="bg-white rounded-2xl shadow-soft divide-y divide-gray-100">
+              <button className="w-full text-left p-4 flex items-center hover:bg-gray-50 transition-colors rounded-t-2xl">
                 <Car size={20} className="text-gray-500 mr-4" />
                 <span className="flex-grow font-semibold text-gray-700">{t.goToDriverAccount}</span>
                 <ChevronRight size={20} className="text-gray-400" />
@@ -1072,7 +1062,7 @@ const App = () => {
                 href="https://t.me/@locontico"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full text-left p-4 flex items-center hover:bg-gray-50 transition-colors rounded-b-xl"
+                className="w-full text-left p-4 flex items-center hover:bg-gray-50 transition-colors rounded-b-2xl"
               >
                 <MessageCircle size={20} className="text-gray-500 mr-4" />
                 <span className="flex-grow font-semibold text-gray-700">{t.support}</span>
@@ -1087,10 +1077,10 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 font-['Inter',_sans-serif] text-gray-800 antialiased">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 via-purple-50 to-pink-50 font-['Inter',_sans-serif] text-gray-800 antialiased">
       <CustomScrollbarStyles />
       {!selectedRide && (
-        <header className="flex-shrink-0 bg-white p-4 flex items-center justify-between border-b border-gray-200 z-20">
+        <header className="flex-shrink-0 bg-white/80 backdrop-blur-sm p-4 flex items-center justify-between border-b border-gray-200 z-20 sticky top-0">
           <span className="font-semibold text-gray-800">+998 90 123 45 67</span>
           <button
             onClick={() => setActiveTab(activeTab === "profile" ? "search" : "profile")}
@@ -1104,13 +1094,11 @@ const App = () => {
           </button>
         </header>
       )}
-
-      <main className="flex-grow overflow-hidden flex flex-col">{renderContent()}</main>
-
+      <main className="flex-grow overflow-y-auto">{renderContent()}</main>
       {!selectedRide && !showSearchResults && activeTab === "search" && (
-        <div className="p-4 bg-white border-t border-gray-200">
+        <div className="p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200 sticky bottom-16 sm:bottom-0">
           <button
-            className={`w-full py-3 font-semibold transition-all rounded-xl ${pickupLocation && destinationLocation && pickupDate && (seatsNeeded || searchForMail) ? "bg-green-500 text-white shadow-lg shadow-green-500/30" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
+            className={`w-full py-4 font-semibold transition-all rounded-full text-lg ${pickupLocation && destinationLocation && pickupDate && (seatsNeeded || searchForMail) ? "bg-gray-900 text-white shadow-lg shadow-gray-900/30" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
             onClick={() => {
               if (searchForMail) {
                 setActiveFilter("mail");
@@ -1123,19 +1111,18 @@ const App = () => {
           </button>
         </div>
       )}
-
       {!selectedRide && (
-        <nav className="sticky bottom-0 bg-white/70 backdrop-blur-sm p-2 z-50 border-t border-gray-200">
+        <nav className="sticky bottom-0 bg-white/80 backdrop-blur-sm p-2 z-50 border-t border-gray-200">
           <div className="bg-gray-100 rounded-full flex items-center p-1 max-w-sm mx-auto">
             <button
-              className={`flex-1 py-2.5 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === "search" ? "bg-white shadow text-gray-800" : "text-gray-500"}`}
+              className={`flex-1 py-2.5 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === "search" ? "bg-white shadow text-gray-900" : "text-gray-500"}`}
               onClick={resetSearch}
             >
               <Search size={20} />
               <span>{t.search}</span>
             </button>
             <button
-              className={`flex-1 py-2.5 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === "history" ? "bg-white shadow text-gray-800" : "text-gray-500"}`}
+              className={`flex-1 py-2.5 text-sm font-semibold rounded-full flex items-center justify-center space-x-2 transition-all duration-300 ${activeTab === "history" ? "bg-white shadow text-gray-900" : "text-gray-500"}`}
               onClick={() => setActiveTab("history")}
             >
               <History size={20} />
@@ -1144,7 +1131,6 @@ const App = () => {
           </div>
         </nav>
       )}
-
       <ModalWrapper isOpen={showCalendar} onClose={() => setShowCalendar(false)} title="Select a Date">
         <CalendarView
           selectedDate={pickupDate}
@@ -1186,7 +1172,7 @@ const App = () => {
 const AccordionItem = ({ icon, title, value, children }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="border-b last:border-b-0 border-gray-200">
+    <div className="border-b last:border-b-0 border-gray-100">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="p-4 flex justify-between items-center w-full hover:bg-gray-50 transition-colors"
@@ -1236,16 +1222,13 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
             src={ride.imageUrl}
             alt={ride.carModel}
             className="w-20 h-14 object-cover rounded-lg mr-4"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = "https://placehold.co/200x150/e4e0d4/543d33?text=No+Img";
-            }}
+            onError={(e) => (e.target.src = "https://placehold.co/200x150/e4e0d4/543d33?text=No+Img")}
           />
           <div className="flex items-stretch w-full">
             <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
               <div className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-0.5 bg-gray-200"></div>
-              <MapPin size={20} className="text-green-500 bg-white z-10" />
-              <Target size={20} className="text-red-500 bg-white z-10" />
+              <MapPin size={20} className="text-purple-500 bg-white z-10" />
+              <Target size={20} className="text-pink-500 bg-white z-10" />
             </div>
             <div className="flex flex-col justify-between w-full text-sm">
               <div>
@@ -1273,9 +1256,8 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
               <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
             </label>
           </div>
-
           <h2 className="text-xl font-bold pt-2">About the trip</h2>
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-soft overflow-hidden">
             <AccordionItem icon={<DollarSign size={20} />} title="Payout (est.)" value={`$${finalPrice.toFixed(2)}`}>
               <div className="space-y-2 font-medium">
                 <div className="flex justify-between">
@@ -1318,10 +1300,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
                   src={ride.driverImageUrl}
                   alt={ride.driverName}
                   className="w-20 h-20 object-cover rounded-full"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = "https://placehold.co/100x100/e4e0d4/543d33?text=N/A";
-                  }}
+                  onError={(e) => (e.target.src = "https://placehold.co/100x100/e4e0d4/543d33?text=N/A")}
                 />
                 <div>
                   <p className="font-bold text-lg">{ride.driverName}</p>
@@ -1350,7 +1329,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
         </div>
         <button
           onClick={() => onBook(ride)}
-          className="bg-green-500 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg shadow-green-500/30 hover:bg-green-600 transition-all"
+          className="bg-gray-900 text-white px-8 py-3.5 text-lg font-semibold rounded-full shadow-lg shadow-gray-900/30 hover:bg-gray-800 transition-all"
         >
           Book
         </button>
