@@ -161,29 +161,27 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
           <div className="space-y-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="departure" className="text-base font-semibold">Departure Location</Label>
-                <div className="relative mt-2">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <div className="relative">
+                  <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
                   <Button
                     variant="outline"
                     onClick={() => setShowDepartureSelector(true)}
-                    className="w-full h-14 justify-start text-lg pl-10"
+                    className="w-full h-12 justify-start text-base font-normal bg-background hover:bg-muted/50"
                   >
-                    {departure || "Where are you starting from?"}
+                    {departure || "Buloqboshi"}
                   </Button>
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="destination" className="text-base font-semibold">Destination Location</Label>
-                <div className="relative mt-2">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary" />
+                <div className="relative">
+                  <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
                   <Button
                     variant="outline"
                     onClick={() => setShowDestinationSelector(true)}
-                    className="w-full h-14 justify-start text-lg pl-10 border-primary/50"
+                    className="w-full h-12 justify-start text-base font-normal bg-background hover:bg-muted/50"
                   >
-                    {destination || "Where are you going?"}
+                    {destination || "Buloqboshi"}
                   </Button>
                 </div>
               </div>
@@ -205,18 +203,17 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
         return (
           <div className="space-y-6">
             <div>
-              <Label className="text-base font-semibold mb-4 block">Select Departure Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full h-14 justify-start text-left font-normal text-lg",
+                      "w-full h-12 justify-start text-left font-normal text-base bg-background hover:bg-muted/50",
                       !date && "text-muted-foreground"
                     )}
                   >
-                    <CalendarIcon className="mr-3 h-5 w-5" />
-                    {date ? format(date, "PPP") : <span>Pick a date for your journey</span>}
+                    <CalendarIcon className="absolute right-3 h-5 w-5 text-muted-foreground" />
+                    {date ? format(date, "yyyy-MM-dd") : <span>2025-10-14</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -311,37 +308,31 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
               {(mailOption === "yes" || mailOption === "no") && (
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="ridePrice">Ride Price Per Seat</Label>
-                    <div className="relative mt-2">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input
-                        id="ridePrice"
-                        value={ridePrice}
-                        onChange={(e) => setRidePrice(e.target.value)}
-                        placeholder="0.00"
-                        type="number"
-                        className="pl-10 h-12"
-                      />
-                    </div>
+                    <Label htmlFor="ridePrice" className="text-base font-semibold">Price</Label>
+                    <Input
+                      id="ridePrice"
+                      value={ridePrice}
+                      onChange={(e) => setRidePrice(e.target.value)}
+                      placeholder="423"
+                      type="number"
+                      className="mt-2 h-12"
+                    />
                   </div>
                 </div>
               )}
 
               {(mailOption === "yes" || mailOption === "mailOnly") && (
-                <div className="space-y-4">
+                <div className="space-y-4 mt-4">
                   <div>
-                    <Label htmlFor="mailPrice">Mail Price</Label>
-                    <div className="relative mt-2">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input
-                        id="mailPrice"
-                        value={mailPrice}
-                        onChange={(e) => setMailPrice(e.target.value)}
-                        placeholder="0.00"
-                        type="number"
-                        className="pl-10 h-12"
-                      />
-                    </div>
+                    <Label htmlFor="mailPrice" className="text-base font-semibold">Mail Price</Label>
+                    <Input
+                      id="mailPrice"
+                      value={mailPrice}
+                      onChange={(e) => setMailPrice(e.target.value)}
+                      placeholder="0.00"
+                      type="number"
+                      className="mt-2 h-12"
+                    />
                   </div>
                 </div>
               )}
@@ -416,7 +407,29 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
 
               <div className="mt-4 space-y-4">
                 <div>
-                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <Label htmlFor="totalSeats" className="text-base font-semibold">Free Seats</Label>
+                  <div className="grid grid-cols-4 gap-3 mt-2">
+                    {[1, 2, 3, 4].map((num) => (
+                      <Button
+                        key={num}
+                        type="button"
+                        variant="outline"
+                        onClick={() => setTotalSeats(String(num))}
+                        className={cn(
+                          "h-12 text-base font-medium",
+                          totalSeats === String(num) 
+                            ? "bg-primary/10 border-primary text-primary hover:bg-primary/20" 
+                            : "hover:bg-muted/50"
+                        )}
+                      >
+                        {num}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="phoneNumber" className="text-base font-semibold">Phone Number</Label>
                   <Input
                     id="phoneNumber"
                     value={phoneNumber}
@@ -425,34 +438,22 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
                     className="mt-2 h-12"
                   />
                 </div>
-
-                <div>
-                  <Label htmlFor="totalSeats">Number of Seats (1-4)</Label>
-                  <Input
-                    id="totalSeats"
-                    type="number"
-                    min="1"
-                    max="4"
-                    value={totalSeats}
-                    onChange={(e) => setTotalSeats(e.target.value)}
-                    className="mt-2 h-12"
-                  />
-                </div>
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <Button onClick={() => setStep(4)} variant="outline" className="flex-1">
-                Back
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => setStep(4)} 
+                variant="outline" 
+                className="flex-1 h-12"
+              >
+                Cancel
               </Button>
               <Button 
                 onClick={handlePost}
                 disabled={!departureType || (departureType === "fixed" && !departureTime) || !phoneNumber || isLoading}
-                variant="hero"
-                size="xl"
-                className="flex-1"
+                className="flex-1 h-12 bg-foreground text-background hover:bg-foreground/90"
               >
-                <Car className="mr-2 h-5 w-5" />
                 {isLoading ? "Posting..." : "Post Ride"}
               </Button>
             </div>
@@ -469,12 +470,9 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-center">
+            <DialogTitle className="text-xl font-bold">
               Post a New Ride
             </DialogTitle>
-            <div className="text-center text-sm text-muted-foreground">
-              Step {step} of 5
-            </div>
           </DialogHeader>
           
           <div className="py-4">
