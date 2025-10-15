@@ -872,8 +872,8 @@ const CarTypeModal = ({
       onClose();
     }
   };
-  return <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-      <div className="retro-window w-full max-w-md h-auto max-h-[80vh] flex flex-col">
+  return <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+      <div className="retro-window w-full max-w-md h-auto max-h-[80vh] flex flex-col animate-scale-in">
         <div className="retro-title-bar">
           <span>{t("selectCar")}</span>
           <button onClick={onClose} className="retro-title-bar-button">
@@ -928,8 +928,8 @@ const LocationSelectModal = ({
     cities: regionData.cities.filter(city => city.toLowerCase().includes(searchTerm.toLowerCase()))
   })).filter(regionData => regionData.cities.length > 0 || regionData.region.toLowerCase().includes(searchTerm.toLowerCase()));
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-      <div className="retro-window w-full max-w-md h-[80vh] flex flex-col">
+  return <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+      <div className="retro-window w-full max-w-md h-[80vh] flex flex-col animate-scale-in">
         <div className="retro-title-bar">
           <span>{title}</span>
           <button onClick={handleClose} className="retro-title-bar-button">
@@ -1023,8 +1023,8 @@ const PostRideForm = ({
     const dates = Array.from({
       length: daysInMonth
     }, (_, i) => i + 1);
-    return <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-        <div className="retro-window w-full max-w-xs flex flex-col">
+    return <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+        <div className="retro-window w-full max-w-xs flex flex-col animate-scale-in">
           <div className="retro-title-bar">
             <span>{t("selectDepDate")}</span>
             <button onClick={onClose} className="retro-title-bar-button">
@@ -1066,8 +1066,8 @@ const PostRideForm = ({
         </div>
       </div>;
   };
-  return <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 font-sans">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+  return <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden animate-scale-in">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold">{isEditing ? t("editRide") : t("postNewRide")}</h2>
           <button onClick={onClose} aria-label="Close" className="rounded-full p-1 hover:bg-gray-100">
@@ -1199,7 +1199,7 @@ const RideDetailModal = ({
     setSelectedPassenger(passenger);
   };
   if (!isOpen || !ride) return null;
-  return <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans" onClick={() => setSelectedPassenger(null)}>
+  return <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in" onClick={() => setSelectedPassenger(null)}>
       {selectedPassenger && <div className="bg-white rounded-md shadow-lg border fixed z-[51] p-1 space-y-1" style={{
       top: popoverPosition.top,
       left: popoverPosition.left
@@ -1302,8 +1302,8 @@ const EditProfileModal = ({
     onClose();
   };
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-      <div className="retro-window w-full max-w-md flex flex-col">
+  return <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+      <div className="retro-window w-full max-w-md flex flex-col animate-scale-in">
         <div className="retro-title-bar">
           <span>{t("editProfile")}</span>
           <button onClick={onClose} className="retro-title-bar-button">
@@ -1363,8 +1363,8 @@ const EditCarModal = ({
     onClose();
   };
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-      <div className="retro-window w-full max-w-md flex flex-col">
+  return <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+      <div className="retro-window w-full max-w-md flex flex-col animate-scale-in">
         <div className="retro-title-bar">
           <span>{t("editVehicle")}</span>
           <button onClick={onClose} className="retro-title-bar-button">
@@ -1395,8 +1395,8 @@ const SettingsModal = ({
   children
 }) => {
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-      <div className="retro-window w-full max-w-md flex flex-col h-auto max-h-[80vh]">
+  return <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+      <div className="retro-window w-full max-w-md flex flex-col h-auto max-h-[80vh] animate-scale-in">
         <div className="retro-title-bar">
           <span>{title}</span>
           <button onClick={onClose} className="retro-title-bar-button">
@@ -1575,8 +1575,8 @@ const ArchiveConfirmModal = ({
   const isUpcoming = rideStatus === "upcoming";
   const title = isUpcoming ? t("archiveRide") : t("stopRide");
   const message = isUpcoming ? t("confirmArchiveRide") : `${t("youLoseClients")} ${t("confirmStopRide")}`;
-  return <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-      <div className="retro-window w-full max-w-sm p-0 text-center">
+  return <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+      <div className="retro-window w-full max-w-sm p-0 text-center animate-scale-in">
         <div className="p-6">
           <h2 className="text-xl font-bold mb-2">{title}</h2>
           <p className="mb-6 text-gray-600">{message}</p>
@@ -1606,8 +1606,8 @@ const ConfirmationModal = ({
     t
   } = useLanguage();
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-      <div className="retro-window w-full max-w-sm flex flex-col">
+  return <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+      <div className="retro-window w-full max-w-sm flex flex-col animate-scale-in">
         <div className="retro-title-bar">
           <span>{t("confirmRidePost")}</span>
           <button onClick={onClose} className="retro-title-bar-button">
@@ -1661,8 +1661,8 @@ const NewRideOptionsModal = ({
     t
   } = useLanguage();
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-      <div className="retro-window w-full max-w-sm p-6 text-center">
+  return <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+      <div className="retro-window w-full max-w-sm p-6 text-center animate-scale-in">
         <h2 className="text-xl font-bold mb-6">{t("newRide")}</h2>
         <div className="space-y-4">
           <button onClick={onStartNewRide} className="w-full h-12 retro-button primary flex items-center justify-center gap-2">
@@ -2164,8 +2164,8 @@ const AppContent = () => {
       setShowArchiveConfirmModal(true);
     }} initialValues={editingRide} isEditing={true} userPhone={userData.phone} />}
       <CarTypeModal isOpen={showCarTypeModal} onClose={() => setShowCarTypeModal(false)} onSelectCar={setSelectedCar} currentCar={selectedCar} />
-      {showConfirmationModal && <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-          <div className="retro-window w-full max-w-sm p-0 text-center">
+      {showConfirmationModal && <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+          <div className="retro-window w-full max-w-sm p-0 text-center animate-scale-in">
             <div className="retro-title-bar">
               <span>{t("letsGo")}</span>
             </div>
@@ -2182,8 +2182,8 @@ const AppContent = () => {
             </div>
           </div>
         </div>}
-      {showActiveRideErrorModal && <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-          <div className="retro-window w-full max-w-sm p-0 text-center">
+      {showActiveRideErrorModal && <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+          <div className="retro-window w-full max-w-sm p-0 text-center animate-scale-in">
             <div className="retro-title-bar">
               <span>Error</span>
             </div>
@@ -2196,8 +2196,8 @@ const AppContent = () => {
             </div>
           </div>
         </div>}
-      {showFinishRideModal && <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-sans">
-          <div className="retro-window w-full max-w-sm p-0 text-center">
+      {showFinishRideModal && <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+          <div className="retro-window w-full max-w-sm p-0 text-center animate-scale-in">
             <div className="retro-title-bar">
               <span>{t("finishRide")}</span>
             </div>
