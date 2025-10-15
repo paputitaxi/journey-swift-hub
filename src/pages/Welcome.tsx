@@ -1,138 +1,87 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, createContext, useContext } from "react";
+import { User, Car } from "lucide-react";
 
-// Mock/Helper Components & Hooks
-// =============================================================================
-// The following components and hooks are simplified replacements for your
-// project's imports (e.g., from lucide-react, @/components, @/hooks).
-// This makes the component runnable in this standalone preview environment.
+// --- Start of Fixes ---
 
-/**
- * Custom Illustration
- * A friendly, monochrome illustration fitting the app's theme.
- */
-const WelcomeIllustration = () => (
-  <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" className="w-40 h-auto mx-auto mb-4">
-    {/* Background bubbles */}
-    <circle cx="45" cy="40" r="8" fill="#E0E0E0" opacity="0.5" />
-    <circle cx="155" cy="55" r="12" fill="#E0E0E0" opacity="0.5" />
-    <circle cx="100" cy="20" r="5" fill="#E0E0E0" opacity="0.5" />
+// Minimalist styling for the components
+const componentStyles = `
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.5rem;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    padding: 1rem 1.5rem;
+    width: 100%;
+    font-size: 1rem;
+    gap: 0.75rem;
+  }
+  .btn-primary {
+    background-color: #000;
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background-color: #333;
+  }
+  .btn-primary:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  .btn-outline {
+    background-color: transparent;
+    border: 1px solid #e5e7eb;
+    color: #000;
+  }
+  .btn-outline:hover {
+    background-color: #f3f4f6;
+  }
+  .input-field {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 1.5rem;
+    text-align: center;
+    font-size: 1rem;
+    background-color: #fff;
+  }
+  .input-field:focus {
+    outline: none;
+    border-color: #000;
+    box-shadow: 0 0 0 2px #00000033;
+  }
+`;
 
-    {/* Character */}
-    <g transform="translate(85, 40)">
-      <path
-        d="M15 40 C 15 55, -15 55, -15 40 S -25 10, 0 10 S 25 10, 15 40 Z"
-        fill="#FFFFFF"
-        stroke="#000000"
-        strokeWidth="2"
-      />
-      <circle cx="0" cy="22" r="14" fill="#F0F0F0" />
-      <path d="M -12 20 a 12 12 0 0 1 24 0" fill="none" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="-5" cy="20" r="1.5" fill="#000000" />
-      <circle cx="5" cy="20" r="1.5" fill="#000000" />
-      <path d="M -3 28 Q 0 32, 3 28" fill="none" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" />
-    </g>
-
-    {/* Car front */}
-    <g transform="translate(30, 60)">
-      <path
-        d="M 0 10 C 0 0, 10 0, 20 0 L 60 0 C 70 0, 75 5, 75 15 L 75 40 L 0 40 Z"
-        fill="#FFFFFF"
-        stroke="#000000"
-        strokeWidth="2"
-      />
-      <path d="M 5 40 V 20 H 25 V 40" fill="none" stroke="#000000" strokeWidth="2" />
-      <circle cx="15" cy="10" r="3" fill="#FFFFFF" stroke="#000000" strokeWidth="1.5" />
-      <path d="M 50 10 H 65" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" />
-      <path d="M 50 18 H 65" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" />
-    </g>
-  </svg>
-);
-
-/**
- * Icon: User
- * A simple SVG component to replace the one from lucide-react.
- */
-const User = ({ className }) => (
-  <svg
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
-  </svg>
-);
-
-/**
- * Icon: Car
- * A simple SVG component to replace the one from lucide-react.
- */
-const Car = ({ className }) => (
-  <svg
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1h2" />
-    <circle cx="7" cy="17" r="2" />
-    <path d="M9 17h6" />
-    <circle cx="17" cy="17" r="2" />
-  </svg>
-);
-
-/**
- * UI Component: Button
- * A styled button to replace your custom Button component.
- */
-const Button = ({ children, className, variant = "default", ...props }) => {
-  const baseClasses =
-    "inline-flex items-center justify-center rounded-2xl text-base font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
-  const variantClasses = {
-    default: "bg-white text-black hover:bg-gray-100", // Changed for black section
-    outline: "border-2 border-white text-white hover:bg-gray-800", // Changed for black section
-  };
+// 1. Re-implementing UI components locally
+const Button = ({ onClick, disabled, className, children, variant }) => {
+  const styleClass = variant === "outline" ? "btn btn-outline" : "btn btn-primary";
   return (
-    <button className={`${baseClasses} ${variantClasses[variant]} ${className}`} {...props}>
+    <button onClick={onClick} disabled={disabled} className={`${styleClass} ${className}`}>
       {children}
     </button>
   );
 };
 
-/**
- * UI Component: Input
- * A styled input to replace your custom Input component.
- */
-const Input = ({ className, ...props }) => {
-  const baseClasses =
-    "flex h-12 w-full rounded-2xl border-2 border-gray-700 bg-gray-900 px-4 py-2 text-base ring-offset-white placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-white"; // Adjusted for black section
-  return <input className={`${baseClasses} ${className}`} {...props} />;
+const Input = ({ type, placeholder, value, onChange, className }) => {
+  return (
+    <input
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      className={`input-field ${className}`}
+    />
+  );
 };
 
-/**
- * Custom Hook: useUsername
- * A hook that uses localStorage to persist the username across sessions.
- */
+// 2. Re-implementing custom hooks locally
 const useUsername = () => {
   const [username, setUsername] = useState(() => {
     try {
       const item = window.localStorage.getItem("username");
       return item ? JSON.parse(item) : "";
     } catch (error) {
-      console.error("Error reading username from localStorage", error);
+      console.error(error);
       return "";
     }
   });
@@ -142,42 +91,26 @@ const useUsername = () => {
       window.localStorage.setItem("username", JSON.stringify(name));
       setUsername(name);
     } catch (error) {
-      console.error("Error saving username to localStorage", error);
+      console.error(error);
     }
   };
 
   return { username, saveUsername };
 };
 
-/**
- * Font Loader
- * Injects the "Inter" font into the document's head.
- */
-const useFontLoader = () => {
-  useEffect(() => {
-    const link = document.createElement("link");
-    link.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-
-    return () => {
-      document.head.removeChild(link);
-    };
-  }, []);
+const useLanguage = () => {
+  const t = (key) => key; // Mock translation function
+  return { t };
 };
 
-// Application Components
-// =============================================================================
+// --- End of Fixes ---
 
-/**
- * Welcome Component (from your code)
- * This is your original component, adapted to use the mock helpers above
- * and a `Maps` prop for routing.
- */
-const Welcome = ({ navigate }) => {
+const Welcome = () => {
   const { username, saveUsername } = useUsername();
+  const { t } = useLanguage();
   const [tempUsername, setTempUsername] = useState(username);
   const [showRoleSelection, setShowRoleSelection] = useState(!!username);
+  const [selectedRole, setSelectedRole] = useState(null);
 
   const handleContinue = () => {
     if (tempUsername.trim()) {
@@ -187,40 +120,42 @@ const Welcome = ({ navigate }) => {
   };
 
   const handleRoleSelect = (role) => {
-    if (role === "rider") {
-      navigate("/rider-dashboard");
-    } else {
-      navigate("/driver-dashboard");
-    }
+    setSelectedRole(role);
   };
 
-  return (
-    <div className="min-h-screen bg-white text-black flex flex-col" style={{ fontFamily: "'Inter', sans-serif" }}>
-      {/* Top Illustration and Content Area */}
-      <div className="flex-grow flex items-center justify-center p-4">
-        <div className="text-center">
-          <WelcomeIllustration />
-          <h1 className="text-3xl font-bold tracking-wide text-black mb-2">Welcome</h1>
-          <p className="text-gray-500">
-            {showRoleSelection ? "Choose your role to get started." : "Pick a username to identify yourself."}
+  // Display a confirmation screen after role selection
+  if (selectedRole) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <style>{componentStyles}</style>
+        <div className="bg-white backdrop-blur-lg border border-gray-200 rounded-3xl shadow-2xl p-8 w-full max-w-md text-center">
+          <h1 className="text-3xl font-bold text-black mb-2">Welcome, {username}!</h1>
+          <p className="text-gray-600">
+            You have selected the <span className="font-bold">{selectedRole}</span> role.
           </p>
-          {showRoleSelection && username && (
-            <p className="text-sm text-gray-500 mt-2">
-              Signed in as <span className="font-semibold text-gray-700">{username}</span>
-            </p>
-          )}
+          <p className="text-gray-500 mt-4">
+            In a full application, you would be redirected to the {selectedRole} dashboard.
+          </p>
+          <Button onClick={() => setSelectedRole(null)} className="mt-6">
+            Go Back
+          </Button>
         </div>
       </div>
+    );
+  }
 
-      {/* Bottom Black Component Area */}
-      <div className="bg-black text-white p-8 rounded-t-3xl shadow-lg w-full max-w-md mx-auto">
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <style>{componentStyles}</style>
+      <div className="bg-white backdrop-blur-lg border border-gray-200 rounded-3xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold tracking-wide mb-2">
-            {showRoleSelection ? "Select Your Role" : "Ready to Start?"}
-          </h2>
-          <p className="text-gray-300">
-            {showRoleSelection ? "Find rides or offer a spot in your car." : "You can change your username later."}
+          <h1 className="text-3xl font-bold text-black mb-2">Welcome</h1>
+          <p className="text-gray-600">
+            {showRoleSelection
+              ? "Choose your role to get started. Find rides or offer a spot in your car."
+              : "Pick a unique username to identify you in rides."}
           </p>
+          {showRoleSelection && username && <p className="text-sm text-gray-500 mt-2">Signed in as {username}</p>}
         </div>
 
         {!showRoleSelection ? (
@@ -230,37 +165,21 @@ const Welcome = ({ navigate }) => {
               placeholder="your_username"
               value={tempUsername}
               onChange={(e) => setTempUsername(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && tempUsername.trim() && handleContinue()}
-              className="text-center h-14 text-lg"
             />
-            <Button onClick={handleContinue} disabled={!tempUsername.trim()} className="w-full h-14 text-lg">
+            <Button onClick={handleContinue} disabled={!tempUsername.trim()}>
               Continue
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
-            <Button
-              onClick={() => handleRoleSelect("rider")}
-              variant="outline"
-              className="w-full flex items-center justify-start gap-4 p-6 h-auto text-left"
-            >
-              <User className="w-8 h-8 text-white" />
-              <div>
-                <span className="text-lg font-medium">I'm a Rider</span>
-                <p className="text-sm text-gray-300">Find a ride to your destination.</p>
-              </div>
+            <Button onClick={() => handleRoleSelect("rider")} variant="outline">
+              <User className="w-6 h-6" />
+              <span>I'm a Rider</span>
             </Button>
 
-            <Button
-              onClick={() => handleRoleSelect("driver")}
-              variant="outline"
-              className="w-full flex items-center justify-start gap-4 p-6 h-auto text-left"
-            >
-              <Car className="w-8 h-8 text-white" />
-              <div>
-                <span className="text-lg font-medium">I'm a Driver</span>
-                <p className="text-sm text-gray-300">Offer a ride and share costs.</p>
-              </div>
+            <Button onClick={() => handleRoleSelect("driver")} variant="outline">
+              <Car className="w-6 h-6" />
+              <span>I'm a Driver</span>
             </Button>
           </div>
         )}
@@ -269,74 +188,4 @@ const Welcome = ({ navigate }) => {
   );
 };
 
-/**
- * Placeholder Dashboard: Rider
- * A simple component to show navigation to the rider dashboard is working.
- */
-const RiderDashboard = ({ navigate, username }) => (
-  <div
-    className="min-h-screen bg-gray-100 text-black flex flex-col items-center justify-center p-4"
-    style={{ fontFamily: "'Inter', sans-serif" }}
-  >
-    <div className="text-center">
-      <h1 className="text-4xl font-bold mb-4">Rider Dashboard</h1>
-      <p className="text-gray-500">
-        Welcome, <span className="font-semibold">{username}</span>! Find your next ride here.
-      </p>
-      <Button variant="outline" onClick={() => navigate("/")} className="mt-8 px-8 py-4">
-        Go Back
-      </Button>
-    </div>
-  </div>
-);
-
-/**
- * Placeholder Dashboard: Driver
- * A simple component to show navigation to the driver dashboard is working.
- */
-const DriverDashboard = ({ navigate, username }) => (
-  <div
-    className="min-h-screen bg-gray-100 text-black flex flex-col items-center justify-center p-4"
-    style={{ fontFamily: "'Inter', sans-serif" }}
-  >
-    <div className="text-center">
-      <h1 className="text-4xl font-bold mb-4">Driver Dashboard</h1>
-      <p className="text-gray-500">
-        Welcome, <span className="font-semibold">{username}</span>! Manage your trips here.
-      </p>
-      <Button variant="outline" onClick={() => navigate("/")} className="mt-8 px-8 py-4">
-        Go Back
-      </Button>
-    </div>
-  </div>
-);
-
-/**
- * Main App Component
- * This component acts as a simple router to switch between the welcome
- * screen and the dashboards.
- */
-export default function App() {
-  useFontLoader(); // Load the Inter font
-  const [currentPage, setCurrentPage] = useState("welcome");
-  const { username } = useUsername();
-
-  const navigate = (path) => {
-    if (path === "/rider-dashboard") {
-      setCurrentPage("rider");
-    } else if (path === "/driver-dashboard") {
-      setCurrentPage("driver");
-    } else {
-      setCurrentPage("welcome");
-    }
-  };
-
-  switch (currentPage) {
-    case "rider":
-      return <RiderDashboard navigate={navigate} username={username} />;
-    case "driver":
-      return <DriverDashboard navigate={navigate} username={username} />;
-    default:
-      return <Welcome navigate={navigate} />;
-  }
-}
+export default Welcome;
