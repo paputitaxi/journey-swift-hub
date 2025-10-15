@@ -2098,6 +2098,7 @@ const AppContent = () => {
         return null;
     }
   };
+  const isOverlayOpen = showNewRideOptionsModal || showPostRide || isEditModalOpen || showStatsModal || showHistoryDetailModal || showPostConfirmationModal || showArchiveConfirmModal || showActiveRideErrorModal || showFinishRideModal || showConfirmationModal || showCarTypeModal || showMessages;
   return <div className="h-screen bg-white text-gray-900 flex flex-col font-sans">
       <ModernUIStyles />
       <ModernScrollbarStyles />
@@ -2119,36 +2120,48 @@ const AppContent = () => {
             {t("removePassenger")}
           </button>
         </div>}
-      <header className="p-2 border-b flex items-center justify-between z-20">
-        <div className="flex-1 flex justify-start">
-          <button onClick={() => setActiveTab("dashboard")} className="retro-button">
-            {userData.phone}
-          </button>
-        </div>
-        <div className="flex-1 flex justify-end">
-          <button onClick={() => setActiveTab("profile")} className="retro-button flex items-center gap-2">
-            <span>{userData.fullName}</span>
-            <User className="h-5 w-5" />
-          </button>
-        </div>
-      </header>
-      <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative" onClick={() => selectedPassenger && setSelectedPassenger(null)}>
-        {renderContent()}
-      </main>
-      {!(showMessages || showPostRide || isEditModalOpen || showStatsModal || showHistoryDetailModal || showArchive) && <footer className="border-t z-10 p-1">
-          <div className="flex justify-around">
-            {bottomNavItems.map(item => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return <button key={item.id} onClick={() => {
-            setActiveTab(item.id);
-          }} className={`flex-1 flex flex-col items-center py-2 rounded-lg transition-colors ${isActive ? "bg-gray-100 text-black" : "text-gray-500 hover:bg-gray-100"}`}>
-                  <Icon className={`h-6 w-6 mb-1`} />
-                  <span className="text-xs">{item.label}</span>
-                </button>;
-        })}
+      <div className={`relative flex flex-col flex-1 ${isOverlayOpen ? "blur-sm pointer-events-none" : ""}`}>
+        <header className="p-2 border-b flex items-center justify-between z-20">
+          <div className="flex-1 flex justify-start">
+            <button onClick={() => setActiveTab("dashboard")} className="retro-button">
+              {userData.phone}
+            </button>
           </div>
-        </footer>}
+          <div className="flex-1 flex justify-end">
+            <button onClick={() => setActiveTab("profile")} className="retro-button flex items-center gap-2">
+              <span>{userData.fullName}</span>
+              <User className="h-5 w-5" />
+            </button>
+          </div>
+        </header>
+        <main className="flex-grow overflow-y-auto custom-scrollbar h-full relative" onClick={() => selectedPassenger && setSelectedPassenger(null)}>
+          {renderContent()}
+        </main>
+        {!(showMessages || showPostRide || isEditModalOpen || showStatsModal || showHistoryDetailModal || showArchive) && (
+          <footer className="border-t z-10 p-1">
+            <div className="flex justify-around">
+              {bottomNavItems.map(item => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                    }}
+                    className={`flex-1 flex flex-col items-center py-2 rounded-lg transition-colors ${isActive ? "bg-gray-100 text-black" : "text-gray-500 hover:bg-gray-100"}`}
+                  >
+                    <Icon className={`h-6 w-6 mb-1`} />
+                    <span className="text-xs">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </footer>
+        )}
+      </div>
+      {isOverlayOpen && <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />}
+
       {showPostRide && <PostRideForm onClose={() => {
       setShowPostRide(false);
       setRepostRideData(null);
