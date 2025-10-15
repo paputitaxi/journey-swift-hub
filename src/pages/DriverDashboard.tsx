@@ -2040,7 +2040,6 @@ const AppContent = () => {
                   </div>
                   <div>
                     <p className="font-bold text-lg">{t("postNewRide")}</p>
-                    <p className="text-sm text-gray-500">{t("postRidePrompt")}</p>
                   </div>
                 </button>
                 <button onClick={() => {
