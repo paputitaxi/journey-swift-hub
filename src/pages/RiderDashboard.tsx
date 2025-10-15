@@ -384,15 +384,15 @@ const uzbekistanLocationsData = [
   },
 ];
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   if (!dateString) return "";
-  const options = { weekday: "short", month: "short", day: "numeric" };
+  const options: Intl.DateTimeFormatOptions = { weekday: "short", month: "short", day: "numeric" };
   return new Date(dateString).toLocaleDateString("en-US", options);
 };
 
-const formatTime = (dateString) => {
+const formatTime = (dateString: string) => {
   if (!dateString) return "";
-  const options = { hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
+  const options: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
   return new Date(dateString).toLocaleTimeString("en-US", options);
 };
 
@@ -1222,7 +1222,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
             src={ride.imageUrl}
             alt={ride.carModel}
             className="w-20 h-14 object-cover rounded-lg mr-4"
-            onError={(e) => (e.target.src = "https://placehold.co/200x150/e4e0d4/543d33?text=No+Img")}
+            onError={(e: React.SyntheticEvent<HTMLImageElement>) => (e.currentTarget.src = "https://placehold.co/200x150/e4e0d4/543d33?text=No+Img")}
           />
           <div className="flex items-stretch w-full">
             <div className="relative flex flex-col justify-between items-center mr-4 shrink-0">
@@ -1300,7 +1300,7 @@ const TripDetails = ({ ride, isUnreliable, onToggleReliability, onBack, onBook }
                   src={ride.driverImageUrl}
                   alt={ride.driverName}
                   className="w-20 h-20 object-cover rounded-full"
-                  onError={(e) => (e.target.src = "https://placehold.co/100x100/e4e0d4/543d33?text=N/A")}
+                  onError={(e: React.SyntheticEvent<HTMLImageElement>) => (e.currentTarget.src = "https://placehold.co/100x100/e4e0d4/543d33?text=N/A")}
                 />
                 <div>
                   <p className="font-bold text-lg">{ride.driverName}</p>

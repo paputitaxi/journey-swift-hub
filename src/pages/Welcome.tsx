@@ -130,7 +130,7 @@ const useUsername = () => {
   const [username, setUsername] = useState(() => {
     try {
       const item = window.localStorage.getItem("username");
-      return item ? JSON.parse(item) : "";
+      return item || "";
     } catch (error) {
       console.error("Error reading username from localStorage", error);
       return "";
@@ -139,7 +139,7 @@ const useUsername = () => {
 
   const saveUsername = (name) => {
     try {
-      window.localStorage.setItem("username", JSON.stringify(name));
+      window.localStorage.setItem("username", name);
       setUsername(name);
     } catch (error) {
       console.error("Error saving username to localStorage", error);
