@@ -779,9 +779,14 @@ const MessageDashboard = ({
   };
   return <div className="retro-window flex flex-col h-full">
       <div className="retro-title-bar">
+        {selectedChat && (
+          <button onClick={() => setSelectedChat(null)} className="mr-2">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+        )}
         <span>{selectedChat ? selectedChat.name : t("chats")}</span>
         <button onClick={onClose} className="retro-title-bar-button">
-          X
+          <X className="h-4 w-4" />
         </button>
       </div>
       {!selectedChat && <div className="flex border-b border-gray-200">
@@ -1677,12 +1682,19 @@ const NewRideOptionsModal = ({
 };
 const ArchivePage = ({
   archivedRides,
-  onRideClick
+  onRideClick,
+  onClose
 }) => {
   const {
     t
   } = useLanguage();
   return <div className="p-4 space-y-4 pb-20">
+      <div className="flex items-center mb-4">
+        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <ArrowLeft className="h-6 w-6" />
+        </button>
+        <h2 className="text-xl font-bold ml-2">{t("archive")}</h2>
+      </div>
       {archivedRides.length > 0 ? archivedRides.map(ride => <button key={ride.id} onClick={() => onRideClick(ride)} className="w-full text-left p-4 border rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
             <div className="flex justify-between items-center">
               <div>
@@ -2026,8 +2038,8 @@ const AppContent = () => {
   };
   const renderContent = () => {
     if (showMessages) return <MessageDashboard onClose={() => setShowMessages(false)} />;
-    if (showStatsModal) return <StatsModal />;
-    if (showArchive) return <ArchivePage archivedRides={archivedRides} onRideClick={handleHistoryRideClick} />;
+    if (showStatsModal) return <StatsModal onClose={() => setShowStatsModal(false)} />;
+    if (showArchive) return <ArchivePage archivedRides={archivedRides} onRideClick={handleHistoryRideClick} onClose={() => setShowArchive(false)} />;
     const completedRides = myRides.filter(r => r.status === "completed");
     switch (activeTab) {
       case "dashboard":
@@ -2213,7 +2225,7 @@ const AppContent = () => {
 };
 
 // StatsModal Component
-const StatsModal = () => {
+const StatsModal = ({ onClose }) => {
   const {
     t
   } = useLanguage();
@@ -2256,6 +2268,12 @@ const StatsModal = () => {
     earnings: 45
   }];
   return <div className="p-4 space-y-4">
+      <div className="flex items-center mb-4">
+        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <ArrowLeft className="h-6 w-6" />
+        </button>
+        <h2 className="text-xl font-bold ml-2">{t("stats")}</h2>
+      </div>
       <div className="border rounded-lg overflow-hidden">
         <div className="p-3 border-b bg-gray-50 font-semibold">
           <span>{t("dailyEarnings")}</span>
