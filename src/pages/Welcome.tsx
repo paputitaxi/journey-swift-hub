@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUsername } from "../hooks/useUsername";
 
 // Mock/Helper Components & Hooks
 // =============================================================================
@@ -122,32 +124,7 @@ const Input = ({ className, ...props }) => {
   return <input className={`${baseClasses} ${className}`} {...props} />;
 };
 
-/**
- * Custom Hook: useUsername
- * A hook that uses localStorage to persist the username across sessions.
- */
-const useUsername = () => {
-  const [username, setUsername] = useState(() => {
-    try {
-      const item = window.localStorage.getItem("username");
-      return item || "";
-    } catch (error) {
-      console.error("Error reading username from localStorage", error);
-      return "";
-    }
-  });
-
-  const saveUsername = (name) => {
-    try {
-      window.localStorage.setItem("username", name);
-      setUsername(name);
-    } catch (error) {
-      console.error("Error saving username to localStorage", error);
-    }
-  };
-
-  return { username, saveUsername };
-};
+/* useUsername: replaced by shared hook from ../hooks/useUsername */
 
 /**
  * Font Loader
@@ -174,10 +151,16 @@ const useFontLoader = () => {
  * This is your original component, adapted to use the mock helpers above
  * and a `Maps` prop for routing.
  */
-const Welcome = ({ navigate }) => {
+const Welcome = () => {
+  const navigate = useNavigate();
   const { username, saveUsername } = useUsername();
   const [tempUsername, setTempUsername] = useState(username);
   const [showRoleSelection, setShowRoleSelection] = useState(!!username);
+
+  useEffect(() => {
+    setTempUsername(username);
+    setShowRoleSelection(!!username);
+  }, [username]);
 
   const handleContinue = () => {
     if (tempUsername.trim()) {
@@ -259,74 +242,4 @@ const Welcome = ({ navigate }) => {
   );
 };
 
-/**
- * Placeholder Dashboard: Rider
- * A simple component to show navigation to the rider dashboard is working.
- */
-const RiderDashboard = ({ navigate, username }) => (
-  <div
-    className="min-h-screen bg-gray-100 text-black flex flex-col items-center justify-center p-4"
-    style={{ fontFamily: "'Inter', sans-serif" }}
-  >
-    <div className="text-center">
-      <h1 className="text-4xl font-bold mb-4">Rider Dashboard</h1>
-      <p className="text-gray-500">
-        Welcome, <span className="font-semibold">{username}</span>! Find your next ride here.
-      </p>
-      <Button variant="outline" onClick={() => navigate("/")} className="mt-8 px-8 py-4">
-        Go Back
-      </Button>
-    </div>
-  </div>
-);
-
-/**
- * Placeholder Dashboard: Driver
- * A simple component to show navigation to the driver dashboard is working.
- */
-const DriverDashboard = ({ navigate, username }) => (
-  <div
-    className="min-h-screen bg-gray-100 text-black flex flex-col items-center justify-center p-4"
-    style={{ fontFamily: "'Inter', sans-serif" }}
-  >
-    <div className="text-center">
-      <h1 className="text-4xl font-bold mb-4">Driver Dashboard</h1>
-      <p className="text-gray-500">
-        Welcome, <span className="font-semibold">{username}</span>! Manage your trips here.
-      </p>
-      <Button variant="outline" onClick={() => navigate("/")} className="mt-8 px-8 py-4">
-        Go Back
-      </Button>
-    </div>
-  </div>
-);
-
-/**
- * Main App Component
- * This component acts as a simple router to switch between the welcome
- * screen and the dashboards.
- */
-export default function App() {
-  useFontLoader(); // Load the Inter font
-  const [currentPage, setCurrentPage] = useState("welcome");
-  const { username } = useUsername();
-
-  const navigate = (path) => {
-    if (path === "/rider-dashboard") {
-      setCurrentPage("rider");
-    } else if (path === "/driver-dashboard") {
-      setCurrentPage("driver");
-    } else {
-      setCurrentPage("welcome");
-    }
-  };
-
-  switch (currentPage) {
-    case "rider":
-      return <RiderDashboard navigate={navigate} username={username} />;
-    case "driver":
-      return <DriverDashboard navigate={navigate} username={username} />;
-    default:
-      return <Welcome navigate={navigate} />;
-  }
-}
+export default Welcome;
