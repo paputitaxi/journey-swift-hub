@@ -396,82 +396,7 @@ const formatTime = (dateString: string) => {
   return new Date(dateString).toLocaleTimeString("en-US", options);
 };
 
-const initialDummySearchResults = [
-  {
-    id: 1,
-    driverName: "Alisher V.",
-    driverImageUrl: "https://placehold.co/100x100/E2E8F0/4A5568?text=AV",
-    reliabilityStars: 4.5,
-    carModel: "Chevrolet Cobalt",
-    carYear: 2022,
-    imageUrl: "https://placehold.co/600x400/E2E8F0/4A5568?text=Cobalt",
-    plateNumber: { locationCode: "01", series: "A", serialNumber: "123BC" },
-    origin: "Tashkent",
-    originDate: "2025-08-26T09:00:00",
-    destination: "Tashkent Region",
-    destinationDate: "2025-08-26T13:00:00",
-    sitsAvailable: "2 seats",
-    basePrice: 284.44,
-    serviceType: "rider",
-    specialServices: ["Wi-Fi", "Air Conditioning"],
-  },
-  {
-    id: 2,
-    driverName: "Botir K.",
-    driverImageUrl: "https://placehold.co/100x100/E2E8F0/4A5568?text=BK",
-    reliabilityStars: 3.8,
-    carModel: "Lada Granta",
-    carYear: 2020,
-    imageUrl: "https://placehold.co/600x400/E2E8F0/4A5568?text=Lada",
-    plateNumber: { locationCode: "30", series: "D", serialNumber: "456EF" },
-    origin: "Fergana",
-    originDate: "2025-08-27T14:00:00",
-    destination: "Samarkand Region",
-    destinationDate: "2025-08-27T21:30:00",
-    sitsAvailable: "1 seat",
-    basePrice: 332.22,
-    mailPayout: "$25",
-    serviceType: "mail",
-    specialServices: ["Mail delivery"],
-  },
-  {
-    id: 3,
-    driverName: "Dilshod R.",
-    driverImageUrl: "https://placehold.co/100x100/E2E8F0/4A5568?text=DR",
-    reliabilityStars: 5.0,
-    carModel: "Kia K5",
-    carYear: 2023,
-    imageUrl: "https://placehold.co/600x400/E2E8F0/4A5568?text=Kia",
-    plateNumber: { locationCode: "50", series: "G", serialNumber: "789HI" },
-    origin: "Andijan",
-    originDate: "2025-08-28T10:00:00",
-    destination: "Namangan Region",
-    destinationDate: "2025-08-29T23:00:00",
-    sitsAvailable: "3 seats",
-    basePrice: 1514.44,
-    mailPayout: "$30",
-    serviceType: "both",
-    specialServices: ["Wi-Fi", "Air Conditioning", "Luggage space"],
-  },
-  {
-    id: 4,
-    driverName: "Elbek S.",
-    driverImageUrl: "https://placehold.co/100x100/E2E8F0/4A5568?text=ES",
-    reliabilityStars: 4.2,
-    carModel: "Hyundai Elantra",
-    carYear: 2021,
-    imageUrl: "https://placehold.co/600x400/E2E8F0/4A5568?text=Elantra",
-    plateNumber: { locationCode: "80", series: "J", serialNumber: "321KL" },
-    origin: "Bukhara",
-    originDate: "2025-08-29T08:30:00",
-    destination: "Khorezm Region",
-    destinationDate: "2025-08-29T16:30:00",
-    sitsAvailable: "4 seats",
-    basePrice: 388.89,
-    serviceType: "rider",
-    specialServices: ["Air Conditioning"],
-  },
-];
+const initialDummySearchResults = [];
 
 const CustomScrollbarStyles = () => (
   <style>{`
@@ -741,6 +666,43 @@ const App = () => {
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [availableRides, setAvailableRides] = useState(initialDummySearchResults);
   const t = translations[language];
+
+  // Fetch rides from Supabase
+  useEffect(() => {
+    const fetchRides = async () => {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data, error } = await (supabase as any)
+        .from('Ridesbydrivers')
+        .select('*')
+        .order('departuredate', { ascending: true });
+
+      if (!error && data) {
+        // Transform data to match the UI format
+        const transformedRides = data.map((ride: any, index: number) => ({
+          id: index + 1,
+          driverName: "Driver",
+          driverImageUrl: "https://placehold.co/100x100/E2E8F0/4A5568?text=D",
+          reliabilityStars: 4.0,
+          carModel: "Car",
+          carYear: 2022,
+          imageUrl: "https://placehold.co/600x400/E2E8F0/4A5568?text=Car",
+          plateNumber: null,
+          origin: ride.origincity,
+          originDate: `${ride.departuredate}T${ride.fromfixeddeparturetime}`,
+          destination: ride.destinationcity,
+          destinationDate: `${ride.departuredate}T${ride.tofixeddeparturetime}`,
+          sitsAvailable: `${ride.freeseats} seats`,
+          basePrice: ride.price,
+          serviceType: ride.mailservice ? "mail" : "rider",
+          specialServices: ride.mailservice ? ["Mail delivery"] : [],
+          phoneNumber: ride.phonenumber,
+        }));
+        setAvailableRides(transformedRides);
+      }
+    };
+
+    fetchRides();
+  }, []);
 
   const handleBookClick = (ride) => {
     setRideToBook(ride);

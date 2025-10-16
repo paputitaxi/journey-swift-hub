@@ -63,21 +63,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
   };
 
   const handlePost = async () => {
-    console.log('=== HANDLE POST CALLED ===');
-    console.log('Current form state:', {
-      date,
-      mailOption,
-      departureType,
-      phoneNumber,
-      departure,
-      destination,
-      ridePrice,
-      mailPrice,
-      totalSeats
-    });
-
     if (!date || !mailOption || !departureType || !phoneNumber) {
-      console.log('Form validation failed - missing required fields');
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields including phone number.",
@@ -88,45 +74,42 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
 
     setIsLoading(true);
     try {
-      // Get username from localStorage
-      const finalUsername = localStorage.getItem('username');
-      console.log('PostRideModal - Username from localStorage:', finalUsername);
+      const { supabase } = await import("@/integrations/supabase/client");
       
-      if (!finalUsername) {
-        console.log('PostRideModal - No username found, redirecting to welcome');
+      // Prepare time range for fixed departure
+      const fromTime = departureType === 'fixed' ? departureTime : '00:00:00';
+      const toTime = departureType === 'fixed' ? departureTime : '23:59:59';
+      
+      const rideData = {
+        origincity: departure,
+        destinationcity: destination,
+        departuredate: format(date, 'yyyy-MM-dd'),
+        mailservice: mailOption === 'yes' || mailOption === 'mailOnly',
+        freeseats: mailOption === 'mailOnly' ? 0 : parseInt(totalSeats),
+        isitfixed: departureType === 'fixed',
+        fromfixeddeparturetime: fromTime,
+        tofixeddeparturetime: toTime,
+        price: parseInt(ridePrice || '0'),
+        phonenumber: parseInt(phoneNumber),
+      };
+
+      const { error } = await (supabase as any)
+        .from('Ridesbydrivers')
+        .insert([rideData]);
+
+      if (error) {
+        console.error('Error posting ride:', error);
         toast({
-          title: "Set username first",
-          description: "Please choose a username on the welcome screen.",
+          title: "Error",
+          description: error.message || "Failed to post ride. Please try again.",
           variant: "destructive",
         });
         return;
       }
 
-      const seats = parseInt(totalSeats);
-      console.log('Parsed seats:', seats);
-      
-      const rideData: any = {
-        driver_username: finalUsername,
-        from_location: departure,
-        to_location: destination,
-        departure_date: format(date, 'yyyy-MM-dd'),
-        departure_time: departureType === 'fixed' ? departureTime : null,
-        departure_type: departureType,
-        total_seats: seats,
-        available_seats: seats,
-        ride_price: ridePrice ? parseFloat(ridePrice) : 0,
-        has_mail_service: mailOption === 'yes' || mailOption === 'mailOnly',
-        mail_price: (mailOption === 'yes' || mailOption === 'mailOnly') && mailPrice ? parseFloat(mailPrice) : null,
-        phone_number: phoneNumber,
-        status: 'active',
-      };
-
-      console.log('PostRideModal - Ride data prepared:', rideData);
-      
-      // Backend functionality disabled - no database
       toast({
-        title: "Demo Mode",
-        description: "Backend is disabled. Ride data logged to console.",
+        title: "Success!",
+        description: "Your ride has been posted successfully.",
       });
 
       onOpenChange(false);
