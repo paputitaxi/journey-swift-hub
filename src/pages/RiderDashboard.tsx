@@ -543,7 +543,7 @@ const CalendarView = ({ onDayClick, selectedDate }) => {
               key={day}
               onClick={() => onDayClick(date)}
               disabled={isPast}
-              className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isPast ? "text-gray-300 cursor-not-allowed" : isSelected ? "bg-purple-600 text-white font-semibold" : "hover:bg-gray-100"}`}
+              className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isPast ? "text-muted-foreground/30 cursor-not-allowed" : isSelected ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary"}`}
             >
               {" "}
               {day}{" "}
@@ -559,10 +559,10 @@ const ModalWrapper = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col">
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-          <button onClick={onClose} className="p-1 rounded-full text-gray-500 hover:bg-gray-100">
+      <div className="bg-card rounded-2xl shadow-xl w-full max-w-sm flex flex-col">
+        <div className="p-4 border-b border-border flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-card-foreground">{title}</h2>
+          <button onClick={onClose} className="p-1 rounded-full text-muted-foreground hover:bg-secondary">
             <X size={20} />
           </button>
         </div>
@@ -590,13 +590,13 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
 
   return (
     <ModalWrapper isOpen={isOpen} onClose={handleClose} title={title}>
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-border">
         <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
           <input
             type="text"
             placeholder="Search..."
-            className="w-full pl-11 pr-4 py-2.5 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full pl-11 pr-4 py-2.5 bg-secondary rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -606,7 +606,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
         {filteredLocations.length > 0 ? (
           filteredLocations.map((regionData) => (
             <div key={regionData.region}>
-              <h3 className="w-full text-left p-3 font-semibold text-gray-500 text-sm select-none">
+              <h3 className="w-full text-left p-3 font-semibold text-muted-foreground text-sm select-none">
                 {regionData.region}
               </h3>
               {regionData.cities.map((city) => (
@@ -616,7 +616,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
                     onSelect(city);
                     handleClose();
                   }}
-                  className="w-full text-left pl-6 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg text-base transition-colors"
+                  className="w-full text-left pl-6 py-2.5 text-foreground hover:bg-secondary rounded-lg text-base transition-colors"
                 >
                   {city}
                 </button>
@@ -624,7 +624,7 @@ const LocationSelectModal = ({ title, isOpen, onClose, onSelect }) => {
             </div>
           ))
         ) : (
-          <p className="text-gray-500 text-center mt-10">No locations found.</p>
+          <p className="text-muted-foreground text-center mt-10">No locations found.</p>
         )}
       </div>
     </ModalWrapper>
@@ -646,20 +646,20 @@ const BookingModal = ({ isOpen, onClose, ride, onConfirmBooking }) => {
     <ModalWrapper isOpen={isOpen} onClose={onClose} title="Confirm Your Booking">
       <div className="p-6 space-y-4">
         <div>
-          <p className="text-sm text-gray-500">You are booking a ride from</p>
-          <p className="font-semibold text-lg text-gray-800">
+          <p className="text-sm text-muted-foreground">You are booking a ride from</p>
+          <p className="font-semibold text-lg text-foreground">
             {ride.origin} to {ride.destination}
           </p>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             {formatDate(ride.originDate)} at {formatTime(ride.originDate)}
           </p>
         </div>
         <div className="flex items-center justify-between">
-          <span className="font-semibold text-gray-800">Seats to book:</span>
+          <span className="font-semibold text-foreground">Seats to book:</span>
           <div className="flex items-center space-x-4">
             <button
               onClick={decrementSeats}
-              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+              className="p-2 rounded-full bg-secondary hover:bg-secondary/80 disabled:opacity-50"
               disabled={seats <= 1}
             >
               <Minus size={16} />
@@ -667,7 +667,7 @@ const BookingModal = ({ isOpen, onClose, ride, onConfirmBooking }) => {
             <span className="text-xl font-bold w-8 text-center">{seats}</span>
             <button
               onClick={incrementSeats}
-              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+              className="p-2 rounded-full bg-secondary hover:bg-secondary/80 disabled:opacity-50"
               disabled={seats >= maxSeats}
             >
               <Plus size={16} />
@@ -675,14 +675,14 @@ const BookingModal = ({ isOpen, onClose, ride, onConfirmBooking }) => {
           </div>
         </div>
         <div className="flex justify-between items-baseline pt-4 border-t">
-          <span className="font-semibold text-lg text-gray-800">Total Price:</span>
-          <span className="font-bold text-2xl text-purple-600">${totalPrice}</span>
+          <span className="font-semibold text-lg text-foreground">Total Price:</span>
+          <span className="font-bold text-2xl text-primary">${totalPrice}</span>
         </div>
       </div>
-      <div className="p-4 bg-gray-50 rounded-b-2xl">
+      <div className="p-4 bg-muted rounded-b-2xl">
         <button
           onClick={handleConfirm}
-          className="w-full bg-gray-900 text-white py-3.5 rounded-full font-semibold hover:bg-gray-800 transition duration-300"
+          className="w-full bg-primary text-primary-foreground py-3.5 rounded-full font-semibold hover:bg-primary/90 transition duration-300"
         >
           Confirm Booking
         </button>
@@ -857,41 +857,41 @@ const App = () => {
           return (
             <div className="flex flex-col h-full">
               <div className="flex-shrink-0 bg-white/80 backdrop-blur-sm z-10 sticky top-0">
-                <div className="p-4 border-b border-gray-200">
+                  <div className="p-4 border-b border-border">
                   <div className="flex items-center mb-4">
                     <button
-                      className="p-2 rounded-full hover:bg-gray-100 transition-colors -ml-2 mr-2"
+                      className="p-2 rounded-full hover:bg-secondary transition-colors -ml-2 mr-2"
                       onClick={resetSearch}
                     >
                       <ChevronLeft size={24} />
                     </button>
-                    <h2 className="text-xl font-bold text-gray-900 text-left">{t.results}</h2>
+                    <h2 className="text-xl font-bold text-foreground text-left">{t.results}</h2>
                   </div>
                   <div className="flex items-center space-x-2 overflow-x-auto pb-2 -mb-2">
                     <button
                       onClick={() => handleSortClick("by_seat")}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === "by_seat" ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === "by_seat" ? "bg-primary/10 text-primary" : "bg-secondary text-foreground hover:bg-secondary/80"}`}
                     >
                       <Users size={16} />
                       <span>{t.bySeat}</span>
                     </button>
                     <button
                       onClick={() => handleSortClick("by_time")}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === "by_time" ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeSort === "by_time" ? "bg-primary/10 text-primary" : "bg-secondary text-foreground hover:bg-secondary/80"}`}
                     >
                       <History size={16} />
                       <span>{t.byTime}</span>
                     </button>
                     <button
                       onClick={() => handleFilterClick("mail")}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === "mail" ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === "mail" ? "bg-primary/10 text-primary" : "bg-secondary text-foreground hover:bg-secondary/80"}`}
                     >
                       <Mail size={16} />
                       <span>{t.withMailOption}</span>
                     </button>
                     <button
                       onClick={() => handleFilterClick("recommended")}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === "recommended" ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${activeFilter === "recommended" ? "bg-primary/10 text-primary" : "bg-secondary text-foreground hover:bg-secondary/80"}`}
                     >
                       <Star size={16} />
                       <span>{t.recommended}</span>
@@ -899,7 +899,7 @@ const App = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex-grow overflow-y-auto bg-gray-50">
+              <div className="flex-grow overflow-y-auto bg-background">
                 <div className="p-4 space-y-4">
                   {results.map((item) => (
                     <div
@@ -960,45 +960,45 @@ const App = () => {
         } else {
           return (
             <div className="p-4 sm:p-6 text-center flex flex-col justify-center flex-grow">
-              <h2 className="text-4xl font-extrabold mb-2 text-gray-900">{t.findYourNextRide}</h2>
-              <p className="text-lg text-gray-600 mb-8">{t.selectPickupAndDestination}</p>
-              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-elevated space-y-4">
+              <h2 className="text-4xl font-extrabold mb-2 text-foreground">{t.findYourNextRide}</h2>
+              <p className="text-lg text-muted-foreground mb-8">{t.selectPickupAndDestination}</p>
+              <div className="bg-card p-4 sm:p-6 rounded-2xl shadow-elevated space-y-4">
                 <button
                   onClick={() => setShowFromModal(true)}
-                  className="w-full p-4 bg-gray-100 rounded-xl flex items-center justify-between hover:bg-gray-200 transition-colors"
+                  className="w-full p-4 bg-secondary rounded-xl flex items-center justify-between hover:bg-secondary/80 transition-colors"
                 >
-                  <span className={`font-semibold ${pickupLocation ? "text-gray-800" : "text-gray-500"}`}>
+                  <span className={`font-semibold ${pickupLocation ? "text-foreground" : "text-muted-foreground"}`}>
                     {pickupLocation || t.origin}
                   </span>
-                  <MapPin className="h-5 w-5 text-gray-400" />
+                  <MapPin className="h-5 w-5 text-muted-foreground" />
                 </button>
                 <button
                   onClick={() => setShowToModal(true)}
-                  className="w-full p-4 bg-gray-100 rounded-xl flex items-center justify-between hover:bg-gray-200 transition-colors"
+                  className="w-full p-4 bg-secondary rounded-xl flex items-center justify-between hover:bg-secondary/80 transition-colors"
                 >
-                  <span className={`font-semibold ${destinationLocation ? "text-gray-800" : "text-gray-500"}`}>
+                  <span className={`font-semibold ${destinationLocation ? "text-foreground" : "text-muted-foreground"}`}>
                     {destinationLocation || t.destination}
                   </span>
-                  <Target className="h-5 w-5 text-gray-400" />
+                  <Target className="h-5 w-5 text-muted-foreground" />
                 </button>
                 <button
                   onClick={() => setShowCalendar(true)}
-                  className="w-full p-4 bg-gray-100 rounded-xl flex items-center justify-between hover:bg-gray-200 transition-colors"
+                  className="w-full p-4 bg-secondary rounded-xl flex items-center justify-between hover:bg-secondary/80 transition-colors"
                 >
-                  <span className={`font-semibold ${pickupDate ? "text-gray-800" : "text-gray-500"}`}>
+                  <span className={`font-semibold ${pickupDate ? "text-foreground" : "text-muted-foreground"}`}>
                     {pickupDate ? formatDate(pickupDate) : t.selectADate}
                   </span>
-                  <Calendar className="h-5 w-5 text-gray-400" />
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
                 </button>
-                <div className="pt-4 border-t border-gray-200">
-                  <p className="text-left font-semibold text-gray-700 mb-3">{t.howManySeats}</p>
+                <div className="pt-4 border-t border-border">
+                  <p className="text-left font-semibold text-foreground mb-3">{t.howManySeats}</p>
                   <div className="flex flex-col items-center space-y-3">
                     <div className="flex items-center justify-center space-x-2 sm:space-x-4">
                       {[1, 2, 3, 4].map((num) => (
                         <button
                           key={num}
                           onClick={() => handleSeatsNeededClick(num)}
-                          className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full text-lg font-bold transition-colors flex items-center justify-center ${seatsNeeded === num ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                          className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full text-lg font-bold transition-colors flex items-center justify-center ${seatsNeeded === num ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-secondary/80"}`}
                         >
                           {num}
                         </button>
@@ -1006,7 +1006,7 @@ const App = () => {
                     </div>
                     <button
                       onClick={handleMailOnlyClick}
-                      className={`h-12 sm:h-14 px-5 rounded-full text-md font-semibold transition-colors flex items-center justify-center space-x-2 ${searchForMail ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                      className={`h-12 sm:h-14 px-5 rounded-full text-md font-semibold transition-colors flex items-center justify-center space-x-2 ${searchForMail ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-secondary/80"}`}
                     >
                       <Mail size={20} />
                       <span>{t.mailOnly}</span>
