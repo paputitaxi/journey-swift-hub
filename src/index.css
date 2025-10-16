@@ -8,102 +8,102 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Telegram Theme - Default */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 13%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 13%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 13%;
-    --primary: 208 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 98%;
-    --secondary-foreground: 0 0% 13%;
-    --muted: 210 40% 98%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 208 100% 50%;
-    --accent-foreground: 0 0% 100%;
+    /* Ultra Dark Blue Theme - Default */
+    --background: 220 40% 8%;
+    --foreground: 210 40% 98%;
+    --card: 220 35% 10%;
+    --card-foreground: 210 40% 98%;
+    --popover: 220 35% 10%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 220 40% 8%;
+    --secondary: 220 30% 15%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 30% 15%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 220 40% 8%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 208 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 30% 18%;
+    --input: 220 30% 18%;
+    --ring: 217 91% 60%;
     --radius: 0.5rem;
     
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 13%;
-    --sidebar-primary: 208 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 98%;
-    --sidebar-accent-foreground: 0 0% 13%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 208 100% 50%;
+    --sidebar-background: 220 45% 6%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 220 40% 8%;
+    --sidebar-accent: 220 35% 12%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 220 30% 15%;
+    --sidebar-ring: 217 91% 60%;
   }
 
   /* Instagram Theme */
   [data-theme="instagram"] {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 13%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 13%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 13%;
-    --primary: 316 100% 60%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 310 50% 98%;
-    --secondary-foreground: 0 0% 13%;
-    --muted: 310 50% 98%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 45 100% 51%;
-    --accent-foreground: 0 0% 13%;
+    --background: 220 40% 8%;
+    --foreground: 210 40% 98%;
+    --card: 220 35% 10%;
+    --card-foreground: 210 40% 98%;
+    --popover: 220 35% 10%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 280 70% 60%;
+    --primary-foreground: 220 40% 8%;
+    --secondary: 220 30% 15%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 30% 15%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 280 70% 60%;
+    --accent-foreground: 220 40% 8%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 316 100% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 30% 18%;
+    --input: 220 30% 18%;
+    --ring: 280 70% 60%;
     --radius: 0.75rem;
     
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 13%;
-    --sidebar-primary: 316 100% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 310 50% 98%;
-    --sidebar-accent-foreground: 0 0% 13%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 316 100% 60%;
+    --sidebar-background: 220 45% 6%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 280 70% 60%;
+    --sidebar-primary-foreground: 220 40% 8%;
+    --sidebar-accent: 220 35% 12%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 220 30% 15%;
+    --sidebar-ring: 280 70% 60%;
   }
 
   /* X (Twitter) Theme */
   [data-theme="x"] {
-    --background: 0 0% 6%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 64%;
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 98%;
+    --background: 220 40% 8%;
+    --foreground: 210 40% 98%;
+    --card: 220 35% 10%;
+    --card-foreground: 210 40% 98%;
+    --popover: 220 35% 10%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 200 100% 55%;
+    --primary-foreground: 220 40% 8%;
+    --secondary: 220 30% 15%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 30% 15%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 200 100% 55%;
+    --accent-foreground: 220 40% 8%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 0 0% 83%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 30% 18%;
+    --input: 220 30% 18%;
+    --ring: 200 100% 55%;
     --radius: 1rem;
     
-    --sidebar-background: 0 0% 6%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 0 0% 98%;
-    --sidebar-primary-foreground: 0 0% 9%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 0 0% 83%;
+    --sidebar-background: 220 45% 6%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 200 100% 55%;
+    --sidebar-primary-foreground: 220 40% 8%;
+    --sidebar-accent: 220 35% 12%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 220 30% 15%;
+    --sidebar-ring: 200 100% 55%;
   }
 
   .dark {

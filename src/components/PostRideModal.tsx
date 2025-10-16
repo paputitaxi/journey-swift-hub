@@ -406,27 +406,41 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
               )}
 
               <div className="mt-4 space-y-4">
-                <div>
-                  <Label htmlFor="totalSeats" className="text-base font-semibold">Free Seats</Label>
-                  <div className="grid grid-cols-4 gap-3 mt-2">
-                    {[1, 2, 3, 4].map((num) => (
-                      <Button
-                        key={num}
-                        type="button"
-                        variant="outline"
-                        onClick={() => setTotalSeats(String(num))}
-                        className={cn(
-                          "h-12 text-base font-medium",
-                          totalSeats === String(num) 
-                            ? "bg-primary/10 border-primary text-primary hover:bg-primary/20" 
-                            : "hover:bg-muted/50"
-                        )}
-                      >
-                        {num}
-                      </Button>
-                    ))}
+                {mailOption !== "mailOnly" && (
+                  <div>
+                    <Label htmlFor="totalSeats" className="text-base font-semibold">Free Seats</Label>
+                    <div className="grid grid-cols-4 gap-3 mt-2">
+                      {[1, 2, 3, 4].map((num) => (
+                        <Button
+                          key={num}
+                          type="button"
+                          variant="outline"
+                          onClick={() => setTotalSeats(String(num))}
+                          className={cn(
+                            "h-12 text-base font-medium",
+                            totalSeats === String(num) 
+                              ? "bg-primary/10 border-primary text-primary hover:bg-primary/20" 
+                              : "hover:bg-muted/50"
+                          )}
+                        >
+                          {num}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {mailOption === "mailOnly" && (
+                  <div className="p-4 border border-primary/20 rounded-lg bg-primary/5">
+                    <div className="flex items-center gap-3">
+                      <Mail className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="font-semibold">Mail Only Service</div>
+                        <div className="text-sm text-muted-foreground">No passenger seats available</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <Label htmlFor="phoneNumber" className="text-base font-semibold">Phone Number</Label>
