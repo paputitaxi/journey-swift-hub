@@ -63,10 +63,24 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
   };
 
   const handlePost = async () => {
+    console.log('=== POST RIDE STARTED ===');
+    console.log('Form data:', { date, mailOption, departureType, phoneNumber, departure, destination, ridePrice, totalSeats, departureTime });
+
     if (!date || !mailOption || !departureType || !phoneNumber) {
+      console.error('Validation failed - missing fields');
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields including phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!departure || !destination) {
+      console.error('Validation failed - missing locations');
+      toast({
+        title: "Missing Information", 
+        description: "Please select departure and destination locations.",
         variant: "destructive",
       });
       return;
@@ -76,9 +90,9 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
     try {
       const { supabase } = await import("@/integrations/supabase/client");
       
-      // Prepare time range for fixed departure
-      const fromTime = departureType === 'fixed' ? departureTime : '00:00:00';
-      const toTime = departureType === 'fixed' ? departureTime : '23:59:59';
+      // Prepare time with timezone format (HH:MM:SS+00)
+      const fromTime = departureType === 'fixed' && departureTime ? `${departureTime}:00+00` : '00:00:00+00';
+      const toTime = departureType === 'fixed' && departureTime ? `${departureTime}:00+00` : '23:59:59+00';
       
       const rideData = {
         origincity: departure,
@@ -90,15 +104,20 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
         fromfixeddeparturetime: fromTime,
         tofixeddeparturetime: toTime,
         price: parseInt(ridePrice || '0'),
-        phonenumber: parseInt(phoneNumber),
+        phonenumber: parseInt(phoneNumber.replace(/\D/g, '')), // Remove non-digits
       };
 
-      const { error } = await (supabase as any)
+      console.log('Attempting to insert:', rideData);
+
+      const { data, error } = await (supabase as any)
         .from('Ridesbydrivers')
-        .insert([rideData]);
+        .insert([rideData])
+        .select();
+
+      console.log('Insert result:', { data, error });
 
       if (error) {
-        console.error('Error posting ride:', error);
+        console.error('Supabase error:', error);
         toast({
           title: "Error",
           description: error.message || "Failed to post ride. Please try again.",
@@ -107,6 +126,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
         return;
       }
 
+      console.log('=== POST RIDE SUCCESS ===');
       toast({
         title: "Success!",
         description: "Your ride has been posted successfully.",
@@ -126,10 +146,10 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
       setPhoneNumber("");
       setTotalSeats("4");
     } catch (error) {
-      console.error('Error posting ride:', error);
+      console.error('Caught error:', error);
       toast({
         title: "Error",
-        description: "Failed to post ride. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to post ride. Please try again.",
         variant: "destructive",
       });
     } finally {
