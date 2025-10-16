@@ -992,16 +992,18 @@ const App = () => {
                 </button>
                 <div className="pt-4 border-t border-gray-200">
                   <p className="text-left font-semibold text-gray-700 mb-3">{t.howManySeats}</p>
-                  <div className="flex items-center justify-center space-x-2 sm:space-x-4">
-                    {[1, 2, 3, 4].map((num) => (
-                      <button
-                        key={num}
-                        onClick={() => handleSeatsNeededClick(num)}
-                        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full text-lg font-bold transition-colors flex items-center justify-center ${seatsNeeded === num ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-                      >
-                        {num}
-                      </button>
-                    ))}{" "}
+                  <div className="flex flex-col items-center space-y-3">
+                    <div className="flex items-center justify-center space-x-2 sm:space-x-4">
+                      {[1, 2, 3, 4].map((num) => (
+                        <button
+                          key={num}
+                          onClick={() => handleSeatsNeededClick(num)}
+                          className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full text-lg font-bold transition-colors flex items-center justify-center ${seatsNeeded === num ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                        >
+                          {num}
+                        </button>
+                      ))}
+                    </div>
                     <button
                       onClick={handleMailOnlyClick}
                       className={`h-12 sm:h-14 px-5 rounded-full text-md font-semibold transition-colors flex items-center justify-center space-x-2 ${searchForMail ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
