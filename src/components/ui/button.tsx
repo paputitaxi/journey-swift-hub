@@ -21,6 +21,7 @@ const buttonVariants = cva(
         gradient: "bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] text-primary-foreground shadow-glow hover:bg-right-bottom animate-gradient hover:scale-[1.02]",
         premium: "bg-gradient-to-br from-primary via-accent to-primary text-primary-foreground shadow-glow hover:shadow-[0_0_60px_hsl(var(--primary-glow)/0.6)] hover:scale-[1.02]",
         glass: "bg-card/30 backdrop-blur-md border border-primary/20 text-foreground hover:bg-card/40 hover:border-primary/30 hover:scale-[1.02]",
+        orange: "bg-gradient-to-br from-[hsl(25,95%,63%)] to-[hsl(33,100%,65%)] text-[hsl(220,40%,8%)] shadow-[0_10px_30px_-10px_hsl(25,95%,63%,0.4)] hover:shadow-[0_0_40px_hsl(33,100%,65%,0.5)] hover:scale-[1.02]",
       },
       size: {
         default: "h-12 px-6 py-3",

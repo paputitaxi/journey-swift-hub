@@ -469,7 +469,8 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
               <Button 
                 onClick={handlePost}
                 disabled={!departureType || (departureType === "fixed" && !departureTime) || !phoneNumber || isLoading}
-                className="flex-1 h-12 bg-foreground text-background hover:bg-foreground/90"
+                variant="orange"
+                className="flex-1 h-12"
               >
                 {isLoading ? "Posting..." : "Post Ride"}
               </Button>
