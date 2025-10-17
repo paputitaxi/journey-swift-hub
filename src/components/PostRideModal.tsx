@@ -193,7 +193,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
             <Button 
               onClick={() => setStep(2)} 
               disabled={!departure || !destination}
-              variant="ride"
+              variant="gradient"
               size="lg"
               className="w-full"
             >
@@ -239,7 +239,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
               <Button 
                 onClick={() => setStep(3)} 
                 disabled={!date}
-                variant="ride"
+                variant="gradient"
                 className="flex-1"
               >
                 Continue
@@ -293,7 +293,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
               <Button 
                 onClick={() => setStep(4)} 
                 disabled={!mailOption}
-                variant="ride"
+                variant="gradient"
                 className="flex-1"
               >
                 Continue
@@ -348,7 +348,7 @@ const PostRideModal = ({ open, onOpenChange }: PostRideModalProps) => {
               <Button 
                 onClick={() => setStep(5)} 
                 disabled={!ridePrice && !mailPrice}
-                variant="ride"
+                variant="gradient"
                 className="flex-1"
               >
                 Continue
