@@ -1863,11 +1863,12 @@ const RideDetailModal = ({ ride, isOpen, onClose, onRepost }) => {
             <h3 className="font-bold mb-2">{t("passengers")}</h3>
             <div className="space-y-2">
               {ride.passengers && ride.passengers.length > 0 ? (
-                ride.passengers.map((p) => (
+                ride.passengers.map((p, index) => (
                   <button
                     key={p.id}
                     onClick={(e) => handlePassengerClick(p, e)}
-                    className="w-full flex items-center p-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-left"
+                    className="w-full flex items-center p-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-left animate-fade-in hover:scale-[1.02] transition-transform"
+                    style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <div className={`w-8 h-8 flex items-center justify-center mr-3 rounded-full bg-gray-200`}>
                       {p.gender === "male" ? <User className="h-5 w-5" /> : <UserRound className="h-5 w-5" />}
@@ -2713,11 +2714,12 @@ const AppContent = () => {
             <div>
               <p className="font-bold mb-2">{t("passengers")}</p>
               <div className="flex space-x-2">
-                {activeRide.passengers.map((p) => (
+                {activeRide.passengers.map((p, index) => (
                   <div
                     key={p.id}
                     onClick={(e) => handlePassengerClick(p, e)}
-                    className={`w-10 h-10 flex items-center justify-center cursor-pointer border-2 border-gray-300 rounded-full bg-gray-200`}
+                    className={`w-10 h-10 flex items-center justify-center cursor-pointer border-2 border-gray-300 rounded-full bg-gray-200 animate-scale-in hover:scale-110 transition-transform`}
+                    style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     {p.gender === "male" ? <User className="h-6 w-6" /> : <UserRound className="h-6 w-6" />}
                   </div>
