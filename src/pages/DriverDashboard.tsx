@@ -1871,7 +1871,7 @@ const RideDetailModal = ({ ride, isOpen, onClose, onRepost }) => {
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <div className={`w-8 h-8 flex items-center justify-center mr-3 rounded-full bg-gray-200`}>
-                      {p.gender === "male" ? <User className="h-5 w-5" /> : <UserRound className="h-5 w-5" />}
+                      <User className="h-5 w-5" />
                     </div>
                     <span className="font-semibold">{p.name}</span>
                   </button>
@@ -2721,7 +2721,7 @@ const AppContent = () => {
                     className={`w-10 h-10 flex items-center justify-center cursor-pointer border-2 border-gray-300 rounded-full bg-gray-200 animate-scale-in hover:scale-110 transition-transform`}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    {p.gender === "male" ? <User className="h-6 w-6" /> : <UserRound className="h-6 w-6" />}
+                    <User className="h-6 w-6" />
                   </div>
                 ))}
                 {Array.from({
